@@ -62,6 +62,7 @@ export default function UserCheckout() {
 
   const placeOrder = async () => {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
+    if (deliveryType === "scheduled" && (!scheduledAt || new Date(scheduledAt) <= new Date())) { toast.error("Pick a future date/time for scheduled delivery"); return; }
     setBusy(true);
     const addr2 = addresses.find((a) => a.id === addrId);
     const merchant_id = items[0].merchant_id;
@@ -77,7 +78,8 @@ export default function UserCheckout() {
       payment_method: paymentMethod,
       payment_status: "pending",
       status: "pending",
-      delivery_type: "immediate",
+      delivery_type: deliveryType,
+      scheduled_at: deliveryType === "scheduled" ? scheduledAt : null,
       notes,
       promotion_code: promoCode || null,
     }).select().single();
