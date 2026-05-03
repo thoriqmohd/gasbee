@@ -24,6 +24,8 @@ export default function UserCheckout() {
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "fpx" | "card" | "ewallet">("cod");
+  const [deliveryType, setDeliveryType] = useState<"immediate" | "scheduled">("immediate");
+  const [scheduledAt, setScheduledAt] = useState<string>("");
   const [busy, setBusy] = useState(false);
 
   const totalKg = items.reduce((a, it: any) => a + Number(it.cylinder_size_kg ?? 0) * it.quantity, 0);
@@ -60,6 +62,7 @@ export default function UserCheckout() {
 
   const placeOrder = async () => {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
+    if (deliveryType === "scheduled" && (!scheduledAt || new Date(scheduledAt) <= new Date())) { toast.error("Pick a future date/time for scheduled delivery"); return; }
     setBusy(true);
     const addr2 = addresses.find((a) => a.id === addrId);
     const merchant_id = items[0].merchant_id;
@@ -75,7 +78,8 @@ export default function UserCheckout() {
       payment_method: paymentMethod,
       payment_status: "pending",
       status: "pending",
-      delivery_type: "immediate",
+      delivery_type: deliveryType,
+      scheduled_at: deliveryType === "scheduled" ? scheduledAt : null,
       notes,
       promotion_code: promoCode || null,
     }).select().single();
@@ -140,6 +144,17 @@ export default function UserCheckout() {
           <Input value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="Enter code" />
           <Button variant="outline" onClick={applyPromo}>Apply</Button>
         </div>
+      </div>
+
+      <div>
+        <div className="mb-2 text-sm font-semibold">Delivery time</div>
+        <RadioGroup value={deliveryType} onValueChange={(v) => setDeliveryType(v as any)} className="grid grid-cols-2 gap-2">
+          <Card className="flex items-center gap-2 p-3"><RadioGroupItem value="immediate" id="dt-now" /><Label htmlFor="dt-now" className="cursor-pointer text-sm">Send now</Label></Card>
+          <Card className="flex items-center gap-2 p-3"><RadioGroupItem value="scheduled" id="dt-sch" /><Label htmlFor="dt-sch" className="cursor-pointer text-sm">Schedule</Label></Card>
+        </RadioGroup>
+        {deliveryType === "scheduled" && (
+          <Input type="datetime-local" className="mt-2" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} min={new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)} />
+        )}
       </div>
 
       <div>

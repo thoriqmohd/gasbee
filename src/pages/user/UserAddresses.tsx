@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MapPin, Plus, Trash2, Star } from "lucide-react";
+import { MapPin, Plus, Trash2, Star, Crosshair } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { MapPicker } from "@/components/MapPicker";
 
 const schema = z.object({
   label: z.string().trim().max(50).optional(),
@@ -25,7 +26,8 @@ export default function UserAddresses() {
   const { user } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<any>({ address_line1: "", city: "", postcode: "", label: "Home" });
+  const empty: any = { address_line1: "", city: "", postcode: "", label: "Home", latitude: null, longitude: null };
+  const [form, setForm] = useState<any>(empty);
 
   const load = () => {
     if (!user) return;
@@ -33,12 +35,21 @@ export default function UserAddresses() {
   };
   useEffect(load, [user]);
 
+  const useMyLocation = () => {
+    if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
+    navigator.geolocation.getCurrentPosition(
+      (p) => setForm((f: any) => ({ ...f, latitude: p.coords.latitude, longitude: p.coords.longitude })),
+      () => toast.error("Could not get location")
+    );
+  };
+
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (form.latitude == null || form.longitude == null) { toast.error("Pin your location on the map"); return; }
     const isDefault = items.length === 0;
-    const { error } = await supabase.from("addresses").insert({ ...parsed.data, address_line1: parsed.data.address_line1, user_id: user!.id, is_default: isDefault });
-    if (error) toast.error(error.message); else { toast.success("Address added"); setOpen(false); setForm({ address_line1: "", city: "", postcode: "", label: "Home" }); load(); }
+    const { error } = await supabase.from("addresses").insert({ user_id: user!.id, address_line1: parsed.data.address_line1, address_line2: parsed.data.address_line2, city: parsed.data.city, state: parsed.data.state, postcode: parsed.data.postcode, label: parsed.data.label, recipient_name: parsed.data.recipient_name, recipient_phone: parsed.data.recipient_phone, is_default: isDefault, latitude: form.latitude, longitude: form.longitude });
+    if (error) toast.error(error.message); else { toast.success("Address added"); setOpen(false); setForm(empty); load(); }
   };
 
   const setDefault = async (id: string) => {
@@ -46,10 +57,7 @@ export default function UserAddresses() {
     await supabase.from("addresses").update({ is_default: true }).eq("id", id);
     load();
   };
-  const del = async (id: string) => {
-    await supabase.from("addresses").delete().eq("id", id);
-    load();
-  };
+  const del = async (id: string) => { await supabase.from("addresses").delete().eq("id", id); load(); };
 
   return (
     <div className="space-y-4">
@@ -57,7 +65,7 @@ export default function UserAddresses() {
         <h1 className="text-lg font-bold">Addresses</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button size="sm"><Plus className="mr-1 h-4 w-4" />Add</Button></DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>New address</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>Label</Label><Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></div>
@@ -69,6 +77,14 @@ export default function UserAddresses() {
                 <div><Label>Postcode</Label><Input value={form.postcode ?? ""} onChange={(e) => setForm({ ...form, postcode: e.target.value })} /></div>
                 <div><Label>City</Label><Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
                 <div><Label>State</Label><Input value={form.state ?? ""} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
+              </div>
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <Label>Pin location on map *</Label>
+                  <Button type="button" size="sm" variant="outline" onClick={useMyLocation}><Crosshair className="mr-1 h-3 w-3" />Use my location</Button>
+                </div>
+                <MapPicker lat={form.latitude} lng={form.longitude} onChange={(la, ln) => setForm({ ...form, latitude: la, longitude: ln })} />
+                {form.latitude != null && <p className="mt-1 text-[11px] text-muted-foreground">Pinned: {form.latitude.toFixed(5)}, {form.longitude.toFixed(5)}</p>}
               </div>
               <Button className="w-full" onClick={save}>Save</Button>
             </div>
@@ -83,6 +99,7 @@ export default function UserAddresses() {
             <div className="flex items-center gap-2 text-sm font-semibold">{a.label ?? "Address"} {a.is_default && <span className="rounded bg-primary/10 px-2 text-xs text-primary">Default</span>}</div>
             <div className="text-xs text-muted-foreground">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ""}, {a.postcode} {a.city} {a.state}</div>
             {a.recipient_name && <div className="text-xs text-muted-foreground">{a.recipient_name} · {a.recipient_phone}</div>}
+            {a.latitude && <div className="text-[10px] text-muted-foreground">📍 {Number(a.latitude).toFixed(4)}, {Number(a.longitude).toFixed(4)}</div>}
           </div>
           {!a.is_default && <Button size="icon" variant="ghost" onClick={() => setDefault(a.id)}><Star className="h-4 w-4" /></Button>}
           <Button size="icon" variant="ghost" onClick={() => del(a.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>

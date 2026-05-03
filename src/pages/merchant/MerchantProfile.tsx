@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ImageUpload";
+import { MapPicker } from "@/components/MapPicker";
+import { Crosshair } from "lucide-react";
 import { toast } from "sonner";
 
 export default function MerchantProfile() {
@@ -15,10 +17,20 @@ export default function MerchantProfile() {
   useEffect(() => { if (merchant) setForm(merchant); }, [merchant]);
 
   if (!form) return <p className="text-sm text-muted-foreground">Loading…</p>;
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
+    navigator.geolocation.getCurrentPosition(
+      (p) => setForm({ ...form, latitude: p.coords.latitude, longitude: p.coords.longitude }),
+      () => toast.error("Could not get location")
+    );
+  };
+
   const save = async () => {
     const { error } = await supabase.from("merchants").update({
       name: form.name, description: form.description, phone: form.phone, email: form.email,
       address: form.address, city: form.city, state: form.state, postcode: form.postcode, logo_url: form.logo_url,
+      latitude: form.latitude, longitude: form.longitude,
     }).eq("id", form.id);
     if (error) toast.error(error.message); else { toast.success("Saved"); refresh(); }
   };
@@ -43,9 +55,16 @@ export default function MerchantProfile() {
           <div><Label>City</Label><Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
           <div><Label>State</Label><Input value={form.state ?? ""} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
         </div>
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <Label>Pickup location (used for delivery fee distance)</Label>
+            <Button type="button" size="sm" variant="outline" onClick={useMyLocation}><Crosshair className="mr-1 h-3 w-3" />Use current</Button>
+          </div>
+          <MapPicker lat={form.latitude} lng={form.longitude} onChange={(la, ln) => setForm({ ...form, latitude: la, longitude: ln })} height={300} />
+          {form.latitude != null && <p className="mt-1 text-[11px] text-muted-foreground">Pinned: {Number(form.latitude).toFixed(5)}, {Number(form.longitude).toFixed(5)}</p>}
+        </div>
         <Button onClick={save}>Save</Button>
       </Card>
     </div>
   );
 }
-
