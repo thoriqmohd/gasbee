@@ -1,0 +1,68 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { MapPin, Search, Flame } from "lucide-react";
+import { Link } from "react-router-dom";
+
+export default function UserHome() {
+  const [banners, setBanners] = useState<any[]>([]);
+  const [cats, setCats] = useState<any[]>([]);
+  const [merchants, setMerchants] = useState<any[]>([]);
+  const [addr, setAddr] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const [b, c, m, a] = await Promise.all([
+        supabase.from("banners").select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("categories").select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("merchants").select("*").eq("status","active").limit(10),
+        supabase.from("addresses").select("*").eq("is_default", true).maybeSingle(),
+      ]);
+      setBanners(b.data ?? []); setCats(c.data ?? []); setMerchants(m.data ?? []); setAddr(a.data);
+    })();
+  }, []);
+
+  return (
+    <div className="space-y-5">
+      <Card className="flex items-center gap-2 p-3">
+        <MapPin className="h-4 w-4 text-primary" />
+        <div className="flex-1 truncate text-sm">
+          <div className="text-xs text-muted-foreground">Deliver to</div>
+          <Link to="/user/addresses" className="font-medium">{addr?.address_line1 ?? "Select an address"}</Link>
+        </div>
+      </Card>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="Search gas, dealers…" className="pl-9" />
+      </div>
+      {banners[0] && (
+        <Card className="overflow-hidden">
+          <img src={banners[0].image_url} alt={banners[0].title ?? ""} className="h-32 w-full object-cover" />
+        </Card>
+      )}
+      <div>
+        <h2 className="mb-2 text-sm font-semibold">Categories</h2>
+        <div className="grid grid-cols-4 gap-2">
+          {cats.map((c) => (
+            <Card key={c.id} className="flex flex-col items-center gap-1 p-3 text-center">
+              <Flame className="h-5 w-5 text-primary" />
+              <div className="text-xs">{c.name}</div>
+            </Card>
+          ))}
+        </div>
+      </div>
+      <div>
+        <h2 className="mb-2 text-sm font-semibold">Nearby merchants</h2>
+        <div className="space-y-2">
+          {merchants.map((m) => (
+            <Link key={m.id} to={`/user/merchant/${m.id}`}>
+              <Card className="p-3"><div className="font-medium">{m.name}</div><div className="text-xs text-muted-foreground">{m.city ?? "—"} · ★ {Number(m.rating ?? 0).toFixed(1)}</div></Card>
+            </Link>
+          ))}
+          {merchants.length === 0 && <p className="text-sm text-muted-foreground">No merchants nearby yet.</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
