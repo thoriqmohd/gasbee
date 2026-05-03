@@ -68,8 +68,27 @@ export default function OrderDetail() {
         </Card>
         <Card className="p-5 space-y-3">
           <h2 className="font-semibold">Delivery</h2>
-          <pre className="whitespace-pre-wrap text-xs text-muted-foreground">{JSON.stringify(order.address_snapshot, null, 2)}</pre>
-          <div className="space-y-2">
+          {(() => {
+            const a = order.address_snapshot ?? {};
+            return (
+              <div className="space-y-1 text-sm">
+                {a.label && <div className="font-medium">{a.label}</div>}
+                {a.recipient_name && <div>{a.recipient_name} {a.recipient_phone && <span className="text-muted-foreground">· {a.recipient_phone}</span>}</div>}
+                <div className="text-muted-foreground">
+                  {a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ""}
+                </div>
+                <div className="text-muted-foreground">
+                  {[a.postcode, a.city, a.state].filter(Boolean).join(" ")}
+                </div>
+                {a.latitude && a.longitude && (
+                  <a className="text-xs text-primary underline" target="_blank" rel="noreferrer" href={`https://www.google.com/maps?q=${a.latitude},${a.longitude}`}>
+                    📍 Open in Google Maps
+                  </a>
+                )}
+              </div>
+            );
+          })()}
+          <div className="space-y-2 border-t pt-3">
             <label className="text-sm font-medium">Assign rider</label>
             <div className="flex gap-2">
               <Select value={riderId} onValueChange={setRiderId}>
