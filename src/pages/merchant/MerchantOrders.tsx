@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 const TABS: any[] = [
   { value: "all", label: "All", filter: null },
   { value: "pending", label: "Pending", filter: ["pending"] },
-  { value: "active", label: "Active", filter: ["confirmed","preparing","out_for_delivery"] },
+  { value: "active", label: "Active", filter: ["accepted","preparing","assigned","rider_accepted","arrived_at_merchant","picked_up","on_delivery","arrived_at_customer"] },
   { value: "delivered", label: "Delivered", filter: ["delivered"] },
   { value: "cancelled", label: "Cancelled", filter: ["cancelled"] },
 ];

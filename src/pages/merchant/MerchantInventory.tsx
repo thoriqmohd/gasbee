@@ -15,7 +15,7 @@ export default function MerchantInventory() {
   const { merchant } = useMerchantContext();
   const [products, setProducts] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ product_id: "", qty: 1, type: "stock_in" as "stock_in"|"stock_out"|"adjustment", reason: "" });
+  const [form, setForm] = useState({ product_id: "", qty: 1, type: "in" as "in"|"out"|"adjustment", reason: "" });
 
   const load = () => merchant && supabase.from("products").select("*").eq("merchant_id", merchant.id).order("name").then(({ data }) => setProducts(data ?? []));
   useEffect(() => { load(); }, [merchant?.id]);
@@ -23,18 +23,18 @@ export default function MerchantInventory() {
   const submit = async () => {
     if (!form.product_id || !form.qty) { toast.error("Select product and qty"); return; }
     const product = products.find((p) => p.id === form.product_id);
-    const delta = form.type === "stock_out" ? -Math.abs(form.qty) : form.type === "stock_in" ? Math.abs(form.qty) : form.qty;
+    const delta = form.type === "out" ? -Math.abs(form.qty) : form.type === "in" ? Math.abs(form.qty) : form.qty;
     const newQty = Math.max(0, Number(product.stock_qty) + delta);
 
-    const { error: mErr } = await supabase.from("inventory_movements").insert({
+    const { error: mErr } = await supabase.from("inventory_movements").insert([{
       product_id: form.product_id, merchant_id: merchant!.id, performed_by: user!.id,
       quantity: Math.abs(form.qty), type: form.type, reason: form.reason || null,
-    });
+    }]);
     if (mErr) { toast.error(mErr.message); return; }
     const { error: pErr } = await supabase.from("products").update({ stock_qty: newQty }).eq("id", form.product_id);
     if (pErr) { toast.error(pErr.message); return; }
     toast.success("Inventory updated");
-    setOpen(false); setForm({ product_id: "", qty: 1, type: "stock_in", reason: "" }); load();
+    setOpen(false); setForm({ product_id: "", qty: 1, type: "in", reason: "" }); load();
   };
 
   if (!merchant) return <p className="text-sm text-muted-foreground">No merchant linked.</p>;
@@ -56,8 +56,8 @@ export default function MerchantInventory() {
               </div>
               <div><Label>Type</Label>
                 <select className="mt-1 w-full rounded-md border bg-background p-2 text-sm" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as any })}>
-                  <option value="stock_in">Stock in (add)</option>
-                  <option value="stock_out">Stock out (remove)</option>
+                  <option value="in">Stock in (add)</option>
+                  <option value="out">Stock out (remove)</option>
                   <option value="adjustment">Adjustment (signed)</option>
                 </select>
               </div>

@@ -30,7 +30,7 @@ export default function MerchantDashboard() {
       const [todayRes, paidRes, pendRes, prodRes, ridRes, recentRes] = await Promise.all([
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("merchant_id", merchant.id).gte("created_at", today.toISOString()),
         supabase.from("orders").select("total_amount").eq("merchant_id", merchant.id).eq("payment_status", "paid"),
-        supabase.from("orders").select("id", { count: "exact", head: true }).eq("merchant_id", merchant.id).in("status", ["pending","confirmed","preparing"]),
+        supabase.from("orders").select("id", { count: "exact", head: true }).eq("merchant_id", merchant.id).in("status", ["pending","accepted","preparing","assigned","rider_accepted","picked_up","on_delivery"]),
         supabase.from("products").select("id", { count: "exact", head: true }).eq("merchant_id", merchant.id).eq("is_active", true),
         supabase.from("riders").select("id", { count: "exact", head: true }).eq("merchant_id", merchant.id).eq("is_active", true),
         supabase.from("orders").select("*").eq("merchant_id", merchant.id).order("created_at", { ascending: false }).limit(5),
