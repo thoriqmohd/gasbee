@@ -6,3 +6,10 @@ verify_jwt = true
 [functions.merchant-create-staff]
 verify_jwt = true
 
+[functions.billplz-create-bill]
+verify_jwt = true
+
+[functions.billplz-webhook]
+verify_jwt = false
+
+
