@@ -34,6 +34,19 @@ import UserLayout from "@/components/user/UserLayout";
 import UserLogin from "@/pages/user/UserLogin";
 import UserRegister from "@/pages/user/UserRegister";
 import UserHome from "@/pages/user/UserHome";
+import UserProducts from "@/pages/user/UserProducts";
+import UserMerchants from "@/pages/user/UserMerchants";
+import UserMerchantDetail from "@/pages/user/UserMerchantDetail";
+import UserProductDetail from "@/pages/user/UserProductDetail";
+import UserCart from "@/pages/user/UserCart";
+import UserCheckout from "@/pages/user/UserCheckout";
+import UserOrders from "@/pages/user/UserOrders";
+import UserOrderDetail from "@/pages/user/UserOrderDetail";
+import UserAddresses from "@/pages/user/UserAddresses";
+import UserProfile from "@/pages/user/UserProfile";
+import UserNotifications from "@/pages/user/UserNotifications";
+import UserSupport from "@/pages/user/UserSupport";
+import UserRefund from "@/pages/user/UserRefund";
 
 import MerchantLayout from "@/components/merchant/MerchantLayout";
 import RiderLayout from "@/components/merchant/RiderLayout";
@@ -97,21 +110,20 @@ const App = () => (
             <Route element={<ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout /></ProtectedRoute>}>
               <Route path="/user" element={<Navigate to="/user/home" replace />} />
               <Route path="/user/home" element={<UserHome />} />
-              <Route path="/user/products" element={<PlaceholderPage title="Products" />} />
-              <Route path="/user/merchants" element={<PlaceholderPage title="Merchants" />} />
-              <Route path="/user/merchant/:id" element={<PlaceholderPage title="Merchant" />} />
-              <Route path="/user/product/:id" element={<PlaceholderPage title="Product" />} />
-              <Route path="/user/cart" element={<PlaceholderPage title="Cart" />} />
-              <Route path="/user/checkout" element={<PlaceholderPage title="Checkout" />} />
-              <Route path="/user/orders" element={<PlaceholderPage title="My Orders" />} />
-              <Route path="/user/orders/:id" element={<PlaceholderPage title="Order" />} />
-              <Route path="/user/tracking/:orderId" element={<PlaceholderPage title="Track Order" />} />
-              <Route path="/user/reorder" element={<PlaceholderPage title="Reorder" />} />
-              <Route path="/user/refund" element={<PlaceholderPage title="Request Refund" />} />
-              <Route path="/user/profile" element={<PlaceholderPage title="Profile" />} />
-              <Route path="/user/addresses" element={<PlaceholderPage title="Addresses" />} />
-              <Route path="/user/support" element={<PlaceholderPage title="Support" />} />
-              <Route path="/user/notifications" element={<PlaceholderPage title="Notifications" />} />
+              <Route path="/user/products" element={<UserProducts />} />
+              <Route path="/user/merchants" element={<UserMerchants />} />
+              <Route path="/user/merchant/:id" element={<UserMerchantDetail />} />
+              <Route path="/user/product/:id" element={<UserProductDetail />} />
+              <Route path="/user/cart" element={<UserCart />} />
+              <Route path="/user/checkout" element={<UserCheckout />} />
+              <Route path="/user/orders" element={<UserOrders />} />
+              <Route path="/user/orders/:id" element={<UserOrderDetail />} />
+              <Route path="/user/tracking/:orderId" element={<UserOrderDetail />} />
+              <Route path="/user/refund" element={<UserRefund />} />
+              <Route path="/user/profile" element={<UserProfile />} />
+              <Route path="/user/addresses" element={<UserAddresses />} />
+              <Route path="/user/support" element={<UserSupport />} />
+              <Route path="/user/notifications" element={<UserNotifications />} />
             </Route>
 
             {/* ===== MERCHANT MANAGER ===== */}

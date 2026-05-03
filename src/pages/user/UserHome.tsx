@@ -45,10 +45,12 @@ export default function UserHome() {
         <h2 className="mb-2 text-sm font-semibold">Categories</h2>
         <div className="grid grid-cols-4 gap-2">
           {cats.map((c) => (
-            <Card key={c.id} className="flex flex-col items-center gap-1 p-3 text-center">
-              <Flame className="h-5 w-5 text-primary" />
-              <div className="text-xs">{c.name}</div>
-            </Card>
+            <Link key={c.id} to={`/user/products?category=${c.id}`}>
+              <Card className="flex flex-col items-center gap-1 p-3 text-center">
+                <Flame className="h-5 w-5 text-primary" />
+                <div className="text-xs">{c.name}</div>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>

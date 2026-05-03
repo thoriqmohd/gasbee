@@ -1,0 +1,58 @@
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Store, Flame, MapPin, Phone } from "lucide-react";
+
+export default function UserMerchantDetail() {
+  const { id } = useParams();
+  const [m, setM] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!id) return;
+    supabase.from("merchants").select("*").eq("id", id).maybeSingle().then(({ data }) => setM(data));
+    supabase.from("products").select("*").eq("merchant_id", id).eq("is_active", true).then(({ data }) => setProducts(data ?? []));
+  }, [id]);
+
+  if (!m) return <p className="text-sm text-muted-foreground">Loading…</p>;
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-muted">
+            {m.logo_url ? <img src={m.logo_url} alt={m.name} className="h-full w-full rounded-lg object-cover" /> : <Store className="h-6 w-6 text-primary" />}
+          </div>
+          <div className="flex-1">
+            <h1 className="text-lg font-bold">{m.name}</h1>
+            <div className="text-xs text-muted-foreground">★ {Number(m.rating ?? 0).toFixed(1)} · {m.total_orders} orders</div>
+          </div>
+        </div>
+        {m.description && <p className="mt-3 text-sm text-muted-foreground">{m.description}</p>}
+        <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+          {m.address && <div className="flex items-center gap-1"><MapPin className="h-3 w-3" />{m.address}, {m.city}</div>}
+          {m.phone && <div className="flex items-center gap-1"><Phone className="h-3 w-3" />{m.phone}</div>}
+        </div>
+      </Card>
+
+      <h2 className="text-sm font-semibold">Products</h2>
+      <div className="grid grid-cols-2 gap-3">
+        {products.map((p) => (
+          <Link key={p.id} to={`/user/product/${p.id}`}>
+            <Card className="overflow-hidden">
+              <div className="flex h-24 items-center justify-center bg-muted">
+                {p.image_url ? <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" /> : <Flame className="h-8 w-8 text-primary" />}
+              </div>
+              <div className="p-2">
+                <div className="line-clamp-1 text-sm font-medium">{p.name}</div>
+                <div className="mt-1 text-sm font-bold text-primary">RM {Number(p.refill_price || p.selling_price).toFixed(2)}</div>
+              </div>
+            </Card>
+          </Link>
+        ))}
+        {products.length === 0 && <p className="col-span-2 text-sm text-muted-foreground">No products available.</p>}
+      </div>
+    </div>
+  );
+}
