@@ -45,10 +45,10 @@ export default function MerchantProductForm() {
     if (!merchant) return;
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
-    const payload = { ...parsed.data, image_url: parsed.data.image_url || null, category_id: form.category_id || null, merchant_id: merchant.id };
+    const payload: any = { ...parsed.data, image_url: parsed.data.image_url || null, category_id: form.category_id || null, merchant_id: merchant.id, name: parsed.data.name! };
     const res = isEdit
       ? await supabase.from("products").update(payload).eq("id", id!)
-      : await supabase.from("products").insert(payload);
+      : await supabase.from("products").insert([payload]);
     if (res.error) toast.error(res.error.message); else { toast.success("Saved"); nav("/merchant/products"); }
   };
 
