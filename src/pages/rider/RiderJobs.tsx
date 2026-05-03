@@ -21,8 +21,11 @@ export default function RiderJobs() {
   };
   useEffect(() => { load(); }, [user?.id]);
 
+  const licenseOk = rider?.license_image_url && (!rider?.license_expiry_date || new Date(rider.license_expiry_date) >= new Date());
+
   const accept = async (orderId: string) => {
     if (!rider) return;
+    if (!licenseOk) { toast.error("Upload a valid driving license before accepting jobs."); return; }
     const { error } = await supabase.from("orders").update({ rider_id: rider.id, status: "rider_accepted" as any, assigned_at: new Date().toISOString() }).eq("id", orderId);
     if (error) toast.error(error.message); else { toast.success("Accepted"); load(); }
   };
@@ -32,6 +35,12 @@ export default function RiderJobs() {
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-bold">Available jobs</h1>
+      {rider && !licenseOk && (
+        <Card className="border-destructive bg-destructive/10 p-3 text-sm">
+          <p className="font-semibold text-destructive">License required</p>
+          <p>{!rider.license_image_url ? "Your driving license has not been uploaded." : "Your driving license has expired."} Contact your merchant to update it.</p>
+        </Card>
+      )}
       {jobs.length === 0 && <p className="text-sm text-muted-foreground">No available jobs.</p>}
       {jobs.map((o) => (
         <Card key={o.id} className="space-y-2 p-4">
@@ -39,7 +48,7 @@ export default function RiderJobs() {
           <p className="text-sm">{o.address_snapshot?.address_line1}, {o.address_snapshot?.city}</p>
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm" className="flex-1"><Link to={`/merchant/rider/jobs/${o.id}`}>Details</Link></Button>
-            <Button size="sm" className="flex-1" onClick={() => accept(o.id)}>Accept</Button>
+            <Button size="sm" className="flex-1" onClick={() => accept(o.id)} disabled={!licenseOk}>Accept</Button>
           </div>
         </Card>
       ))}
