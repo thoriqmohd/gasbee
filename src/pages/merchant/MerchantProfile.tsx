@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 
 export default function MerchantProfile() {
@@ -25,7 +26,11 @@ export default function MerchantProfile() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Merchant profile</h1>
-      <Card className="space-y-3 p-6">
+      <Card className="space-y-4 p-6">
+        <div>
+          <Label>Logo</Label>
+          <ImageUpload bucket="merchant-logos" pathPrefix={form.id} value={form.logo_url} onChange={(url) => setForm({ ...form, logo_url: url })} label="Upload logo" />
+        </div>
         <div><Label>Name</Label><Input value={form.name ?? ""} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={150} /></div>
         <div><Label>Description</Label><Textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={1000} /></div>
         <div className="grid grid-cols-2 gap-3">
@@ -38,9 +43,9 @@ export default function MerchantProfile() {
           <div><Label>City</Label><Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
           <div><Label>State</Label><Input value={form.state ?? ""} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
         </div>
-        <div><Label>Logo URL</Label><Input value={form.logo_url ?? ""} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} /></div>
         <Button onClick={save}>Save</Button>
       </Card>
     </div>
   );
 }
+

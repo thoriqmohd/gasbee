@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -21,7 +22,7 @@ const schema = z.object({
   deposit_amount: z.coerce.number().nonnegative(),
   stock_qty: z.coerce.number().int().nonnegative(),
   low_stock_threshold: z.coerce.number().int().nonnegative(),
-  image_url: z.string().trim().url().optional().or(z.literal("")),
+  image_url: z.string().trim().url().optional().or(z.literal("")).nullable(),
 });
 
 export default function MerchantProductForm() {
@@ -75,7 +76,7 @@ export default function MerchantProductForm() {
           <div><Label>Stock qty</Label><Input type="number" value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} /></div>
           <div><Label>Low-stock threshold</Label><Input type="number" value={form.low_stock_threshold} onChange={(e) => setForm({ ...form, low_stock_threshold: e.target.value })} /></div>
         </div>
-        <div><Label>Image URL</Label><Input value={form.image_url ?? ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" /></div>
+        <div><Label>Product image</Label><ImageUpload bucket="product-images" pathPrefix={merchant?.id ?? "p"} value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} aspect="square" /></div>
         <div className="flex gap-2"><Button onClick={save}>Save</Button><Button variant="outline" onClick={() => nav(-1)}>Cancel</Button></div>
       </Card>
     </div>
