@@ -2,3 +2,7 @@ project_id = "dkxjykxvljppdiaekvwk"
 
 [functions.merchant-create-rider]
 verify_jwt = true
+
+[functions.merchant-create-staff]
+verify_jwt = true
+
