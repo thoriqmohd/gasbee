@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ShoppingBag, MapPin, User, Bell, Flame, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { Logo } from "@/components/Logo";
 
 const tabs = [
   { to: "/user/home", label: "Home", icon: Home },
