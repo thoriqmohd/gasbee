@@ -40,10 +40,10 @@ export default function MerchantOrderDetail() {
 
   const updateStatus = async (next: string) => {
     const stamp: any = {};
-    if (next === "confirmed") stamp.accepted_at = new Date().toISOString();
-    if (next === "out_for_delivery") stamp.picked_up_at = new Date().toISOString();
+    if (next === "accepted") stamp.accepted_at = new Date().toISOString();
+    if (next === "picked_up") stamp.picked_up_at = new Date().toISOString();
     if (next === "delivered") stamp.delivered_at = new Date().toISOString();
-    const { error } = await supabase.from("orders").update({ status: next, ...stamp }).eq("id", o.id);
+    const { error } = await supabase.from("orders").update({ status: next as any, ...stamp }).eq("id", o.id);
     if (error) toast.error(error.message); else { toast.success("Updated"); load(); }
   };
   const reject = async () => {
