@@ -4,6 +4,7 @@ import { LayoutDashboard, ShoppingBag, Package, Boxes, Bike, Users, Wallet, BarC
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { MerchantOrderAlert } from "@/components/merchant/MerchantOrderAlert";
 
 const items = [
   { to: "/merchant/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -46,6 +47,7 @@ export default function MerchantLayout({ children }: { children?: ReactNode }) {
         </div>
       </aside>
       <main className="flex-1 overflow-x-auto"><div className="mx-auto max-w-6xl p-6 md:p-8">{children ?? <Outlet />}</div></main>
+      <MerchantOrderAlert />
     </div>
   );
 }
