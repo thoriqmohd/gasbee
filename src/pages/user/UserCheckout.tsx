@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { MapPin } from "lucide-react";
+import { calcDeliveryFee, haversineKm, DELIVERY_RATE } from "@/lib/delivery";
 
 export default function UserCheckout() {
   const { user } = useAuth();
@@ -18,13 +19,18 @@ export default function UserCheckout() {
   const nav = useNavigate();
   const [addresses, setAddresses] = useState<any[]>([]);
   const [addrId, setAddrId] = useState<string>("");
+  const [merchant, setMerchant] = useState<any>(null);
   const [notes, setNotes] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "fpx" | "card" | "ewallet">("cod");
   const [busy, setBusy] = useState(false);
 
-  const deliveryFee = subtotal > 0 ? 5 : 0;
+  const totalKg = items.reduce((a, it: any) => a + Number(it.cylinder_size_kg ?? 0) * it.quantity, 0);
+  const addr = addresses.find((a) => a.id === addrId);
+  const distanceKm = haversineKm(addr?.latitude, addr?.longitude, merchant?.latitude, merchant?.longitude);
+  const feeCalc = calcDeliveryFee({ distanceKm, totalKg });
+  const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
   const total = Math.max(0, subtotal + deliveryFee - discount);
 
   useEffect(() => {
@@ -35,6 +41,12 @@ export default function UserCheckout() {
       if (def) setAddrId(def.id);
     });
   }, [user]);
+
+  useEffect(() => {
+    const mid = items[0]?.merchant_id;
+    if (!mid) { setMerchant(null); return; }
+    supabase.from("merchants").select("id,latitude,longitude,name").eq("id", mid).maybeSingle().then(({ data }) => setMerchant(data));
+  }, [items[0]?.merchant_id]);
 
   const applyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -49,13 +61,13 @@ export default function UserCheckout() {
   const placeOrder = async () => {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
     setBusy(true);
-    const addr = addresses.find((a) => a.id === addrId);
+    const addr2 = addresses.find((a) => a.id === addrId);
     const merchant_id = items[0].merchant_id;
 
     const { data: order, error } = await supabase.from("orders").insert({
       customer_id: user.id,
       merchant_id,
-      address_snapshot: addr as any,
+      address_snapshot: addr2 as any,
       items_subtotal: subtotal,
       delivery_fee: deliveryFee,
       discount,
@@ -149,7 +161,13 @@ export default function UserCheckout() {
 
       <Card className="space-y-1 p-3 text-sm">
         <div className="flex justify-between"><span>Subtotal</span><span>RM {subtotal.toFixed(2)}</span></div>
-        <div className="flex justify-between"><span>Delivery</span><span>RM {deliveryFee.toFixed(2)}</span></div>
+        <div className="flex justify-between">
+          <span>Delivery {distanceKm != null && <span className="text-xs text-muted-foreground">({distanceKm.toFixed(1)} km · {totalKg} kg)</span>}</span>
+          <span>RM {deliveryFee.toFixed(2)}</span>
+        </div>
+        {subtotal > 0 && (
+          <div className="text-[10px] text-muted-foreground">Base RM{DELIVERY_RATE.BASE} + RM{DELIVERY_RATE.PER_KM}/km + RM{DELIVERY_RATE.PER_KG}/kg{distanceKm == null && " · estimated, set address coordinates for accurate fee"}</div>
+        )}
         {discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {discount.toFixed(2)}</span></div>}
         <div className="mt-1 flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {total.toFixed(2)}</span></div>
       </Card>
