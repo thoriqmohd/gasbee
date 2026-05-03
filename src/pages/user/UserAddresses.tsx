@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MapPin, Plus, Trash2, Star, Crosshair } from "lucide-react";
+import { MapPin, Plus, Trash2, Star, Crosshair, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { MapPicker } from "@/components/MapPicker";
@@ -26,7 +26,7 @@ export default function UserAddresses() {
   const { user } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const empty: any = { address_line1: "", city: "", postcode: "", label: "Home", latitude: null, longitude: null };
+  const empty: any = { id: null, address_line1: "", city: "", postcode: "", label: "Home", latitude: null, longitude: null };
   const [form, setForm] = useState<any>(empty);
 
   const load = () => {
@@ -43,13 +43,25 @@ export default function UserAddresses() {
     );
   };
 
+  const openNew = () => { setForm(empty); setOpen(true); };
+  const openEdit = (a: any) => { setForm({ ...a }); setOpen(true); };
+
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
     if (form.latitude == null || form.longitude == null) { toast.error("Pin your location on the map"); return; }
-    const isDefault = items.length === 0;
-    const { error } = await supabase.from("addresses").insert({ user_id: user!.id, address_line1: parsed.data.address_line1, address_line2: parsed.data.address_line2, city: parsed.data.city, state: parsed.data.state, postcode: parsed.data.postcode, label: parsed.data.label, recipient_name: parsed.data.recipient_name, recipient_phone: parsed.data.recipient_phone, is_default: isDefault, latitude: form.latitude, longitude: form.longitude });
-    if (error) toast.error(error.message); else { toast.success("Address added"); setOpen(false); setForm(empty); load(); }
+    const payload: any = { ...parsed.data, latitude: form.latitude, longitude: form.longitude };
+    if (form.id) {
+      const { error } = await supabase.from("addresses").update(payload).eq("id", form.id);
+      if (error) return toast.error(error.message);
+      toast.success("Address updated");
+    } else {
+      const isDefault = items.length === 0;
+      const { error } = await supabase.from("addresses").insert({ ...payload, user_id: user!.id, is_default: isDefault });
+      if (error) return toast.error(error.message);
+      toast.success("Address added");
+    }
+    setOpen(false); setForm(empty); load();
   };
 
   const setDefault = async (id: string) => {
@@ -57,18 +69,18 @@ export default function UserAddresses() {
     await supabase.from("addresses").update({ is_default: true }).eq("id", id);
     load();
   };
-  const del = async (id: string) => { await supabase.from("addresses").delete().eq("id", id); load(); };
+  const del = async (id: string) => { if (!confirm("Delete address?")) return; await supabase.from("addresses").delete().eq("id", id); load(); };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold">Addresses</h1>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button size="sm"><Plus className="mr-1 h-4 w-4" />Add</Button></DialogTrigger>
+          <DialogTrigger asChild><Button size="sm" onClick={openNew}><Plus className="mr-1 h-4 w-4" />Add</Button></DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>New address</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{form.id ? "Edit address" : "New address"}</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label>Label</Label><Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></div>
+              <div><Label>Label</Label><Input value={form.label ?? ""} onChange={(e) => setForm({ ...form, label: e.target.value })} /></div>
               <div><Label>Recipient name</Label><Input value={form.recipient_name ?? ""} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} /></div>
               <div><Label>Recipient phone</Label><Input value={form.recipient_phone ?? ""} onChange={(e) => setForm({ ...form, recipient_phone: e.target.value })} /></div>
               <div><Label>Address line 1 *</Label><Input value={form.address_line1} onChange={(e) => setForm({ ...form, address_line1: e.target.value })} /></div>
@@ -84,9 +96,9 @@ export default function UserAddresses() {
                   <Button type="button" size="sm" variant="outline" onClick={useMyLocation}><Crosshair className="mr-1 h-3 w-3" />Use my location</Button>
                 </div>
                 <MapPicker lat={form.latitude} lng={form.longitude} onChange={(la, ln) => setForm({ ...form, latitude: la, longitude: ln })} />
-                {form.latitude != null && <p className="mt-1 text-[11px] text-muted-foreground">Pinned: {form.latitude.toFixed(5)}, {form.longitude.toFixed(5)}</p>}
+                {form.latitude != null && <p className="mt-1 text-[11px] text-muted-foreground">Pinned: {Number(form.latitude).toFixed(5)}, {Number(form.longitude).toFixed(5)}</p>}
               </div>
-              <Button className="w-full" onClick={save}>Save</Button>
+              <Button className="w-full" onClick={save}>{form.id ? "Update" : "Save"}</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -101,6 +113,7 @@ export default function UserAddresses() {
             {a.recipient_name && <div className="text-xs text-muted-foreground">{a.recipient_name} · {a.recipient_phone}</div>}
             {a.latitude && <div className="text-[10px] text-muted-foreground">📍 {Number(a.latitude).toFixed(4)}, {Number(a.longitude).toFixed(4)}</div>}
           </div>
+          <Button size="icon" variant="ghost" onClick={() => openEdit(a)}><Pencil className="h-4 w-4" /></Button>
           {!a.is_default && <Button size="icon" variant="ghost" onClick={() => setDefault(a.id)}><Star className="h-4 w-4" /></Button>}
           <Button size="icon" variant="ghost" onClick={() => del(a.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
         </Card>

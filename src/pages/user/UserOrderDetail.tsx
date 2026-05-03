@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Phone, Navigation } from "lucide-react";
 import { MapPicker } from "@/components/MapPicker";
 import { OrderChat } from "@/components/OrderChat";
+import { OrderRating } from "@/components/user/OrderRating";
 
 const STEPS = ["pending", "confirmed", "preparing", "out_for_delivery", "delivered"];
 
@@ -142,6 +143,8 @@ export default function UserOrderDetail() {
         {Number(o.discount) > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {Number(o.discount).toFixed(2)}</span></div>}
         <div className="flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {Number(o.total_amount).toFixed(2)}</span></div>
       </Card>
+
+      {o.status === "delivered" && <OrderRating orderId={o.id} hasRider={!!o.rider_id} />}
 
       <div className="flex gap-2">
         {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={cancel}>Cancel</Button>}
