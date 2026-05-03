@@ -1026,6 +1026,7 @@ export type Database = {
           context_role: string | null
           created_at: string
           id: string
+          merchant_id: string | null
           opened_by: string
           priority: Database["public"]["Enums"]["ticket_priority"]
           related_order_id: string | null
@@ -1039,6 +1040,7 @@ export type Database = {
           context_role?: string | null
           created_at?: string
           id?: string
+          merchant_id?: string | null
           opened_by: string
           priority?: Database["public"]["Enums"]["ticket_priority"]
           related_order_id?: string | null
@@ -1052,6 +1054,7 @@ export type Database = {
           context_role?: string | null
           created_at?: string
           id?: string
+          merchant_id?: string | null
           opened_by?: string
           priority?: Database["public"]["Enums"]["ticket_priority"]
           related_order_id?: string | null
