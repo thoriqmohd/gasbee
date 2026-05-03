@@ -42,11 +42,6 @@ export default function MerchantOrderDetail() {
     const { error } = await supabase.from("orders").update({ status: "cancelled", rejected_at: new Date().toISOString(), failure_reason: "Rejected by merchant" }).eq("id", o.id);
     if (error) toast.error(error.message); else { toast.success("Rejected"); load(); }
   };
-  const assignRider = async () => {
-    if (!riderId) return;
-    const { error } = await supabase.from("orders").update({ rider_id: riderId, assigned_at: new Date().toISOString() }).eq("id", o.id);
-    if (error) toast.error(error.message); else { toast.success("Rider assigned"); load(); }
-  };
 
   return (
     <div className="space-y-4">
@@ -56,25 +51,14 @@ export default function MerchantOrderDetail() {
         <div className="flex gap-2"><StatusBadge value={o.status} /><StatusBadge value={o.payment_status} /></div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="p-4">
-          <h2 className="mb-2 font-semibold">Delivery</h2>
-          <p className="text-sm">{o.address_snapshot?.recipient_name}</p>
-          <p className="text-sm text-muted-foreground">{o.address_snapshot?.recipient_phone}</p>
-          <p className="text-sm text-muted-foreground">{o.address_snapshot?.address_line1}, {o.address_snapshot?.postcode} {o.address_snapshot?.city}</p>
-          {o.notes && <p className="mt-2 text-xs italic">Notes: {o.notes}</p>}
-        </Card>
-        <Card className="p-4">
-          <h2 className="mb-2 font-semibold">Assign rider</h2>
-          <div className="flex gap-2">
-            <Select value={riderId} onValueChange={setRiderId}>
-              <SelectTrigger><SelectValue placeholder="Select rider" /></SelectTrigger>
-              <SelectContent>{riders.map((r) => <SelectItem key={r.id} value={r.id}>{r.full_name}</SelectItem>)}</SelectContent>
-            </Select>
-            <Button onClick={assignRider} disabled={!riderId}>Assign</Button>
-          </div>
-        </Card>
-      </div>
+      <Card className="p-4">
+        <h2 className="mb-2 font-semibold">Delivery</h2>
+        <p className="text-sm">{o.address_snapshot?.recipient_name}</p>
+        <p className="text-sm text-muted-foreground">{o.address_snapshot?.recipient_phone}</p>
+        <p className="text-sm text-muted-foreground">{o.address_snapshot?.address_line1}, {o.address_snapshot?.postcode} {o.address_snapshot?.city}</p>
+        {o.notes && <p className="mt-2 text-xs italic">Notes: {o.notes}</p>}
+        {o.rider_id && <p className="mt-2 text-xs text-muted-foreground">Rider assigned · they can manage this delivery from their app.</p>}
+      </Card>
 
       <Card>
         <table className="w-full text-sm">
