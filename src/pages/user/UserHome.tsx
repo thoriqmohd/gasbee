@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MapPin, Search, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
+import { BannerCarousel } from "@/components/user/BannerCarousel";
 
 export default function UserHome() {
   const [banners, setBanners] = useState<any[]>([]);
@@ -36,11 +37,7 @@ export default function UserHome() {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input placeholder="Search gas, dealers…" className="pl-9" />
       </div>
-      {banners[0] && (
-        <Card className="overflow-hidden">
-          <img src={banners[0].image_url} alt={banners[0].title ?? ""} className="h-32 w-full object-cover" />
-        </Card>
-      )}
+      <BannerCarousel banners={banners} />
       <div>
         <h2 className="mb-2 text-sm font-semibold">Categories</h2>
         <div className="grid grid-cols-4 gap-2">
