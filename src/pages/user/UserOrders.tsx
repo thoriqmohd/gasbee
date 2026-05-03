@@ -23,7 +23,7 @@ export default function UserOrders() {
           <Card className="space-y-1 p-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">{o.code}</span>
-              <StatusBadge status={o.status} />
+              <StatusBadge value={o.status} />
             </div>
             <div className="text-xs text-muted-foreground">{o.merchants?.name} · {new Date(o.created_at).toLocaleString()}</div>
             <div className="text-sm font-bold text-primary">RM {Number(o.total_amount).toFixed(2)}</div>

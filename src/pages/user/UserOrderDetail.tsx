@@ -40,7 +40,7 @@ export default function UserOrderDetail() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold">{o.code}</h1>
-        <StatusBadge status={o.status} />
+        <StatusBadge value={o.status} />
       </div>
 
       {stepIdx >= 0 && o.status !== "cancelled" && (

@@ -49,7 +49,7 @@ export default function UserSupport() {
       </div>
       {items.map((t) => (
         <Card key={t.id} className="space-y-1 p-3">
-          <div className="flex items-center justify-between"><div className="text-sm font-semibold">{t.subject}</div><StatusBadge status={t.status} /></div>
+          <div className="flex items-center justify-between"><div className="text-sm font-semibold">{t.subject}</div><StatusBadge value={t.status} /></div>
           {t.body && <div className="text-xs text-muted-foreground line-clamp-2">{t.body}</div>}
           <div className="text-[10px] text-muted-foreground">{new Date(t.created_at).toLocaleString()}</div>
         </Card>
