@@ -48,7 +48,7 @@ export default function UserAddresses() {
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
     if (form.latitude == null || form.longitude == null) { toast.error("Pin your location on the map"); return; }
     const isDefault = items.length === 0;
-    const { error } = await supabase.from("addresses").insert({ ...parsed.data, user_id: user!.id, is_default: isDefault, latitude: form.latitude, longitude: form.longitude });
+    const { error } = await supabase.from("addresses").insert({ user_id: user!.id, address_line1: parsed.data.address_line1, address_line2: parsed.data.address_line2, city: parsed.data.city, state: parsed.data.state, postcode: parsed.data.postcode, label: parsed.data.label, recipient_name: parsed.data.recipient_name, recipient_phone: parsed.data.recipient_phone, is_default: isDefault, latitude: form.latitude, longitude: form.longitude });
     if (error) toast.error(error.message); else { toast.success("Address added"); setOpen(false); setForm(empty); load(); }
   };
 
