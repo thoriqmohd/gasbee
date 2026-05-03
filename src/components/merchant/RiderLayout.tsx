@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, Briefcase, Truck, History, Wallet, User, Bell, Flame, LogOut } from "lucide-react";
+import { Home, Briefcase, Truck, History, User, LogOut } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
@@ -18,8 +19,8 @@ export default function RiderLayout() {
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background pb-20">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[image:var(--gradient-primary)]"><Flame className="h-4 w-4 text-primary-foreground" /></div>
-          <span className="font-bold">Rider</span>
+          <Logo size={32} />
+          <span className="font-bold">Gasbee Rider</span>
         </div>
         <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav("/merchant/login"); }}><LogOut className="h-4 w-4" /></Button>
       </header>

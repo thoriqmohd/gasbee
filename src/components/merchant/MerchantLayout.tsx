@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, Package, Boxes, Bike, Users, Wallet, BarChart3, Settings, Bell, LifeBuoy, User, Flame, LogOut, ArrowLeftRight } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Package, Boxes, Bike, Users, Wallet, BarChart3, Settings, Bell, LifeBuoy, User, LogOut, ArrowLeftRight } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
@@ -27,7 +28,7 @@ export default function MerchantLayout({ children }: { children?: ReactNode }) {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
         <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[image:var(--gradient-primary)]"><Flame className="h-5 w-5 text-primary-foreground" /></div>
+          <Logo size={36} />
           <div><div className="text-sm font-bold">Gasbee Merchant</div></div>
         </div>
         <nav className="flex-1 overflow-y-auto px-2 py-4">

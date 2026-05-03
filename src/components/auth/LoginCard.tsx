@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Flame } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { homeForRoles, AppRole } from "@/hooks/useAuth";
 
 interface Props {
@@ -46,9 +46,7 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-accent/40 p-4">
       <Card className="w-full max-w-md p-8 shadow-[var(--shadow-elegant)]">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[image:var(--gradient-primary)]">
-            <Flame className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <Logo size={48} />
           <div>
             <h1 className="text-xl font-bold">{title}</h1>
             <p className="text-xs text-muted-foreground">{subtitle}</p>

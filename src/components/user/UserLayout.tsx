@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Home, ShoppingBag, MapPin, User, Bell, Flame, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { Logo } from "@/components/Logo";
 
 const tabs = [
   { to: "/user/home", label: "Home", icon: Home },
@@ -18,7 +19,7 @@ export default function UserLayout() {
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background pb-20">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[image:var(--gradient-primary)]"><Flame className="h-4 w-4 text-primary-foreground" /></div>
+          <Logo size={32} />
           <span className="font-bold">Gasbee</span>
         </div>
         <Button variant="ghost" size="icon" className="relative" onClick={() => nav("/user/cart")}>

@@ -3,8 +3,9 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingBag, Users, Store, FileCheck2, Bike,
   Package, Tags, Boxes, CreditCard, Undo2, Wallet, Percent,
-  Image as ImageIcon, Megaphone, BarChart3, Bell, LifeBuoy, Settings, ScrollText, Flame, LogOut,
+  Image as ImageIcon, Megaphone, BarChart3, Bell, LifeBuoy, Settings, ScrollText, LogOut,
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
@@ -38,9 +39,7 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
         <div className="flex h-16 items-center gap-3 px-5 border-b border-sidebar-border">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[image:var(--gradient-primary)]">
-            <Flame className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <Logo size={36} />
           <div>
             <div className="text-sm font-bold">Gasbee HQ</div>
             <div className="text-[10px] uppercase tracking-wider opacity-60">Admin</div>
