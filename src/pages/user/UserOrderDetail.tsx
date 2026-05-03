@@ -5,6 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toast } from "sonner";
+import { Phone, Navigation } from "lucide-react";
+import { MapPicker } from "@/components/MapPicker";
+import { OrderChat } from "@/components/OrderChat";
 
 const STEPS = ["pending", "confirmed", "preparing", "out_for_delivery", "delivered"];
 
@@ -12,12 +15,16 @@ export default function UserOrderDetail() {
   const { id } = useParams();
   const [o, setO] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
+  const [riderLoc, setRiderLoc] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const { data: order } = await supabase.from("orders").select("*, merchants(name, phone), riders(full_name, phone)").eq("id", id).maybeSingle();
+      const { data: order } = await supabase.from("orders").select("*, merchants(name, phone, latitude, longitude), riders(id, full_name, phone, current_lat, current_lng, vehicle_type, vehicle_plate)").eq("id", id).maybeSingle();
       setO(order);
+      if ((order as any)?.riders?.current_lat) {
+        setRiderLoc({ lat: Number((order as any).riders.current_lat), lng: Number((order as any).riders.current_lng) });
+      }
       const { data: oi } = await supabase.from("order_items").select("*").eq("order_id", id);
       setItems(oi ?? []);
     };
@@ -28,6 +35,17 @@ export default function UserOrderDetail() {
     return () => { supabase.removeChannel(ch); };
   }, [id]);
 
+  // Subscribe to rider location updates
+  useEffect(() => {
+    const riderId = (o as any)?.riders?.id;
+    if (!riderId) return;
+    const ch = supabase.channel(`rider-${riderId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "riders", filter: `id=eq.${riderId}` }, (p: any) => {
+        if (p.new?.current_lat) setRiderLoc({ lat: Number(p.new.current_lat), lng: Number(p.new.current_lng) });
+      }).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [(o as any)?.riders?.id]);
+
   if (!o) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   const stepIdx = STEPS.indexOf(o.status);
@@ -36,12 +54,26 @@ export default function UserOrderDetail() {
     if (error) toast.error(error.message); else { toast.success("Cancelled"); setO({ ...o, status: "cancelled" }); }
   };
 
+  const a = o.address_snapshot ?? {};
+  const markers: any[] = [];
+  if (a.latitude) markers.push({ lat: Number(a.latitude), lng: Number(a.longitude), label: "Delivery address" });
+  if (o.merchants?.latitude) markers.push({ lat: Number(o.merchants.latitude), lng: Number(o.merchants.longitude), label: o.merchants.name });
+  if (riderLoc) markers.push({ lat: riderLoc.lat, lng: riderLoc.lng, label: "Rider 🛵" });
+
+  const trackable = ["rider_accepted","arrived_at_merchant","picked_up","on_delivery","arrived_at_customer","out_for_delivery"].includes(o.status);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold">{o.code}</h1>
         <StatusBadge value={o.status} />
       </div>
+
+      {o.delivery_type === "scheduled" && o.scheduled_at && (
+        <Card className="border-primary bg-primary/5 p-3 text-sm">
+          📅 Scheduled delivery: <span className="font-semibold">{new Date(o.scheduled_at).toLocaleString()}</span>
+        </Card>
+      )}
 
       {stepIdx >= 0 && o.status !== "cancelled" && (
         <Card className="p-3">
@@ -57,6 +89,14 @@ export default function UserOrderDetail() {
         </Card>
       )}
 
+      {trackable && markers.length > 0 && (
+        <Card className="p-2">
+          <div className="mb-1 px-2 pt-1 text-sm font-semibold">Live tracking</div>
+          <MapPicker lat={riderLoc?.lat ?? (a.latitude ? Number(a.latitude) : null)} lng={riderLoc?.lng ?? (a.longitude ? Number(a.longitude) : null)} readOnly markers={markers} height={260} />
+          {!riderLoc && o.riders && <p className="px-2 pb-1 pt-1 text-[11px] text-muted-foreground">Waiting for rider GPS…</p>}
+        </Card>
+      )}
+
       <Card className="space-y-1 p-3 text-sm">
         <div className="font-semibold">Merchant</div>
         <div>{o.merchants?.name}</div>
@@ -64,19 +104,28 @@ export default function UserOrderDetail() {
       </Card>
 
       {o.riders && (
-        <Card className="space-y-1 p-3 text-sm">
+        <Card className="space-y-2 p-3 text-sm">
           <div className="font-semibold">Rider</div>
-          <div>{o.riders.full_name}</div>
+          <div>{o.riders.full_name} {o.riders.vehicle_type && <span className="text-xs text-muted-foreground">· {o.riders.vehicle_type} {o.riders.vehicle_plate ?? ""}</span>}</div>
           <div className="text-xs text-muted-foreground">{o.riders.phone}</div>
+          {o.riders.phone && (
+            <Button asChild size="sm" className="w-full"><a href={`tel:${o.riders.phone}`}><Phone className="mr-1 h-3 w-3" />Call rider</a></Button>
+          )}
         </Card>
       )}
 
       <Card className="p-3">
-        <div className="mb-1 text-sm font-semibold">Delivery to</div>
+        <div className="mb-1 flex items-center justify-between text-sm font-semibold"><span>Delivery to</span>
+          {a.latitude && (
+            <a className="text-xs text-primary underline" href={`https://www.google.com/maps?q=${a.latitude},${a.longitude}`} target="_blank" rel="noreferrer"><Navigation className="mr-1 inline h-3 w-3" />Open map</a>
+          )}
+        </div>
         <div className="text-xs text-muted-foreground">
-          {o.address_snapshot?.address_line1}, {o.address_snapshot?.postcode} {o.address_snapshot?.city}
+          {a.address_line1}, {a.postcode} {a.city}
         </div>
       </Card>
+
+      {o.rider_id && <OrderChat orderId={o.id} senderRole="customer" />}
 
       <Card className="divide-y">
         {items.map((it) => (
