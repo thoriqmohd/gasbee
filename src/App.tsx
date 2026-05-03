@@ -153,33 +153,33 @@ const App = () => (
             <Route path="/merchant/login" element={<MerchantLogin />} />
             <Route element={<ProtectedRoute allow={MERCHANT_MANAGER_ROLES} loginPath="/merchant/login"><MerchantLayout /></ProtectedRoute>}>
               <Route path="/merchant" element={<Navigate to="/merchant/dashboard" replace />} />
-              <Route path="/merchant/dashboard" element={<PlaceholderPage title="Merchant Dashboard" description="Today's orders, sales, alerts." />} />
-              <Route path="/merchant/orders" element={<PlaceholderPage title="Orders" />} />
-              <Route path="/merchant/orders/:id" element={<PlaceholderPage title="Order" />} />
-              <Route path="/merchant/products" element={<PlaceholderPage title="Products" />} />
-              <Route path="/merchant/products/new" element={<PlaceholderPage title="New Product" />} />
-              <Route path="/merchant/products/:id/edit" element={<PlaceholderPage title="Edit Product" />} />
-              <Route path="/merchant/inventory" element={<PlaceholderPage title="Inventory" />} />
-              <Route path="/merchant/inventory-movements" element={<PlaceholderPage title="Inventory Movements" />} />
-              <Route path="/merchant/riders" element={<PlaceholderPage title="Riders" />} />
-              <Route path="/merchant/staff" element={<PlaceholderPage title="Staff" />} />
-              <Route path="/merchant/settlements" element={<PlaceholderPage title="Settlements" />} />
-              <Route path="/merchant/reports" element={<PlaceholderPage title="Reports" />} />
-              <Route path="/merchant/profile" element={<PlaceholderPage title="Merchant Profile" />} />
-              <Route path="/merchant/settings" element={<PlaceholderPage title="Settings" />} />
-              <Route path="/merchant/notifications" element={<PlaceholderPage title="Notifications" />} />
-              <Route path="/merchant/support" element={<PlaceholderPage title="Support" />} />
+              <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
+              <Route path="/merchant/orders" element={<MerchantOrders />} />
+              <Route path="/merchant/orders/:id" element={<MerchantOrderDetail />} />
+              <Route path="/merchant/products" element={<MerchantProducts />} />
+              <Route path="/merchant/products/new" element={<MerchantProductForm />} />
+              <Route path="/merchant/products/:id/edit" element={<MerchantProductForm />} />
+              <Route path="/merchant/inventory" element={<MerchantInventory />} />
+              <Route path="/merchant/inventory-movements" element={<MerchantInventoryMovements />} />
+              <Route path="/merchant/riders" element={<MerchantRiders />} />
+              <Route path="/merchant/staff" element={<MerchantStaff />} />
+              <Route path="/merchant/settlements" element={<MerchantSettlements />} />
+              <Route path="/merchant/reports" element={<MerchantReports />} />
+              <Route path="/merchant/profile" element={<MerchantProfile />} />
+              <Route path="/merchant/settings" element={<MerchantSettings />} />
+              <Route path="/merchant/notifications" element={<MerchantNotifications />} />
+              <Route path="/merchant/support" element={<MerchantSupport />} />
             </Route>
 
             {/* ===== RIDER ===== */}
             <Route element={<ProtectedRoute allow={RIDER_ROLES} loginPath="/merchant/login"><RiderLayout /></ProtectedRoute>}>
-              <Route path="/merchant/rider-dashboard" element={<PlaceholderPage title="Rider Dashboard" description="Online status, today's earnings." />} />
-              <Route path="/merchant/rider/jobs" element={<PlaceholderPage title="Jobs" />} />
-              <Route path="/merchant/rider/jobs/:id" element={<PlaceholderPage title="Job" />} />
-              <Route path="/merchant/rider/active-delivery" element={<PlaceholderPage title="Active Delivery" />} />
-              <Route path="/merchant/rider/history" element={<PlaceholderPage title="History" />} />
-              <Route path="/merchant/rider/earnings" element={<PlaceholderPage title="Earnings" />} />
-              <Route path="/merchant/rider/profile" element={<PlaceholderPage title="Profile" />} />
+              <Route path="/merchant/rider-dashboard" element={<RiderDashboard />} />
+              <Route path="/merchant/rider/jobs" element={<RiderJobs />} />
+              <Route path="/merchant/rider/jobs/:id" element={<RiderJobDetail />} />
+              <Route path="/merchant/rider/active-delivery" element={<RiderActive />} />
+              <Route path="/merchant/rider/history" element={<RiderHistory />} />
+              <Route path="/merchant/rider/earnings" element={<RiderEarnings />} />
+              <Route path="/merchant/rider/profile" element={<RiderProfile />} />
               <Route path="/merchant/rider/notifications" element={<PlaceholderPage title="Notifications" />} />
             </Route>
 
