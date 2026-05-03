@@ -56,8 +56,8 @@ export default function MerchantInventory() {
               </div>
               <div><Label>Type</Label>
                 <select className="mt-1 w-full rounded-md border bg-background p-2 text-sm" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as any })}>
-                  <option value="stock_in">Stock in (add)</option>
-                  <option value="stock_out">Stock out (remove)</option>
+                  <option value="in">Stock in (add)</option>
+                  <option value="out">Stock out (remove)</option>
                   <option value="adjustment">Adjustment (signed)</option>
                 </select>
               </div>
