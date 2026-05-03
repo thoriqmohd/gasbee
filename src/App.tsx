@@ -12,9 +12,11 @@ import Dashboard from "@/pages/admin/Dashboard";
 import Orders from "@/pages/admin/Orders";
 import OrderDetail from "@/pages/admin/OrderDetail";
 import Customers from "@/pages/admin/Customers";
+import CustomerDetail from "@/pages/admin/CustomerDetail";
 import Merchants from "@/pages/admin/Merchants";
 import MerchantApplications from "@/pages/admin/MerchantApplications";
 import Riders from "@/pages/admin/Riders";
+import RiderDetail from "@/pages/admin/RiderDetail";
 import Products from "@/pages/admin/Products";
 import Categories from "@/pages/admin/Categories";
 import InventoryOverview from "@/pages/admin/InventoryOverview";
@@ -108,9 +110,11 @@ const App = () => (
               <Route path="/orders" element={<Orders />} />
               <Route path="/orders/:id" element={<OrderDetail />} />
               <Route path="/customers" element={<Customers />} />
+              <Route path="/customers/:id" element={<CustomerDetail />} />
               <Route path="/merchants" element={<Merchants />} />
               <Route path="/merchant-applications" element={<MerchantApplications />} />
               <Route path="/riders" element={<Riders />} />
+              <Route path="/riders/:id" element={<RiderDetail />} />
               <Route path="/products" element={<Products />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/inventory-overview" element={<InventoryOverview />} />
