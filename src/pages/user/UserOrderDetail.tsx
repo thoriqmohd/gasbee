@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Phone, Navigation } from "lucide-react";
 import { MapPicker } from "@/components/MapPicker";
 import { OrderChat } from "@/components/OrderChat";
+import { OrderRating } from "@/components/user/OrderRating";
 
 const STEPS = ["pending", "confirmed", "preparing", "out_for_delivery", "delivered"];
 
@@ -141,7 +142,18 @@ export default function UserOrderDetail() {
         <div className="flex justify-between"><span>Delivery</span><span>RM {Number(o.delivery_fee).toFixed(2)}</span></div>
         {Number(o.discount) > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {Number(o.discount).toFixed(2)}</span></div>}
         <div className="flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {Number(o.total_amount).toFixed(2)}</span></div>
+        <div className="flex justify-between pt-1 text-xs"><span>Payment</span><span className="capitalize">{o.payment_method ?? "—"} · {o.payment_status}</span></div>
       </Card>
+
+      {o.payment_status !== "paid" && o.payment_method && o.payment_method !== "cod" && o.status !== "cancelled" && (
+        <Button className="w-full" onClick={async () => {
+          const { data, error } = await supabase.functions.invoke("billplz-create-bill", { body: { order_id: o.id, redirect_url: window.location.href } });
+          if (error || !data?.url) { toast.error("Could not start payment"); return; }
+          window.location.href = data.url;
+        }}>Pay now (RM {Number(o.total_amount).toFixed(2)})</Button>
+      )}
+
+      {o.status === "delivered" && <OrderRating orderId={o.id} hasRider={!!o.rider_id} />}
 
       <div className="flex gap-2">
         {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={cancel}>Cancel</Button>}
