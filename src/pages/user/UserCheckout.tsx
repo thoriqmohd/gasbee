@@ -100,6 +100,22 @@ export default function UserCheckout() {
     await supabase.from("order_items").insert(orderItems);
 
     clear();
+
+    // Online payment via Billplz
+    if (paymentMethod !== "cod") {
+      const redirect_url = `${window.location.origin}/user/orders/${order.id}`;
+      const { data: bp, error: bpErr } = await supabase.functions.invoke("billplz-create-bill", {
+        body: { order_id: order.id, redirect_url },
+      });
+      if (bpErr || !bp?.url) {
+        toast.error("Order placed, but payment link failed. You can retry from order details.");
+        nav(`/user/orders/${order.id}`);
+        return;
+      }
+      window.location.href = bp.url;
+      return;
+    }
+
     toast.success("Order placed!");
     nav(`/user/orders/${order.id}`);
   };
