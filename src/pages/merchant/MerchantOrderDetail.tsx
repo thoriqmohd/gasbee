@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toast } from "sonner";
 
 const NEXT: Record<string, string> = {
-  pending: "confirmed", confirmed: "preparing", preparing: "out_for_delivery", out_for_delivery: "delivered",
+  pending: "accepted", accepted: "preparing", preparing: "assigned",
 };
 
 export default function MerchantOrderDetail() {
