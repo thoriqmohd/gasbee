@@ -21,7 +21,7 @@ export default function UserCheckout() {
   const [notes, setNotes] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "fpx" | "card" | "ewallet">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "fpx" | "card" | "ewallet">("cod");
   const [busy, setBusy] = useState(false);
 
   const deliveryFee = subtotal > 0 ? 5 : 0;
@@ -55,7 +55,7 @@ export default function UserCheckout() {
     const { data: order, error } = await supabase.from("orders").insert({
       customer_id: user.id,
       merchant_id,
-      address_snapshot: addr,
+      address_snapshot: addr as any,
       items_subtotal: subtotal,
       delivery_fee: deliveryFee,
       discount,
@@ -75,7 +75,7 @@ export default function UserCheckout() {
       product_id: it.product_id,
       product_name: it.name,
       product_image_url: it.image_url,
-      type: it.type,
+      type: (it.type === "new" ? "new_cylinder" : it.type) as "refill" | "new_cylinder" | "deposit",
       cylinder_size_kg: it.cylinder_size_kg,
       quantity: it.quantity,
       unit_price: it.unit_price,
@@ -133,7 +133,7 @@ export default function UserCheckout() {
       <div>
         <div className="mb-2 text-sm font-semibold">Payment method</div>
         <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="grid grid-cols-2 gap-2">
-          {["cash","fpx","card","ewallet"].map((m) => (
+          {["cod","fpx","card","ewallet"].map((m) => (
             <Card key={m} className="flex items-center gap-2 p-3">
               <RadioGroupItem value={m} id={m} />
               <Label htmlFor={m} className="cursor-pointer text-sm capitalize">{m}</Label>
