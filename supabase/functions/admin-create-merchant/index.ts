@@ -68,14 +68,11 @@ Deno.serve(async (req) => {
     }
 
     // Remove default 'customer' role and assign merchant_owner + merchant_manager
-    await admin.from("user_roles").delete().eq("user_id", ownerId).eq("role", "customer");
-    await admin.from("user_roles").upsert(
-      [
-        { user_id: ownerId, role: "merchant_owner", merchant_id: merchant.id },
-        { user_id: ownerId, role: "merchant_manager", merchant_id: merchant.id },
-      ],
-      { onConflict: "user_id,role" } as any
-    );
+    await admin.from("user_roles").delete().eq("user_id", ownerId).in("role", ["customer","merchant_owner","merchant_manager"]);
+    await admin.from("user_roles").insert([
+      { user_id: ownerId, role: "merchant_owner", merchant_id: merchant.id },
+      { user_id: ownerId, role: "merchant_manager", merchant_id: merchant.id },
+    ]);
 
     return new Response(JSON.stringify({ merchant, owner_id: ownerId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
