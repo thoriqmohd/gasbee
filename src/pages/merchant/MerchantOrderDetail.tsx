@@ -4,36 +4,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMerchantContext } from "@/hooks/useMerchantContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toast } from "sonner";
 
 const NEXT: Record<string, string> = {
-  pending: "accepted", accepted: "preparing", preparing: "assigned",
+  pending: "accepted", accepted: "preparing",
 };
 
 export default function MerchantOrderDetail() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { merchant } = useMerchantContext();
+  useMerchantContext();
   const [o, setO] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
-  const [riders, setRiders] = useState<any[]>([]);
-  const [riderId, setRiderId] = useState<string>("");
 
   const load = async () => {
     if (!id) return;
     const { data } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
     setO(data);
-    setRiderId(data?.rider_id ?? "");
     const { data: oi } = await supabase.from("order_items").select("*").eq("order_id", id);
     setItems(oi ?? []);
   };
   useEffect(() => { load(); }, [id]);
-  useEffect(() => {
-    if (!merchant) return;
-    supabase.from("riders").select("*").eq("merchant_id", merchant.id).eq("is_active", true).then(({ data }) => setRiders(data ?? []));
-  }, [merchant?.id]);
 
   if (!o) return <p className="text-sm text-muted-foreground">Loading…</p>;
   const fmt = (n: any) => new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR" }).format(Number(n||0));
