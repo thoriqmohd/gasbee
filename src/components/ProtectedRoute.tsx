@@ -1,5 +1,17 @@
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { useAuth, AppRole } from "@/hooks/useAuth";
+import { Splash } from "@/components/Splash";
+
+export function ProtectedRoute({ children, allow, loginPath }: { children: React.ReactNode; allow: AppRole[]; loginPath: string }) {
+  const { user, roles, loading } = useAuth();
+  const loc = useLocation();
+  if (loading) return <Splash />;
+  if (!user) return <Navigate to={loginPath} replace state={{ from: loc }} />;
+  if (!roles.some((r) => allow.includes(r))) return <Navigate to={loginPath} replace />;
+  return <>{children}</>;
+}
+
 import { AppRole, homeForRoles, useAuth } from "@/hooks/useAuth";
 
 interface Props { children: ReactNode; allow: AppRole[]; loginPath: string; }
