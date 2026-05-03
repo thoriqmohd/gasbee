@@ -900,9 +900,12 @@ export type Database = {
           full_name: string
           id: string
           is_active: boolean
+          license_expiry_date: string | null
+          license_image_url: string | null
           license_no: string | null
           merchant_id: string | null
           phone: string
+          profile_image_url: string | null
           rating: number | null
           status: Database["public"]["Enums"]["rider_status"]
           total_deliveries: number
@@ -918,9 +921,12 @@ export type Database = {
           full_name: string
           id?: string
           is_active?: boolean
+          license_expiry_date?: string | null
+          license_image_url?: string | null
           license_no?: string | null
           merchant_id?: string | null
           phone: string
+          profile_image_url?: string | null
           rating?: number | null
           status?: Database["public"]["Enums"]["rider_status"]
           total_deliveries?: number
@@ -936,9 +942,12 @@ export type Database = {
           full_name?: string
           id?: string
           is_active?: boolean
+          license_expiry_date?: string | null
+          license_image_url?: string | null
           license_no?: string | null
           merchant_id?: string | null
           phone?: string
+          profile_image_url?: string | null
           rating?: number | null
           status?: Database["public"]["Enums"]["rider_status"]
           total_deliveries?: number

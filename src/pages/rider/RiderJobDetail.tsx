@@ -20,8 +20,10 @@ export default function RiderJobDetail() {
   useEffect(() => { load(); }, [id]);
 
   const accept = async () => {
-    const { data: r } = await supabase.from("riders").select("id").eq("user_id", user!.id).maybeSingle();
+    const { data: r } = await supabase.from("riders").select("*").eq("user_id", user!.id).maybeSingle();
     if (!r) return;
+    const licenseOk = r.license_image_url && (!r.license_expiry_date || new Date(r.license_expiry_date) >= new Date());
+    if (!licenseOk) { toast.error("Upload a valid driving license before accepting jobs."); return; }
     const { error } = await supabase.from("orders").update({ rider_id: r.id, status: "rider_accepted" as any, assigned_at: new Date().toISOString() }).eq("id", o.id);
     if (error) toast.error(error.message); else { toast.success("Accepted"); nav("/merchant/rider/active-delivery"); }
   };
