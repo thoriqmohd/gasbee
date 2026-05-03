@@ -1,24 +1,156 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { AuthProvider, ADMIN_ROLES, MERCHANT_MANAGER_ROLES, RIDER_ROLES, CUSTOMER_ROLES } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLogin from "@/pages/admin/AdminLogin";
+import Dashboard from "@/pages/admin/Dashboard";
+import Orders from "@/pages/admin/Orders";
+import OrderDetail from "@/pages/admin/OrderDetail";
+import Customers from "@/pages/admin/Customers";
+import Merchants from "@/pages/admin/Merchants";
+import MerchantApplications from "@/pages/admin/MerchantApplications";
+import Riders from "@/pages/admin/Riders";
+import Products from "@/pages/admin/Products";
+import Categories from "@/pages/admin/Categories";
+import InventoryOverview from "@/pages/admin/InventoryOverview";
+import Payments from "@/pages/admin/Payments";
+import Refunds from "@/pages/admin/Refunds";
+import Settlements from "@/pages/admin/Settlements";
+import Commissions from "@/pages/admin/Commissions";
+import Banners from "@/pages/admin/Banners";
+import Promotions from "@/pages/admin/Promotions";
+import Reports from "@/pages/admin/Reports";
+import Notifications from "@/pages/admin/Notifications";
+import SupportTickets from "@/pages/admin/SupportTickets";
+import AuditLogs from "@/pages/admin/AuditLogs";
+import Settings from "@/pages/admin/Settings";
+
+import UserLayout from "@/components/user/UserLayout";
+import UserLogin from "@/pages/user/UserLogin";
+import UserRegister from "@/pages/user/UserRegister";
+import UserHome from "@/pages/user/UserHome";
+
+import MerchantLayout from "@/components/merchant/MerchantLayout";
+import RiderLayout from "@/components/merchant/RiderLayout";
+import MerchantLogin from "@/pages/merchant/MerchantLogin";
+
+import PlaceholderPage from "@/components/PlaceholderPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const Admin = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout>{children}</AdminLayout></ProtectedRoute>
+);
+const Customer = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout />{children}</ProtectedRoute>
+);
+const Merchant = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute allow={MERCHANT_MANAGER_ROLES} loginPath="/merchant/login"><MerchantLayout>{children}</MerchantLayout></ProtectedRoute>
+);
+const Rider = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute allow={RIDER_ROLES} loginPath="/merchant/login"><RiderLayout />{children}</ProtectedRoute>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
+      <Toaster /><Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* ===== ADMIN ===== */}
+            <Route path="/login" element={<AdminLogin />} />
+            <Route element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout /></ProtectedRoute>}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/orders/:id" element={<OrderDetail />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/merchants" element={<Merchants />} />
+              <Route path="/merchant-applications" element={<MerchantApplications />} />
+              <Route path="/riders" element={<Riders />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/inventory-overview" element={<InventoryOverview />} />
+              <Route path="/payments" element={<Payments />} />
+              <Route path="/refunds" element={<Refunds />} />
+              <Route path="/settlements" element={<Settlements />} />
+              <Route path="/commissions" element={<Commissions />} />
+              <Route path="/banners" element={<Banners />} />
+              <Route path="/promotions" element={<Promotions />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/support-tickets" element={<SupportTickets />} />
+              <Route path="/audit-logs" element={<AuditLogs />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
+
+            {/* ===== USER (BUYER) ===== */}
+            <Route path="/user/login" element={<UserLogin />} />
+            <Route path="/user/register" element={<UserRegister />} />
+            <Route element={<ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout /></ProtectedRoute>}>
+              <Route path="/user" element={<Navigate to="/user/home" replace />} />
+              <Route path="/user/home" element={<UserHome />} />
+              <Route path="/user/products" element={<PlaceholderPage title="Products" />} />
+              <Route path="/user/merchants" element={<PlaceholderPage title="Merchants" />} />
+              <Route path="/user/merchant/:id" element={<PlaceholderPage title="Merchant" />} />
+              <Route path="/user/product/:id" element={<PlaceholderPage title="Product" />} />
+              <Route path="/user/cart" element={<PlaceholderPage title="Cart" />} />
+              <Route path="/user/checkout" element={<PlaceholderPage title="Checkout" />} />
+              <Route path="/user/orders" element={<PlaceholderPage title="My Orders" />} />
+              <Route path="/user/orders/:id" element={<PlaceholderPage title="Order" />} />
+              <Route path="/user/tracking/:orderId" element={<PlaceholderPage title="Track Order" />} />
+              <Route path="/user/reorder" element={<PlaceholderPage title="Reorder" />} />
+              <Route path="/user/refund" element={<PlaceholderPage title="Request Refund" />} />
+              <Route path="/user/profile" element={<PlaceholderPage title="Profile" />} />
+              <Route path="/user/addresses" element={<PlaceholderPage title="Addresses" />} />
+              <Route path="/user/support" element={<PlaceholderPage title="Support" />} />
+              <Route path="/user/notifications" element={<PlaceholderPage title="Notifications" />} />
+            </Route>
+
+            {/* ===== MERCHANT MANAGER ===== */}
+            <Route path="/merchant/login" element={<MerchantLogin />} />
+            <Route element={<ProtectedRoute allow={MERCHANT_MANAGER_ROLES} loginPath="/merchant/login"><MerchantLayout /></ProtectedRoute>}>
+              <Route path="/merchant" element={<Navigate to="/merchant/dashboard" replace />} />
+              <Route path="/merchant/dashboard" element={<PlaceholderPage title="Merchant Dashboard" description="Today's orders, sales, alerts." />} />
+              <Route path="/merchant/orders" element={<PlaceholderPage title="Orders" />} />
+              <Route path="/merchant/orders/:id" element={<PlaceholderPage title="Order" />} />
+              <Route path="/merchant/products" element={<PlaceholderPage title="Products" />} />
+              <Route path="/merchant/products/new" element={<PlaceholderPage title="New Product" />} />
+              <Route path="/merchant/products/:id/edit" element={<PlaceholderPage title="Edit Product" />} />
+              <Route path="/merchant/inventory" element={<PlaceholderPage title="Inventory" />} />
+              <Route path="/merchant/inventory-movements" element={<PlaceholderPage title="Inventory Movements" />} />
+              <Route path="/merchant/riders" element={<PlaceholderPage title="Riders" />} />
+              <Route path="/merchant/staff" element={<PlaceholderPage title="Staff" />} />
+              <Route path="/merchant/settlements" element={<PlaceholderPage title="Settlements" />} />
+              <Route path="/merchant/reports" element={<PlaceholderPage title="Reports" />} />
+              <Route path="/merchant/profile" element={<PlaceholderPage title="Merchant Profile" />} />
+              <Route path="/merchant/settings" element={<PlaceholderPage title="Settings" />} />
+              <Route path="/merchant/notifications" element={<PlaceholderPage title="Notifications" />} />
+              <Route path="/merchant/support" element={<PlaceholderPage title="Support" />} />
+            </Route>
+
+            {/* ===== RIDER ===== */}
+            <Route element={<ProtectedRoute allow={RIDER_ROLES} loginPath="/merchant/login"><RiderLayout /></ProtectedRoute>}>
+              <Route path="/merchant/rider-dashboard" element={<PlaceholderPage title="Rider Dashboard" description="Online status, today's earnings." />} />
+              <Route path="/merchant/rider/jobs" element={<PlaceholderPage title="Jobs" />} />
+              <Route path="/merchant/rider/jobs/:id" element={<PlaceholderPage title="Job" />} />
+              <Route path="/merchant/rider/active-delivery" element={<PlaceholderPage title="Active Delivery" />} />
+              <Route path="/merchant/rider/history" element={<PlaceholderPage title="History" />} />
+              <Route path="/merchant/rider/earnings" element={<PlaceholderPage title="Earnings" />} />
+              <Route path="/merchant/rider/profile" element={<PlaceholderPage title="Profile" />} />
+              <Route path="/merchant/rider/notifications" element={<PlaceholderPage title="Notifications" />} />
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
