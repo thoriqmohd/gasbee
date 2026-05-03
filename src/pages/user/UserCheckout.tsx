@@ -147,6 +147,17 @@ export default function UserCheckout() {
       </div>
 
       <div>
+        <div className="mb-2 text-sm font-semibold">Delivery time</div>
+        <RadioGroup value={deliveryType} onValueChange={(v) => setDeliveryType(v as any)} className="grid grid-cols-2 gap-2">
+          <Card className="flex items-center gap-2 p-3"><RadioGroupItem value="immediate" id="dt-now" /><Label htmlFor="dt-now" className="cursor-pointer text-sm">Send now</Label></Card>
+          <Card className="flex items-center gap-2 p-3"><RadioGroupItem value="scheduled" id="dt-sch" /><Label htmlFor="dt-sch" className="cursor-pointer text-sm">Schedule</Label></Card>
+        </RadioGroup>
+        {deliveryType === "scheduled" && (
+          <Input type="datetime-local" className="mt-2" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} min={new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)} />
+        )}
+      </div>
+
+      <div>
         <div className="mb-2 text-sm font-semibold">Payment method</div>
         <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="grid grid-cols-2 gap-2">
           {["cod","fpx","card","ewallet"].map((m) => (
