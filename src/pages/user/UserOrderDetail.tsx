@@ -146,11 +146,21 @@ export default function UserOrderDetail() {
       </Card>
 
       {o.payment_status !== "paid" && o.payment_method && o.payment_method !== "cod" && o.status !== "cancelled" && (
-        <Button className="w-full" onClick={async () => {
-          const { data, error } = await supabase.functions.invoke("billplz-create-bill", { body: { order_id: o.id, redirect_url: window.location.href } });
-          if (error || !data?.url) { toast.error("Could not start payment"); return; }
-          window.location.href = data.url;
-        }}>Pay now (RM {Number(o.total_amount).toFixed(2)})</Button>
+        <Card className={`space-y-2 p-3 ${o.payment_status === "failed" ? "border-destructive bg-destructive/5" : "border-amber-500 bg-amber-500/5"}`}>
+          <div className="text-sm font-semibold">
+            {o.payment_status === "failed" ? "❌ Payment failed" : "⏳ Payment pending"}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {o.payment_status === "failed"
+              ? "Your previous payment attempt was unsuccessful. The order is on hold and will not be processed by the merchant until payment is completed."
+              : "Complete the payment to confirm your order. The merchant will only start processing once payment is received."}
+          </p>
+          <Link to={`/user/payment/${o.id}`}>
+            <Button className="w-full">
+              {o.payment_status === "failed" ? "Retry payment" : "Pay now"} (RM {Number(o.total_amount).toFixed(2)})
+            </Button>
+          </Link>
+        </Card>
       )}
 
       {o.status === "delivered" && <OrderRating orderId={o.id} hasRider={!!o.rider_id} />}
