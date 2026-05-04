@@ -44,6 +44,7 @@ import UserCart from "@/pages/user/UserCart";
 import UserCheckout from "@/pages/user/UserCheckout";
 import UserOrders from "@/pages/user/UserOrders";
 import UserOrderDetail from "@/pages/user/UserOrderDetail";
+import UserPayment from "@/pages/user/UserPayment";
 import UserAddresses from "@/pages/user/UserAddresses";
 import UserProfile from "@/pages/user/UserProfile";
 import UserNotifications from "@/pages/user/UserNotifications";
@@ -145,6 +146,7 @@ const App = () => (
               <Route path="/user/checkout" element={<UserCheckout />} />
               <Route path="/user/orders" element={<UserOrders />} />
               <Route path="/user/orders/:id" element={<UserOrderDetail />} />
+              <Route path="/user/payment/:id" element={<UserPayment />} />
               <Route path="/user/tracking/:orderId" element={<UserOrderDetail />} />
               <Route path="/user/refund" element={<UserRefund />} />
               <Route path="/user/profile" element={<UserProfile />} />
