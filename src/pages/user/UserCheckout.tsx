@@ -120,17 +120,22 @@ export default function UserCheckout() {
           <Button variant="link" size="sm" onClick={() => nav("/user/addresses")}>Manage</Button>
         </div>
         {addresses.length === 0 && <Card className="p-3 text-sm text-muted-foreground">Add an address first.</Card>}
-        <RadioGroup value={addrId} onValueChange={setAddrId} className="space-y-2">
-          {addresses.map((a) => (
-            <Card key={a.id} className="flex items-start gap-3 p-3">
-              <RadioGroupItem value={a.id} id={a.id} className="mt-1" />
-              <Label htmlFor={a.id} className="flex-1 cursor-pointer">
-                <div className="flex items-center gap-1 text-sm font-medium"><MapPin className="h-3 w-3" />{a.label ?? "Address"}</div>
-                <div className="text-xs text-muted-foreground">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ""}, {a.postcode} {a.city}</div>
-              </Label>
-            </Card>
-          ))}
-        </RadioGroup>
+        {addr && (
+          <Card className="p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-1 text-sm font-medium"><MapPin className="h-3 w-3" />{addr.label ?? "Address"}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{addr.address_line1}{addr.address_line2 ? `, ${addr.address_line2}` : ""}, {addr.postcode} {addr.city}</div>
+              </div>
+              {(addr.recipient_name || addr.recipient_phone) && (
+                <div className="shrink-0 text-right text-xs">
+                  {addr.recipient_name && <div className="font-medium">{addr.recipient_name}</div>}
+                  {addr.recipient_phone && <div className="text-muted-foreground">{addr.recipient_phone}</div>}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
       </div>
 
       <div>
