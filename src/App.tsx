@@ -44,6 +44,7 @@ import UserCart from "@/pages/user/UserCart";
 import UserCheckout from "@/pages/user/UserCheckout";
 import UserOrders from "@/pages/user/UserOrders";
 import UserOrderDetail from "@/pages/user/UserOrderDetail";
+import UserPayment from "@/pages/user/UserPayment";
 import UserAddresses from "@/pages/user/UserAddresses";
 import UserProfile from "@/pages/user/UserProfile";
 import UserNotifications from "@/pages/user/UserNotifications";
