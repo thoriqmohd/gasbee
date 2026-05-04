@@ -2,7 +2,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Flame } from "lucide-react";
+import { MapPin, Search, Flame, Cylinder, Wrench, Factory, Package } from "lucide-react";
+
+const categoryIcon = (c: any) => {
+  const key = `${c.slug ?? ""} ${c.name ?? ""}`.toLowerCase();
+  if (key.includes("refill")) return Flame;
+  if (key.includes("new") || key.includes("cylinder")) return Cylinder;
+  if (key.includes("accessor")) return Wrench;
+  if (key.includes("industrial")) return Factory;
+  return Package;
+};
 import { Link } from "react-router-dom";
 import { BannerCarousel } from "@/components/user/BannerCarousel";
 
@@ -41,14 +50,17 @@ export default function UserHome() {
       <div>
         <h2 className="mb-2 text-sm font-semibold">Categories</h2>
         <div className="grid grid-cols-4 gap-2">
-          {cats.map((c) => (
-            <Link key={c.id} to={`/user/products?category=${c.id}`}>
-              <Card className="flex flex-col items-center gap-1 p-3 text-center">
-                <Flame className="h-5 w-5 text-primary" />
-                <div className="text-xs">{c.name}</div>
-              </Card>
-            </Link>
-          ))}
+          {cats.map((c) => {
+            const Icon = categoryIcon(c);
+            return (
+              <Link key={c.id} to={`/user/products?category=${c.id}`}>
+                <Card className="flex flex-col items-center gap-1 p-3 text-center">
+                  <Icon className="h-5 w-5 text-primary" />
+                  <div className="text-xs">{c.name}</div>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </div>
       <div>
