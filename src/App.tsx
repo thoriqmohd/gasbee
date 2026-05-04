@@ -146,6 +146,7 @@ const App = () => (
               <Route path="/user/checkout" element={<UserCheckout />} />
               <Route path="/user/orders" element={<UserOrders />} />
               <Route path="/user/orders/:id" element={<UserOrderDetail />} />
+              <Route path="/user/payment/:id" element={<UserPayment />} />
               <Route path="/user/tracking/:orderId" element={<UserOrderDetail />} />
               <Route path="/user/refund" element={<UserRefund />} />
               <Route path="/user/profile" element={<UserProfile />} />
