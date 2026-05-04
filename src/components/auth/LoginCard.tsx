@@ -49,7 +49,7 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
       style={{ backgroundImage: `url(${authBg})` }}
     >
       <div className="absolute inset-0 bg-black/55" aria-hidden />
-      <Card className="relative w-full max-w-md p-8 shadow-[var(--shadow-elegant)] bg-card/95 backdrop-blur-xl border-white/20">
+      <Card className="relative w-full max-w-md p-8 shadow-[var(--shadow-elegant)] bg-card/85 backdrop-blur-2xl border-white/20">
         <div className="mb-6 flex items-center gap-3">
           <Logo size={48} />
           <div>
