@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Flame, Cylinder, Wrench, Factory, Package } from "lucide-react";
+import { MapPin, Search, Flame, Cylinder, Wrench, Factory, Package, Store } from "lucide-react";
 
 const categoryIcon = (c: any) => {
   const key = `${c.slug ?? ""} ${c.name ?? ""}`.toLowerCase();
@@ -68,7 +68,15 @@ export default function UserHome() {
         <div className="space-y-2">
           {merchants.map((m) => (
             <Link key={m.id} to={`/user/merchant/${m.id}`}>
-              <Card className="p-3"><div className="font-medium">{m.name}</div><div className="text-xs text-muted-foreground">{m.city ?? "—"} · ★ {Number(m.rating ?? 0).toFixed(1)}</div></Card>
+              <Card className="flex items-center gap-3 p-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  {m.logo_url ? <img src={m.logo_url} alt={m.name} className="h-full w-full rounded-lg object-cover" /> : <Store className="h-5 w-5 text-primary" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{m.name}</div>
+                  <div className="text-xs text-muted-foreground">{m.city ?? "—"} · ★ {Number(m.rating ?? 0).toFixed(1)}</div>
+                </div>
+              </Card>
             </Link>
           ))}
           {merchants.length === 0 && <p className="text-sm text-muted-foreground">No merchants nearby yet.</p>}
