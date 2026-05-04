@@ -25,6 +25,7 @@ export default function RiderLayout() {
         <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav("/merchant/login"); }}><LogOut className="h-4 w-4" /></Button>
       </header>
       <main className="flex-1 p-4"><Outlet /></main>
+      <div className="text-center text-[10px] text-muted-foreground py-1">Version 2.0.0</div>
       <nav className="fixed bottom-0 left-1/2 grid w-full max-w-md -translate-x-1/2 grid-cols-5 border-t bg-background">
         {tabs.map((t) => (
           <NavLink key={t.to} to={t.to} className={({ isActive }) => `flex flex-col items-center gap-1 py-2 text-xs ${isActive ? "text-primary font-semibold" : "text-muted-foreground"}`}>

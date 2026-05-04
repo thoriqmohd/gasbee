@@ -62,6 +62,7 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
             onClick={async () => { await signOut(); nav("/login"); }}>
             <LogOut className="mr-2 h-4 w-4" />Sign out
           </Button>
+          <div className="mt-2 text-center text-[10px] opacity-50">Version 2.0.0</div>
         </div>
       </aside>
       <main className="flex-1 overflow-x-auto">
