@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { homeForRoles, AppRole } from "@/hooks/useAuth";
+import authBg from "@/assets/auth-bg.png";
 
 interface Props {
   title: string;
@@ -43,8 +44,12 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-accent/40 p-4">
-      <Card className="w-full max-w-md p-8 shadow-[var(--shadow-elegant)]">
+    <div
+      className="relative flex min-h-screen items-center justify-center bg-cover bg-center p-4"
+      style={{ backgroundImage: `url(${authBg})` }}
+    >
+      <div className="absolute inset-0 bg-black/55" aria-hidden />
+      <Card className="relative w-full max-w-md p-8 shadow-[var(--shadow-elegant)] bg-card/95 backdrop-blur-xl border-white/20">
         <div className="mb-6 flex items-center gap-3">
           <Logo size={48} />
           <div>
