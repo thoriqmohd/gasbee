@@ -112,7 +112,11 @@ export default function UserCheckout() {
         nav(`/user/orders/${order.id}`);
         return;
       }
-      window.location.href = bp.url;
+      if (window.top && window.top !== window.self) {
+        window.top.location.href = bp.url;
+      } else {
+        window.location.href = bp.url;
+      }
       return;
     }
 
