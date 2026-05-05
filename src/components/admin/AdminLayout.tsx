@@ -15,6 +15,7 @@ const items = [
   { to: "/customers", label: "Customers", icon: Users },
   { to: "/merchants", label: "Merchants", icon: Store },
   { to: "/merchant-applications", label: "Applications", icon: FileCheck2 },
+  { to: "/company-verifications", label: "Company Verify", icon: FileCheck2 },
   { to: "/riders", label: "Riders", icon: Bike },
   { to: "/products", label: "Products", icon: Package },
   { to: "/categories", label: "Categories", icon: Tags },
