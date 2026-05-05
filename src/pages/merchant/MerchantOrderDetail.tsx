@@ -46,7 +46,7 @@ export default function MerchantOrderDetail() {
       const r = riders.find((x) => x.id === rid);
       const { data: rider } = await supabase.from("riders").select("user_id").eq("id", rid).maybeSingle();
       if (rider?.user_id) {
-        await supabase.from("notifications").insert({ user_id: rider.user_id, title: `New job ${o.code}`, body: `Pickup at merchant`, type: "order", link: `/rider/jobs/${o.id}` });
+        await supabase.from("notifications").insert({ user_id: rider.user_id, title: `New job ${o.code}`, body: `Pickup at merchant`, type: "order", link: `/merchant/rider/jobs/${o.id}` });
       }
       toast.success(`Assigned to ${r?.full_name}`);
     } else toast.success("Unassigned");
