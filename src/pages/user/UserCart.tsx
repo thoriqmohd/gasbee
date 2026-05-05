@@ -43,10 +43,10 @@ export default function UserCart() {
           <div className="flex items-start gap-2">
             <Building2 className="h-4 w-4 mt-0.5" />
             <div className="flex-1">
-              <p className="font-semibold">Akaun syarikat diperlukan</p>
-              <p className="text-xs">{status === "pending" ? "Permohonan syarikat anda sedang disemak." : "Daftar syarikat & upload SSM untuk teruskan."}</p>
+              <p className="font-semibold">Company account required</p>
+              <p className="text-xs">{status === "pending" ? "Your company application is under review." : "Register company & upload SSM to proceed."}</p>
               {status !== "pending" && (
-                <Button asChild size="sm" className="mt-2"><Link to="/user/company-verification">Daftar sekarang</Link></Button>
+                <Button asChild size="sm" className="mt-2"><Link to="/user/company-verification">Register now</Link></Button>
               )}
             </div>
           </div>
