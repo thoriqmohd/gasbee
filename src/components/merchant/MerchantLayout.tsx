@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, Package, Boxes, Bike, Users, Wallet, BarChart3, Settings, Bell, LifeBuoy, User, LogOut, ArrowLeftRight } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Package, Boxes, Bike, Users, Wallet, BarChart3, Settings, Bell, LifeBuoy, User, LogOut, ArrowLeftRight, RotateCcw } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ const items = [
   { to: "/merchant/riders", label: "Riders", icon: Bike },
   { to: "/merchant/staff", label: "Staff", icon: Users },
   { to: "/merchant/settlements", label: "Settlements", icon: Wallet },
+  { to: "/merchant/refunds", label: "Refunds", icon: RotateCcw },
   { to: "/merchant/reports", label: "Reports", icon: BarChart3 },
   { to: "/merchant/notifications", label: "Notifications", icon: Bell },
   { to: "/merchant/support", label: "Support", icon: LifeBuoy },
