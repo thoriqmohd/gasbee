@@ -34,7 +34,7 @@ export default function UserCart() {
 
       {cylinders > 0 && (
         <Card className={`p-2 text-xs ${cylinders >= CYLINDER_LIMIT ? "border-amber-500 bg-amber-500/10" : ""}`}>
-          Tong gas: <strong>{cylinders}/{CYLINDER_LIMIT}</strong> per transaksi.
+          Cylinders (LPG Refill / Cylinder Gas): <strong>{cylinders}/{CYLINDER_LIMIT}</strong> per transaction.
         </Card>
       )}
 
