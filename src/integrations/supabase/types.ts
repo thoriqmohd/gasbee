@@ -877,6 +877,8 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          merchant_acknowledged_at: string | null
+          merchant_acknowledged_by: string | null
           notes: string | null
           order_id: string
           processed_by: string | null
@@ -889,6 +891,8 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          merchant_acknowledged_at?: string | null
+          merchant_acknowledged_by?: string | null
           notes?: string | null
           order_id: string
           processed_by?: string | null
@@ -901,6 +905,8 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          merchant_acknowledged_at?: string | null
+          merchant_acknowledged_by?: string | null
           notes?: string | null
           order_id?: string
           processed_by?: string | null
