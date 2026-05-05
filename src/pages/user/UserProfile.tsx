@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogOut, MapPin, ShoppingBag, LifeBuoy, Bell, Store } from "lucide-react";
+import { LogOut, MapPin, ShoppingBag, LifeBuoy, Bell, Store, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function UserProfile() {
@@ -41,6 +41,7 @@ export default function UserProfile() {
           { to: "/user/addresses", icon: MapPin, label: "Addresses" },
           { to: "/user/notifications", icon: Bell, label: "Notifications" },
           { to: "/user/apply-merchant", icon: Store, label: "Apply as Merchant" },
+          { to: "/user/company-verification", icon: Building2, label: "Akaun Syarikat (Industrial)" },
           { to: "/user/support", icon: LifeBuoy, label: "Support" },
         ].map((r) => (
           <Link key={r.to} to={r.to} className="flex items-center gap-3 p-3 text-sm hover:bg-accent">
