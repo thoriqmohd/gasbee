@@ -5,6 +5,7 @@ import { useMerchantContext } from "@/hooks/useMerchantContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 const NEXT: Record<string, string> = {
@@ -14,18 +15,43 @@ const NEXT: Record<string, string> = {
 export default function MerchantOrderDetail() {
   const { id } = useParams();
   const nav = useNavigate();
-  useMerchantContext();
+  const { merchant } = useMerchantContext();
   const [o, setO] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
+  const [riders, setRiders] = useState<any[]>([]);
+  const [riderId, setRiderId] = useState<string>("");
 
   const load = async () => {
     if (!id) return;
     const { data } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
     setO(data);
+    setRiderId(data?.rider_id ?? "");
     const { data: oi } = await supabase.from("order_items").select("*").eq("order_id", id);
     setItems(oi ?? []);
   };
   useEffect(() => { load(); }, [id]);
+  useEffect(() => {
+    if (!merchant) return;
+    supabase.from("riders").select("id,full_name,phone,is_active").eq("merchant_id", merchant.id).eq("is_active", true).then(({ data }) => setRiders(data ?? []));
+  }, [merchant?.id]);
+
+  const assignRider = async (rid: string) => {
+    const { error } = await supabase.from("orders").update({
+      rider_id: rid || null,
+      assigned_at: rid ? new Date().toISOString() : null,
+      status: rid && o.status === "preparing" ? "assigned" : o.status,
+    }).eq("id", o.id);
+    if (error) { toast.error(error.message); return; }
+    if (rid) {
+      const r = riders.find((x) => x.id === rid);
+      const { data: rider } = await supabase.from("riders").select("user_id").eq("id", rid).maybeSingle();
+      if (rider?.user_id) {
+        await supabase.from("notifications").insert({ user_id: rider.user_id, title: `New job ${o.code}`, body: `Pickup at merchant`, type: "order", link: `/rider/jobs/${o.id}` });
+      }
+      toast.success(`Assigned to ${r?.full_name}`);
+    } else toast.success("Unassigned");
+    load();
+  };
 
   if (!o) return <p className="text-sm text-muted-foreground">Loading…</p>;
   const fmt = (n: any) => new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR" }).format(Number(n||0));
@@ -57,7 +83,21 @@ export default function MerchantOrderDetail() {
         <p className="text-sm text-muted-foreground">{o.address_snapshot?.recipient_phone}</p>
         <p className="text-sm text-muted-foreground">{o.address_snapshot?.address_line1}, {o.address_snapshot?.postcode} {o.address_snapshot?.city}</p>
         {o.notes && <p className="mt-2 text-xs italic">Notes: {o.notes}</p>}
-        {o.rider_id && <p className="mt-2 text-xs text-muted-foreground">Rider assigned · they can manage this delivery from their app.</p>}
+      </Card>
+
+      <Card className="p-4">
+        <h2 className="mb-2 font-semibold">Assign Rider</h2>
+        <div className="flex gap-2">
+          <Select value={riderId || "none"} onValueChange={(v) => setRiderId(v === "none" ? "" : v)}>
+            <SelectTrigger className="max-w-xs"><SelectValue placeholder="Select rider" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— Unassigned —</SelectItem>
+              {riders.map((r) => <SelectItem key={r.id} value={r.id}>{r.full_name} · {r.phone}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => assignRider(riderId)}>{o.rider_id ? "Update" : "Assign"}</Button>
+        </div>
+        {riders.length === 0 && <p className="mt-2 text-xs text-muted-foreground">No active riders. Add riders in the Riders page.</p>}
       </Card>
 
       <Card>
