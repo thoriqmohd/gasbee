@@ -63,6 +63,13 @@ export default function UserCheckout() {
   const placeOrder = async () => {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
     if (deliveryType === "scheduled" && (!scheduledAt || new Date(scheduledAt) <= new Date())) { toast.error("Pick a future date/time for scheduled delivery"); return; }
+    // Cart limit guards (defensive)
+    const cyl = items.filter((it: any) => it.category_slug === "cylinder").reduce((a, x) => a + x.quantity, 0);
+    if (cyl > 2) { toast.error("Maksimum 2 tong gas per transaksi."); return; }
+    if (items.some((it: any) => it.category_slug === "industrial-gas")) {
+      const { data: v } = await supabase.from("company_verifications").select("status").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (v?.status !== "approved") { toast.error("Akaun syarikat diperlukan untuk industrial gas."); return; }
+    }
     setBusy(true);
     const addr2 = addresses.find((a) => a.id === addrId);
     const merchant_id = items[0].merchant_id;
