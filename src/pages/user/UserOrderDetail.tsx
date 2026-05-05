@@ -167,7 +167,9 @@ export default function UserOrderDetail() {
 
       <div className="flex gap-2">
         {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={cancel}>Cancel</Button>}
-        {o.status === "delivered" && <Button asChild variant="outline" className="flex-1"><Link to={`/user/refund?order=${o.id}`}>Request refund</Link></Button>}
+        {o.payment_status === "paid" && o.status !== "cancelled" && (
+          <Button asChild variant="outline" className="flex-1"><Link to={`/user/refund?order=${o.id}`}>Mohon refund</Link></Button>
+        )}
       </div>
     </div>
   );
