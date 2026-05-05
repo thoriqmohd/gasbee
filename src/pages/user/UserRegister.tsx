@@ -27,7 +27,15 @@ export default function UserRegister() {
       },
     });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      const msg = error.message?.toLowerCase() ?? "";
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists") || error.status === 422) {
+        toast.error("Email sudah didaftarkan. Sila log masuk.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
     toast.success("Account created. You can log in now.");
     nav("/user/login");
   };

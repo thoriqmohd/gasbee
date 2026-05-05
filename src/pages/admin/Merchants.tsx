@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Eye, EyeOff, Copy, RefreshCw, Pencil } from "lucide-react";
+import { Eye, EyeOff, Copy, RefreshCw, Pencil, Trash2 } from "lucide-react";
 
 const genPassword = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
@@ -144,7 +144,17 @@ export default function Merchants() {
       title="Merchants" description="All gas dealers on Gasbee."
       table="merchants" searchField="name"
       orderBy={{ column: "created_at", ascending: false }}
-      rowAction={(r: any) => <EditMerchantDialog row={r} onDone={() => setReloadKey((k) => k + 1)} />}
+      rowAction={(r: any) => (
+        <div className="flex justify-end gap-2">
+          <EditMerchantDialog row={r} onDone={() => setReloadKey((k) => k + 1)} />
+          <Button size="sm" variant="outline" onClick={async () => {
+            if (!confirm(`Delete merchant "${r.name}"? This cannot be undone.`)) return;
+            const { error } = await supabase.from("merchants").delete().eq("id", r.id);
+            if (error) return toast.error(error.message);
+            toast.success("Merchant deleted"); setReloadKey((k) => k + 1);
+          }}><Trash2 className="h-3 w-3" /></Button>
+        </div>
+      )}
       topAction={
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setForm({ ...initial, password: genPassword() }); }}>
           <DialogTrigger asChild><Button>+ New merchant</Button></DialogTrigger>

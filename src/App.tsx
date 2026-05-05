@@ -50,6 +50,7 @@ import UserProfile from "@/pages/user/UserProfile";
 import UserNotifications from "@/pages/user/UserNotifications";
 import UserSupport from "@/pages/user/UserSupport";
 import UserRefund from "@/pages/user/UserRefund";
+import UserApplyMerchant from "@/pages/user/UserApplyMerchant";
 
 import MerchantLayout from "@/components/merchant/MerchantLayout";
 import RiderLayout from "@/components/merchant/RiderLayout";
@@ -153,6 +154,7 @@ const App = () => (
               <Route path="/user/addresses" element={<UserAddresses />} />
               <Route path="/user/support" element={<UserSupport />} />
               <Route path="/user/notifications" element={<UserNotifications />} />
+              <Route path="/user/apply-merchant" element={<UserApplyMerchant />} />
             </Route>
 
             {/* ===== MERCHANT MANAGER ===== */}
