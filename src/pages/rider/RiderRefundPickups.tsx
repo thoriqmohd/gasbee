@@ -52,7 +52,7 @@ export default function RiderRefundPickups() {
           <Card key={r.id} className="space-y-2 p-4">
             <div className="flex justify-between text-sm"><span className="font-mono">{r.orders?.code}</span><span className="uppercase text-xs">{r.pickup_status.replace(/_/g, " ")}</span></div>
             <div className="rounded bg-amber-500/10 p-2 text-xs">
-              <div className="font-semibold">Pickup balik tong gas dari customer</div>
+              <div className="font-semibold">Pick up cylinder from customer</div>
               <div>{a.recipient_name} — {a.recipient_phone}</div>
               <div className="text-muted-foreground">{a.address_line1}, {a.city}</div>
               <div className="mt-1">Sebab: <span className="font-medium">{r.reason}</span></div>

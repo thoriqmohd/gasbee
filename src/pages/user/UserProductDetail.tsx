@@ -35,7 +35,7 @@ export default function UserProductDetail() {
 
   const addToCart = () => {
     if (blockedIndustrial) {
-      toast.error("Akaun syarikat diperlukan untuk industrial gas.");
+      toast.error("Company account required for industrial gas.");
       return;
     }
     const res = add({
@@ -72,14 +72,14 @@ export default function UserProductDetail() {
             <Building2 className="h-4 w-4 mt-0.5" />
             <div className="flex-1">
               {isApproved ? (
-                <span className="text-xs">✓ Akaun syarikat anda telah diluluskan.</span>
+                <span className="text-xs">✓ Your company account is approved.</span>
               ) : verifStatus === "pending" ? (
-                <span className="text-xs">⏳ Permohonan syarikat sedang disemak admin.</span>
+                <span className="text-xs">⏳ Company application is under review.</span>
               ) : (
                 <>
-                  <p className="font-semibold">Industrial gas — pendaftaran syarikat diperlukan</p>
-                  <p className="text-xs text-muted-foreground">Perlu upload SSM untuk membeli industrial gas.</p>
-                  <Button asChild size="sm" className="mt-2"><Link to="/user/company-verification">Daftar syarikat</Link></Button>
+                  <p className="font-semibold">Industrial gas — company registration required</p>
+                  <p className="text-xs text-muted-foreground">SSM document upload required to purchase industrial gas.</p>
+                  <Button asChild size="sm" className="mt-2"><Link to="/user/company-verification">Register company</Link></Button>
                 </>
               )}
             </div>
