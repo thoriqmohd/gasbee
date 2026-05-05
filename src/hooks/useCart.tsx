@@ -23,7 +23,7 @@ function write(items: CartItem[]) {
   window.dispatchEvent(new Event("gasbee-cart"));
 }
 
-export const isCylinder = (it: CartItem) => it.category_slug === "cylinder";
+export const isCylinder = (it: CartItem) => it.category_slug === "cylinder" || it.category_slug === "lpg-refill";
 export const isIndustrial = (it: CartItem) => it.category_slug === "industrial-gas";
 
 export function cylinderTotal(items: CartItem[]) {
