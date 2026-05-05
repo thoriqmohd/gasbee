@@ -23,10 +23,17 @@ function RefundDetails({ row }: { row: any }) {
           <DialogHeader><DialogTitle>Refund details</DialogTitle></DialogHeader>
           <div className="space-y-2 text-sm">
             <div><span className="text-muted-foreground">Order:</span> <span className="font-mono">{order?.code ?? row.order_id}</span></div>
-            <div><span className="text-muted-foreground">Amount:</span> <strong>{fmt(row.amount)}</strong></div>
-            <div><span className="text-muted-foreground">Reason:</span> {row.reason}</div>
+            <div><span className="text-muted-foreground">Stage:</span> <span className="capitalize">{(row.stage ?? "—").replace(/_/g, " ")}</span></div>
+            <div><span className="text-muted-foreground">Reason:</span> {row.reason_category ?? "—"} {row.reason && <span className="text-xs text-muted-foreground">— {row.reason}</span>}</div>
+            <div className="rounded bg-muted p-2 text-xs space-y-1">
+              <div className="flex justify-between"><span>Refund amount</span><strong>{fmt(row.refund_amount ?? row.amount)}</strong></div>
+              {Number(row.delivery_fee_charged) > 0 && <div className="flex justify-between"><span>− Delivery charged</span><span>{fmt(row.delivery_fee_charged)}</span></div>}
+              {Number(row.restocking_fee) > 0 && <div className="flex justify-between"><span>− Restocking</span><span>{fmt(row.restocking_fee)}</span></div>}
+            </div>
             {row.notes && <div><span className="text-muted-foreground">Notes:</span> {row.notes}</div>}
             <div><span className="text-muted-foreground">Status:</span> <StatusBadge value={row.status} /></div>
+            <div><span className="text-muted-foreground">Pickup:</span> <StatusBadge value={row.pickup_status} /></div>
+            {row.pickup_proof_url && <div><a className="text-primary underline" href={row.pickup_proof_url} target="_blank" rel="noreferrer">View pickup proof</a></div>}
             <div><span className="text-muted-foreground">Requested:</span> {new Date(row.created_at).toLocaleString()}</div>
             {row.merchant_acknowledged_at && (
               <div className="rounded bg-muted p-2 text-xs">✓ Merchant acknowledged on {new Date(row.merchant_acknowledged_at).toLocaleString()}</div>
@@ -42,28 +49,60 @@ function RefundDetails({ row }: { row: any }) {
 }
 
 export default function Refunds() {
-  const decide = async (id: string, status: "approved" | "rejected" | "processed") => {
-    const { error } = await supabase.from("refunds").update({ status: status as any }).eq("id", id);
+  const decide = async (row: any, status: "approved" | "rejected" | "processed") => {
+    const updates: any = { status };
+    const { error } = await supabase.from("refunds").update(updates).eq("id", row.id);
     if (error) return toast.error(error.message);
+
+    const { data: order } = await supabase.from("orders").select("merchant_id,code,customer_id").eq("id", row.order_id).maybeSingle();
+
     if (status === "approved") {
-      // notify merchant
-      const { data: refund } = await supabase.from("refunds").select("order_id,amount").eq("id", id).maybeSingle();
-      if (refund?.order_id) {
-        const { data: order } = await supabase.from("orders").select("merchant_id,code").eq("id", refund.order_id).maybeSingle();
-        if (order?.merchant_id) {
-          const { data: ms } = await supabase.from("merchants").select("owner_id").eq("id", order.merchant_id).maybeSingle();
-          if (ms?.owner_id) {
-            await supabase.from("notifications").insert({
-              user_id: ms.owner_id, type: "system" as any,
-              title: "Refund approved — please acknowledge",
-              body: `Order ${order.code}: refund of ${fmt(refund.amount)} approved by admin.`,
-              link: "/merchant/refunds",
-            });
-          }
+      // Notify merchant
+      if (order?.merchant_id) {
+        const { data: ms } = await supabase.from("merchants").select("owner_id").eq("id", order.merchant_id).maybeSingle();
+        if (ms?.owner_id) {
+          await supabase.from("notifications").insert({
+            user_id: ms.owner_id, type: "system" as any,
+            title: "Refund approved — please acknowledge",
+            body: `Order ${order.code}: refund of ${fmt(row.refund_amount ?? row.amount)} approved.`,
+            link: "/merchant/refunds",
+          });
+        }
+      }
+      // Notify rider if pickup required
+      if (row.pickup_rider_id) {
+        const { data: r } = await supabase.from("riders").select("user_id").eq("id", row.pickup_rider_id).maybeSingle();
+        if (r?.user_id) {
+          await supabase.from("notifications").insert({
+            user_id: r.user_id, type: "order" as any,
+            title: "Refund pickup ditugaskan",
+            body: `Order ${order?.code}: ambil semula tong gas dari customer.`,
+            link: "/merchant/rider/refund-pickups",
+          });
         }
       }
     }
+
+    if (status === "processed") {
+      // Notify customer
+      if (order?.customer_id) {
+        await supabase.from("notifications").insert({
+          user_id: order.customer_id, type: "system" as any,
+          title: "Refund anda diproses",
+          body: `Order ${order.code}: refund ${fmt(row.refund_amount ?? row.amount)} telah diproses.`,
+          link: `/user/orders/${row.order_id}`,
+        });
+      }
+    }
+
     toast.success("Updated"); setTimeout(() => location.reload(), 200);
+  };
+
+  const canProcess = (r: any) => {
+    if (r.status !== "approved") return false;
+    if (!r.merchant_acknowledged_at) return false;
+    if (r.pickup_status === "pending") return false; // wait for rider pickup
+    return true;
   };
 
   return (
@@ -71,21 +110,23 @@ export default function Refunds() {
       title="Refunds" description="Customer refund requests."
       table="refunds" orderBy={{ column: "created_at", ascending: false }}
       columns={[
-        { key: "amount", label: "Amount", render: (r: any) => fmt(r.amount) },
-        { key: "reason", label: "Reason" },
+        { key: "stage", label: "Stage", render: (r: any) => <span className="capitalize text-xs">{(r.stage ?? "—").replace(/_/g, " ")}</span> },
+        { key: "amount", label: "Refund", render: (r: any) => fmt(r.refund_amount ?? r.amount) },
+        { key: "reason_category", label: "Reason" },
         { key: "status", label: "Status", render: (r: any) => <StatusBadge value={r.status} /> },
-        { key: "ack", label: "Merchant ack", render: (r: any) => r.merchant_acknowledged_at ? "✓" : (r.status === "approved" ? "Pending" : "—") },
-        { key: "created_at", label: "Requested", render: (r: any) => new Date(r.created_at).toLocaleString() },
+        { key: "pickup_status", label: "Pickup", render: (r: any) => r.pickup_status === "not_required" ? "—" : <StatusBadge value={r.pickup_status} /> },
+        { key: "ack", label: "M.Ack", render: (r: any) => r.merchant_acknowledged_at ? "✓" : (r.status === "approved" ? "⏳" : "—") },
+        { key: "created_at", label: "Date", render: (r: any) => new Date(r.created_at).toLocaleDateString() },
       ]}
       rowAction={(r: any) => (
         <div className="flex justify-end gap-2">
           <RefundDetails row={r} />
           {r.status === "requested" && <>
-            <Button size="sm" onClick={() => decide(r.id, "approved")}>Approve</Button>
-            <Button size="sm" variant="outline" onClick={() => decide(r.id, "rejected")}>Reject</Button>
+            <Button size="sm" onClick={() => decide(r, "approved")}>Approve</Button>
+            <Button size="sm" variant="outline" onClick={() => decide(r, "rejected")}>Reject</Button>
           </>}
-          {r.status === "approved" && r.merchant_acknowledged_at && (
-            <Button size="sm" onClick={() => decide(r.id, "processed")}>Mark processed</Button>
+          {canProcess(r) && (
+            <Button size="sm" onClick={() => decide(r, "processed")}>Mark processed</Button>
           )}
         </div>
       )}
