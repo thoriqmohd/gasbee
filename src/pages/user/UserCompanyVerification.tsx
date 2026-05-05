@@ -93,3 +93,8 @@ export default function UserCompanyVerification() {
             <ImageUpload bucket="company-docs" pathPrefix={`u-${user?.id}`} value={form.additional_doc_url || null} onChange={(url) => setForm({ ...form, additional_doc_url: url ?? "" })} label="Upload doc" />
           </div>
           <Button type="submit" className="w-full" disabled={busy}>{busy ? "Submitting…" : "Submit application"}</Button>
+        </form>
+      </Card>
+    </div>
+  );
+}
