@@ -51,6 +51,8 @@ import UserNotifications from "@/pages/user/UserNotifications";
 import UserSupport from "@/pages/user/UserSupport";
 import UserRefund from "@/pages/user/UserRefund";
 import UserApplyMerchant from "@/pages/user/UserApplyMerchant";
+import UserCompanyVerification from "@/pages/user/UserCompanyVerification";
+import CompanyVerifications from "@/pages/admin/CompanyVerifications";
 
 import MerchantLayout from "@/components/merchant/MerchantLayout";
 import RiderLayout from "@/components/merchant/RiderLayout";
@@ -80,6 +82,7 @@ import RiderHistory from "@/pages/rider/RiderHistory";
 import RiderEarnings from "@/pages/rider/RiderEarnings";
 import RiderProfile from "@/pages/rider/RiderProfile";
 import RiderNotifications from "@/pages/rider/RiderNotifications";
+import RiderRefundPickups from "@/pages/rider/RiderRefundPickups";
 
 import PlaceholderPage from "@/components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
@@ -117,6 +120,7 @@ const App = () => (
               <Route path="/customers/:id" element={<CustomerDetail />} />
               <Route path="/merchants" element={<Merchants />} />
               <Route path="/merchant-applications" element={<MerchantApplications />} />
+              <Route path="/company-verifications" element={<CompanyVerifications />} />
               <Route path="/riders" element={<Riders />} />
               <Route path="/riders/:id" element={<RiderDetail />} />
               <Route path="/products" element={<Products />} />
@@ -157,6 +161,7 @@ const App = () => (
               <Route path="/user/support" element={<UserSupport />} />
               <Route path="/user/notifications" element={<UserNotifications />} />
               <Route path="/user/apply-merchant" element={<UserApplyMerchant />} />
+              <Route path="/user/company-verification" element={<UserCompanyVerification />} />
             </Route>
 
             {/* ===== MERCHANT MANAGER ===== */}
@@ -192,6 +197,7 @@ const App = () => (
               <Route path="/merchant/rider/earnings" element={<RiderEarnings />} />
               <Route path="/merchant/rider/profile" element={<RiderProfile />} />
               <Route path="/merchant/rider/notifications" element={<RiderNotifications />} />
+              <Route path="/merchant/rider/refund-pickups" element={<RiderRefundPickups />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

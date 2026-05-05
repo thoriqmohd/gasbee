@@ -83,7 +83,10 @@ export default function RiderActive() {
 
   return (
     <div className="space-y-3">
-      <h1 className="text-xl font-bold">Active deliveries</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">Active deliveries</h1>
+        <Button asChild variant="outline" size="sm"><Link to="/merchant/rider/refund-pickups">Refund pickups</Link></Button>
+      </div>
       {orders.length === 0 && <p className="text-sm text-muted-foreground">No active delivery.</p>}
       {orders.map((o) => {
         const a = o.address_snapshot ?? {};

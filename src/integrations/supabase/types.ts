@@ -232,6 +232,57 @@ export type Database = {
           },
         ]
       }
+      company_verifications: {
+        Row: {
+          additional_doc_url: string | null
+          business_address: string | null
+          company_name: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          ssm_doc_url: string
+          ssm_number: string
+          status: Database["public"]["Enums"]["company_verification_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_doc_url?: string | null
+          business_address?: string | null
+          company_name: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          ssm_doc_url: string
+          ssm_number: string
+          status?: Database["public"]["Enums"]["company_verification_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_doc_url?: string | null
+          business_address?: string | null
+          company_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          ssm_doc_url?: string
+          ssm_number?: string
+          status?: Database["public"]["Enums"]["company_verification_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       inventory_movements: {
         Row: {
           created_at: string
@@ -876,42 +927,69 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          delivery_fee_charged: number
           id: string
           merchant_acknowledged_at: string | null
           merchant_acknowledged_by: string | null
           notes: string | null
           order_id: string
+          pickup_completed_at: string | null
+          pickup_proof_url: string | null
+          pickup_rider_id: string | null
+          pickup_status: Database["public"]["Enums"]["refund_pickup_status"]
           processed_by: string | null
           reason: string
+          reason_category: string | null
+          refund_amount: number | null
           requester_id: string
+          restocking_fee: number
+          stage: Database["public"]["Enums"]["refund_stage"] | null
           status: Database["public"]["Enums"]["refund_status"]
           updated_at: string
         }
         Insert: {
           amount: number
           created_at?: string
+          delivery_fee_charged?: number
           id?: string
           merchant_acknowledged_at?: string | null
           merchant_acknowledged_by?: string | null
           notes?: string | null
           order_id: string
+          pickup_completed_at?: string | null
+          pickup_proof_url?: string | null
+          pickup_rider_id?: string | null
+          pickup_status?: Database["public"]["Enums"]["refund_pickup_status"]
           processed_by?: string | null
           reason: string
+          reason_category?: string | null
+          refund_amount?: number | null
           requester_id: string
+          restocking_fee?: number
+          stage?: Database["public"]["Enums"]["refund_stage"] | null
           status?: Database["public"]["Enums"]["refund_status"]
           updated_at?: string
         }
         Update: {
           amount?: number
           created_at?: string
+          delivery_fee_charged?: number
           id?: string
           merchant_acknowledged_at?: string | null
           merchant_acknowledged_by?: string | null
           notes?: string | null
           order_id?: string
+          pickup_completed_at?: string | null
+          pickup_proof_url?: string | null
+          pickup_rider_id?: string | null
+          pickup_status?: Database["public"]["Enums"]["refund_pickup_status"]
           processed_by?: string | null
           reason?: string
+          reason_category?: string | null
+          refund_amount?: number | null
           requester_id?: string
+          restocking_fee?: number
+          stage?: Database["public"]["Enums"]["refund_stage"] | null
           status?: Database["public"]["Enums"]["refund_status"]
           updated_at?: string
         }
@@ -1200,6 +1278,7 @@ export type Database = {
         | "buyer"
       application_status: "pending" | "approved" | "rejected"
       commission_type: "percent" | "flat"
+      company_verification_status: "pending" | "approved" | "rejected"
       delivery_type: "immediate" | "scheduled"
       inventory_movement_type:
         | "in"
@@ -1245,6 +1324,12 @@ export type Database = {
         | "refunded"
         | "partial_refund"
       promotion_type: "percent" | "flat" | "free_delivery"
+      refund_pickup_status:
+        | "not_required"
+        | "pending"
+        | "picked_up"
+        | "returned"
+      refund_stage: "pre_dispatch" | "in_transit" | "delivered"
       refund_status: "requested" | "approved" | "rejected" | "processed"
       rider_status: "offline" | "online" | "busy" | "suspended"
       settlement_status: "pending" | "processing" | "paid" | "failed"
@@ -1393,6 +1478,7 @@ export const Constants = {
       ],
       application_status: ["pending", "approved", "rejected"],
       commission_type: ["percent", "flat"],
+      company_verification_status: ["pending", "approved", "rejected"],
       delivery_type: ["immediate", "scheduled"],
       inventory_movement_type: [
         "in",
@@ -1437,6 +1523,13 @@ export const Constants = {
         "partial_refund",
       ],
       promotion_type: ["percent", "flat", "free_delivery"],
+      refund_pickup_status: [
+        "not_required",
+        "pending",
+        "picked_up",
+        "returned",
+      ],
+      refund_stage: ["pre_dispatch", "in_transit", "delivered"],
       refund_status: ["requested", "approved", "rejected", "processed"],
       rider_status: ["offline", "online", "busy", "suspended"],
       settlement_status: ["pending", "processing", "paid", "failed"],
