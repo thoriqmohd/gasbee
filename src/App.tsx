@@ -51,6 +51,8 @@ import UserNotifications from "@/pages/user/UserNotifications";
 import UserSupport from "@/pages/user/UserSupport";
 import UserRefund from "@/pages/user/UserRefund";
 import UserApplyMerchant from "@/pages/user/UserApplyMerchant";
+import UserCompanyVerification from "@/pages/user/UserCompanyVerification";
+import CompanyVerifications from "@/pages/admin/CompanyVerifications";
 
 import MerchantLayout from "@/components/merchant/MerchantLayout";
 import RiderLayout from "@/components/merchant/RiderLayout";
@@ -80,6 +82,7 @@ import RiderHistory from "@/pages/rider/RiderHistory";
 import RiderEarnings from "@/pages/rider/RiderEarnings";
 import RiderProfile from "@/pages/rider/RiderProfile";
 import RiderNotifications from "@/pages/rider/RiderNotifications";
+import RiderRefundPickups from "@/pages/rider/RiderRefundPickups";
 
 import PlaceholderPage from "@/components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
