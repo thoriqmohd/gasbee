@@ -18,6 +18,7 @@ export default function RiderLayout() {
   const nav = useNavigate();
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background pb-20">
+      <RiderJobAlert />
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <Logo size={32} />
