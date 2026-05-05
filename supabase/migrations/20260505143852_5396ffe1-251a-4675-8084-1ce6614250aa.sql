@@ -1,0 +1,2 @@
+UPDATE public.products SET category_id = 'f38ca69e-0457-4f43-b272-986d313e1c99' WHERE category_id = '36a5beb5-0c36-49c5-88a0-833c853885e5';
+DELETE FROM public.categories WHERE id = '36a5beb5-0c36-49c5-88a0-833c853885e5';
