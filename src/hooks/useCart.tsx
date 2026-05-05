@@ -50,7 +50,7 @@ export function useCart() {
     if (idx < 0) projected.push(it);
 
     if (isCylinder(it) && cylinderTotal(projected) > CYLINDER_LIMIT) {
-      return { ok: false, error: `Maksimum ${CYLINDER_LIMIT} tong gas setiap transaksi.` };
+      return { ok: false, error: `Maximum ${CYLINDER_LIMIT} cylinders (LPG Refill / Cylinder Gas) per transaction.` };
     }
     write(projected);
     return { ok: true };
@@ -62,7 +62,7 @@ export function useCart() {
       .map((x) => (x.product_id === product_id && x.type === type ? { ...x, quantity: qty } : x))
       .filter((x) => x.quantity > 0);
     if (cylinderTotal(projected) > CYLINDER_LIMIT) {
-      return { ok: false, error: `Maksimum ${CYLINDER_LIMIT} tong gas setiap transaksi.` };
+      return { ok: false, error: `Maximum ${CYLINDER_LIMIT} cylinders (LPG Refill / Cylinder Gas) per transaction.` };
     }
     write(projected);
     return { ok: true };
