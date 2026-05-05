@@ -35,7 +35,7 @@ export default function UserProductDetail() {
 
   const addToCart = () => {
     if (blockedIndustrial) {
-      toast.error("Akaun syarikat diperlukan untuk industrial gas.");
+      toast.error("Company account required for industrial gas.");
       return;
     }
     const res = add({
