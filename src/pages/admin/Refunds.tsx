@@ -75,8 +75,8 @@ export default function Refunds() {
         if (r?.user_id) {
           await supabase.from("notifications").insert({
             user_id: r.user_id, type: "order" as any,
-            title: "Refund pickup ditugaskan",
-            body: `Order ${order?.code}: ambil semula tong gas dari customer.`,
+            title: "Refund pickup assigned",
+            body: `Order ${order?.code}: collect cylinder back from customer.`,
             link: "/merchant/rider/refund-pickups",
           });
         }
