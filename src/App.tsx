@@ -70,6 +70,7 @@ import MerchantProfile from "@/pages/merchant/MerchantProfile";
 import MerchantSettings from "@/pages/merchant/MerchantSettings";
 import MerchantNotifications from "@/pages/merchant/MerchantNotifications";
 import MerchantSupport from "@/pages/merchant/MerchantSupport";
+import MerchantRefunds from "@/pages/merchant/MerchantRefunds";
 
 import RiderDashboard from "@/pages/rider/RiderDashboard";
 import RiderJobs from "@/pages/rider/RiderJobs";
@@ -172,6 +173,7 @@ const App = () => (
               <Route path="/merchant/riders" element={<MerchantRiders />} />
               <Route path="/merchant/staff" element={<MerchantStaff />} />
               <Route path="/merchant/settlements" element={<MerchantSettlements />} />
+              <Route path="/merchant/refunds" element={<MerchantRefunds />} />
               <Route path="/merchant/reports" element={<MerchantReports />} />
               <Route path="/merchant/profile" element={<MerchantProfile />} />
               <Route path="/merchant/settings" element={<MerchantSettings />} />
