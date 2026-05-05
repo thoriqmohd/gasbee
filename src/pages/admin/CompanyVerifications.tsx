@@ -19,8 +19,8 @@ function ReviewDialog({ row, onDone }: { row: any; onDone: () => void }) {
     if (error) return toast.error(error.message);
     await supabase.from("notifications").insert({
       user_id: row.user_id, type: "system" as any,
-      title: status === "approved" ? "Akaun syarikat diluluskan" : "Akaun syarikat ditolak",
-      body: status === "approved" ? "Anda kini boleh membeli industrial gas." : (notes || "Sila semak permohonan anda."),
+      title: status === "approved" ? "Company account approved" : "Company account rejected",
+      body: status === "approved" ? "You can now purchase industrial gas." : (notes || "Please review your application."),
       link: "/user/company-verification",
     });
     toast.success("Updated"); setOpen(false); onDone();
