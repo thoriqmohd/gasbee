@@ -16,6 +16,14 @@ export default function MerchantSettlements() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Settlements</h1>
+      <Card className="p-4 text-sm">
+        <p className="font-semibold">How settlements work</p>
+        <ol className="mt-1 list-decimal space-y-0.5 pl-5 text-muted-foreground">
+          <li>Gasbee admin generates a settlement for a date range from your paid orders.</li>
+          <li>Gross sales − commission = your net payout.</li>
+          <li>Once admin marks it Paid, the funds are transferred to your registered bank account.</li>
+        </ol>
+      </Card>
       <Card>
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/40"><tr className="text-left"><th className="p-3">Period</th><th className="p-3">Gross</th><th className="p-3">Commission</th><th className="p-3">Net payout</th><th className="p-3">Status</th><th className="p-3">Paid</th></tr></thead>
