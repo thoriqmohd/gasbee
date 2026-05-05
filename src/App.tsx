@@ -120,6 +120,7 @@ const App = () => (
               <Route path="/customers/:id" element={<CustomerDetail />} />
               <Route path="/merchants" element={<Merchants />} />
               <Route path="/merchant-applications" element={<MerchantApplications />} />
+              <Route path="/company-verifications" element={<CompanyVerifications />} />
               <Route path="/riders" element={<Riders />} />
               <Route path="/riders/:id" element={<RiderDetail />} />
               <Route path="/products" element={<Products />} />
@@ -160,6 +161,7 @@ const App = () => (
               <Route path="/user/support" element={<UserSupport />} />
               <Route path="/user/notifications" element={<UserNotifications />} />
               <Route path="/user/apply-merchant" element={<UserApplyMerchant />} />
+              <Route path="/user/company-verification" element={<UserCompanyVerification />} />
             </Route>
 
             {/* ===== MERCHANT MANAGER ===== */}
@@ -195,6 +197,7 @@ const App = () => (
               <Route path="/merchant/rider/earnings" element={<RiderEarnings />} />
               <Route path="/merchant/rider/profile" element={<RiderProfile />} />
               <Route path="/merchant/rider/notifications" element={<RiderNotifications />} />
+              <Route path="/merchant/rider/refund-pickups" element={<RiderRefundPickups />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
