@@ -83,7 +83,21 @@ export default function MerchantOrderDetail() {
         <p className="text-sm text-muted-foreground">{o.address_snapshot?.recipient_phone}</p>
         <p className="text-sm text-muted-foreground">{o.address_snapshot?.address_line1}, {o.address_snapshot?.postcode} {o.address_snapshot?.city}</p>
         {o.notes && <p className="mt-2 text-xs italic">Notes: {o.notes}</p>}
-        {o.rider_id && <p className="mt-2 text-xs text-muted-foreground">Rider assigned · they can manage this delivery from their app.</p>}
+      </Card>
+
+      <Card className="p-4">
+        <h2 className="mb-2 font-semibold">Assign Rider</h2>
+        <div className="flex gap-2">
+          <Select value={riderId || "none"} onValueChange={(v) => setRiderId(v === "none" ? "" : v)}>
+            <SelectTrigger className="max-w-xs"><SelectValue placeholder="Select rider" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— Unassigned —</SelectItem>
+              {riders.map((r) => <SelectItem key={r.id} value={r.id}>{r.full_name} · {r.phone}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => assignRider(riderId)}>{o.rider_id ? "Update" : "Assign"}</Button>
+        </div>
+        {riders.length === 0 && <p className="mt-2 text-xs text-muted-foreground">No active riders. Add riders in the Riders page.</p>}
       </Card>
 
       <Card>
