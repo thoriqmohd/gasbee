@@ -1,23 +1,25 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, Minus, Plus } from "lucide-react";
+import { Flame, Minus, Plus, Building2 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { useCompanyVerification } from "@/hooks/useCompanyVerification";
 import { toast } from "sonner";
 
 export default function UserProductDetail() {
   const { id } = useParams();
   const nav = useNavigate();
   const { add } = useCart();
+  const { status: verifStatus, isApproved } = useCompanyVerification();
   const [p, setP] = useState<any>(null);
   const [qty, setQty] = useState(1);
   const [type, setType] = useState<"refill" | "new" | "deposit">("refill");
 
   useEffect(() => {
     if (!id) return;
-    supabase.from("products").select("*, merchants(name)").eq("id", id).maybeSingle().then(({ data }) => {
+    supabase.from("products").select("*, merchants(name), categories(slug,name)").eq("id", id).maybeSingle().then(({ data }) => {
       setP(data);
       if (data && Number(data.refill_price) === 0 && Number(data.selling_price) > 0) setType("new");
     });
@@ -25,17 +27,27 @@ export default function UserProductDetail() {
 
   if (!p) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
+  const slug = p.categories?.slug as string | undefined;
+  const isIndustrial = slug === "industrial-gas";
+  const blockedIndustrial = isIndustrial && !isApproved;
+
   const price = type === "refill" ? Number(p.refill_price) : type === "new" ? Number(p.selling_price) : Number(p.deposit_amount);
 
   const addToCart = () => {
-    add({
+    if (blockedIndustrial) {
+      toast.error("Akaun syarikat diperlukan untuk industrial gas.");
+      return;
+    }
+    const res = add({
       product_id: p.id,
       merchant_id: p.merchant_id,
       name: p.name,
       image_url: p.image_url,
       type, cylinder_size_kg: p.cylinder_size_kg,
       unit_price: price, quantity: qty,
+      category_slug: slug ?? null,
     });
+    if (!res.ok) { toast.error(res.error!); return; }
     toast.success("Added to cart");
     nav("/user/cart");
   };
@@ -48,11 +60,32 @@ export default function UserProductDetail() {
         </div>
       </Card>
       <div>
-        <div className="text-xs text-muted-foreground">{p.merchants?.name}</div>
+        <div className="text-xs text-muted-foreground">{p.merchants?.name} {p.categories?.name && <>· {p.categories.name}</>}</div>
         <h1 className="text-xl font-bold">{p.name}</h1>
         {p.cylinder_size_kg && <div className="text-sm text-muted-foreground">{p.cylinder_size_kg} kg cylinder</div>}
         {p.description && <p className="mt-2 text-sm">{p.description}</p>}
       </div>
+
+      {isIndustrial && (
+        <Card className={`p-3 text-sm ${isApproved ? "border-primary bg-primary/5" : "border-amber-500 bg-amber-500/10"}`}>
+          <div className="flex items-start gap-2">
+            <Building2 className="h-4 w-4 mt-0.5" />
+            <div className="flex-1">
+              {isApproved ? (
+                <span className="text-xs">✓ Akaun syarikat anda telah diluluskan.</span>
+              ) : verifStatus === "pending" ? (
+                <span className="text-xs">⏳ Permohonan syarikat sedang disemak admin.</span>
+              ) : (
+                <>
+                  <p className="font-semibold">Industrial gas — pendaftaran syarikat diperlukan</p>
+                  <p className="text-xs text-muted-foreground">Perlu upload SSM untuk membeli industrial gas.</p>
+                  <Button asChild size="sm" className="mt-2"><Link to="/user/company-verification">Daftar syarikat</Link></Button>
+                </>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
 
       <div>
         <div className="mb-2 text-sm font-semibold">Order type</div>
@@ -77,7 +110,7 @@ export default function UserProductDetail() {
           <div className="text-xs text-muted-foreground">Total</div>
           <div className="text-lg font-bold text-primary">RM {(price * qty).toFixed(2)}</div>
         </div>
-        <Button onClick={addToCart} disabled={price <= 0}>Add to cart</Button>
+        <Button onClick={addToCart} disabled={price <= 0 || blockedIndustrial}>Add to cart</Button>
       </div>
     </div>
   );
