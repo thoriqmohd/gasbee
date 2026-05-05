@@ -79,6 +79,7 @@ import RiderActive from "@/pages/rider/RiderActive";
 import RiderHistory from "@/pages/rider/RiderHistory";
 import RiderEarnings from "@/pages/rider/RiderEarnings";
 import RiderProfile from "@/pages/rider/RiderProfile";
+import RiderNotifications from "@/pages/rider/RiderNotifications";
 
 import PlaceholderPage from "@/components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
@@ -190,7 +191,7 @@ const App = () => (
               <Route path="/merchant/rider/history" element={<RiderHistory />} />
               <Route path="/merchant/rider/earnings" element={<RiderEarnings />} />
               <Route path="/merchant/rider/profile" element={<RiderProfile />} />
-              <Route path="/merchant/rider/notifications" element={<PlaceholderPage title="Notifications" />} />
+              <Route path="/merchant/rider/notifications" element={<RiderNotifications />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
