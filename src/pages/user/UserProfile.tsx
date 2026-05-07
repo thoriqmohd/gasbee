@@ -7,22 +7,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogOut, MapPin, ShoppingBag, LifeBuoy, Bell, Store, Building2, ChevronRight, User as UserIcon, Mail, Phone } from "lucide-react";
+import { LogOut, MapPin, ShoppingBag, LifeBuoy, Bell, Store, Building2, ChevronRight, User as UserIcon, Mail, Phone, Camera, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function UserProfile() {
   const { user, signOut } = useAuth();
   const nav = useNavigate();
-  const [profile, setProfile] = useState<any>({ full_name: "", phone: "" });
+  const [profile, setProfile] = useState<any>({ full_name: "", phone: "", avatar_url: "" });
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => setProfile(data ?? { full_name: "", phone: "" }));
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => setProfile(data ?? { full_name: "", phone: "", avatar_url: "" }));
   }, [user]);
 
   const save = async () => {
     const { error } = await supabase.from("profiles").update({ full_name: profile.full_name, phone: profile.phone }).eq("id", user!.id);
     if (error) toast.error(error.message); else toast.success("Saved");
+  };
+
+  const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { error: dbErr } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
+      if (dbErr) throw dbErr;
+      setProfile({ ...profile, avatar_url: publicUrl });
+      toast.success("Profile picture updated");
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const initials = (profile.full_name || user?.email || "U")
@@ -38,9 +64,22 @@ export default function UserProfile() {
       <div className="glass-category-card relative overflow-hidden rounded-3xl p-5">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-2xl" />
         <div className="relative flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-xl font-bold text-primary-foreground shadow-lg shadow-primary/30 ring-2 ring-background">
-            {initials}
-          </div>
+          <label className="group relative h-16 w-16 shrink-0 cursor-pointer">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-xl font-bold text-primary-foreground shadow-lg shadow-primary/30 ring-2 ring-background">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="h-full w-full object-cover" />
+              ) : (
+                initials
+              )}
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+              {uploading ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <Camera className="h-5 w-5 text-white" />}
+            </div>
+            <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background">
+              <Camera className="h-3 w-3" />
+            </span>
+            <input type="file" accept="image/*" className="hidden" onChange={onAvatarChange} disabled={uploading} />
+          </label>
           <div className="min-w-0 flex-1">
             <div className="truncate text-base font-semibold">{profile.full_name || "Welcome"}</div>
             <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-muted-foreground">
