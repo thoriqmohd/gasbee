@@ -16,9 +16,24 @@ interface Props {
   expectedRoles?: AppRole[];
   showSignup?: boolean;
   signupLink?: string;
+  showDevPanel?: boolean;
 }
 
-export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink }: Props) => {
+const PORTAL_LINKS = [
+  { label: "Customer", path: "/user/login" },
+  { label: "Merchant", path: "/merchant/login" },
+  { label: "Rider", path: "/rider/login" },
+  { label: "Admin", path: "/admin/login" },
+];
+
+const DEMO_USERS = [
+  { role: "Customer", email: "demo.customer@gasbee.test", password: "Demo1234!" },
+  { role: "Merchant", email: "demo.merchant@gasbee.test", password: "Demo1234!" },
+  { role: "Rider", email: "demo.rider@gasbee.test", password: "Demo1234!" },
+  { role: "Admin", email: "demo.admin@gasbee.test", password: "Demo1234!" },
+];
+
+export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showDevPanel = true }: Props) => {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +56,12 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
     }
     toast.success("Welcome back");
     nav(homeForRoles(roles), { replace: true });
+  };
+
+  const fillDemo = (u: { email: string; password: string }) => {
+    setEmail(u.email);
+    setPassword(u.password);
+    toast.info("Demo credentials filled. Click Sign in.");
   };
 
   return (
@@ -72,6 +93,45 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
           <p className="mt-4 text-center text-sm text-muted-foreground">
             New here? <a href={signupLink} className="font-medium text-primary hover:underline">Create an account</a>
           </p>
+        )}
+
+        {showDevPanel && (
+          <div className="mt-6 space-y-3 rounded-lg border border-dashed border-white/20 bg-background/40 p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Dev · Portals</span>
+              <span className="text-[10px] text-muted-foreground">temporary</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {PORTAL_LINKS.map((p) => (
+                <a
+                  key={p.path}
+                  href={p.path}
+                  className="rounded-md border border-white/10 bg-card/50 px-2 py-1.5 text-center text-xs font-medium hover:bg-primary/20 hover:text-primary transition-colors"
+                >
+                  {p.label}
+                </a>
+              ))}
+            </div>
+            <div className="pt-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Demo accounts</span>
+              <div className="mt-1.5 space-y-1">
+                {DEMO_USERS.map((u) => (
+                  <button
+                    key={u.email}
+                    type="button"
+                    onClick={() => fillDemo(u)}
+                    className="w-full rounded-md bg-muted/40 px-2 py-1.5 text-left text-[11px] hover:bg-muted/70 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{u.role}</span>
+                      <span className="text-muted-foreground">{u.password}</span>
+                    </div>
+                    <div className="truncate text-muted-foreground">{u.email}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
       </Card>
     </div>
