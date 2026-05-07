@@ -26,12 +26,6 @@ const PORTAL_LINKS = [
   { label: "Admin", path: "/admin/login" },
 ];
 
-const DEMO_USERS = [
-  { role: "Customer", email: "demo.customer@gasbee.test", password: "Demo1234!" },
-  { role: "Merchant", email: "demo.merchant@gasbee.test", password: "Demo1234!" },
-  { role: "Rider", email: "demo.rider@gasbee.test", password: "Demo1234!" },
-  { role: "Admin", email: "demo.admin@gasbee.test", password: "Demo1234!" },
-];
 
 export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showDevPanel = true }: Props) => {
   const nav = useNavigate();
@@ -58,11 +52,6 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
     nav(homeForRoles(roles), { replace: true });
   };
 
-  const fillDemo = (u: { email: string; password: string }) => {
-    setEmail(u.email);
-    setPassword(u.password);
-    toast.info("Demo credentials filled. Click Sign in.");
-  };
 
   return (
     <div
@@ -111,25 +100,6 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
                   {p.label}
                 </a>
               ))}
-            </div>
-            <div className="pt-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Demo accounts</span>
-              <div className="mt-1.5 space-y-1">
-                {DEMO_USERS.map((u) => (
-                  <button
-                    key={u.email}
-                    type="button"
-                    onClick={() => fillDemo(u)}
-                    className="w-full rounded-md bg-muted/40 px-2 py-1.5 text-left text-[11px] hover:bg-muted/70 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">{u.role}</span>
-                      <span className="text-muted-foreground">{u.password}</span>
-                    </div>
-                    <div className="truncate text-muted-foreground">{u.email}</div>
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         )}
