@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Fuel, Flame, Wrench, Factory, Package, Store } from "lucide-react";
+import { MapPin, Search, Fuel, Flame, CookingPot, Factory, Package, Store } from "lucide-react";
 
 const categoryIcon = (c: any) => {
   const key = `${c.slug ?? ""} ${c.name ?? ""}`.toLowerCase();
