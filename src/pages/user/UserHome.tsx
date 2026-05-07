@@ -57,16 +57,17 @@ export default function UserHome() {
           {cats.map((c) => {
             const img = categoryImage(c);
             return (
-              <Link key={c.id} to={`/user/products?category=${c.id}`}>
-                <div className="glass-category-card flex flex-col items-center gap-2 rounded-2xl p-3 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl">
+              <Link key={c.id} to={`/user/products?category=${c.id}`} className="group">
+                <div className="glass-category-card flex flex-col items-center gap-2 rounded-2xl p-3 text-center transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-primary/20 group-active:scale-95">
+                  <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                     {img ? (
-                      <img src={img} alt={c.name} className="h-full w-full object-contain" />
+                      <img src={img} alt={c.name} className="h-full w-full object-contain drop-shadow-md transition-all duration-300 group-hover:drop-shadow-[0_8px_16px_hsl(var(--primary)/0.4)]" />
                     ) : (
-                      <Package className="h-6 w-6 text-primary" />
+                      <Package className="h-8 w-8 text-primary" />
                     )}
                   </div>
-                  <div className="text-[11px] font-medium leading-tight">{c.name}</div>
+                  <div className="text-xs font-medium leading-tight transition-colors group-hover:text-primary">{c.name}</div>
                 </div>
               </Link>
             );
