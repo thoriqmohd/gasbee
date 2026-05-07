@@ -13,7 +13,7 @@ export default function UserLayout() {
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <Logo size={32} />
-          <span className="font-bold">Gasbee</span>
+          <span className="font-bold">Gasbee - Fast LPG Gas Delivery to Your Door</span>
         </div>
         <Button variant="ghost" size="icon" className="relative" onClick={() => nav("/user/cart")}>
           <ShoppingCart className="h-5 w-5" />
