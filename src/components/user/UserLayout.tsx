@@ -1,16 +1,9 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, ShoppingBag, MapPin, User, Bell, Flame, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
 import { Logo } from "@/components/Logo";
-
-const tabs = [
-  { to: "/user/home", label: "Home", icon: Home },
-  { to: "/user/products", label: "Shop", icon: Flame },
-  { to: "/user/orders", label: "Orders", icon: ShoppingBag },
-  { to: "/user/notifications", label: "Alerts", icon: Bell },
-  { to: "/user/profile", label: "Profile", icon: User },
-];
+import UserTabBar from "@/components/user/UserTabBar";
 
 export default function UserLayout() {
   const nav = useNavigate();
