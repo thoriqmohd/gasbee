@@ -7,9 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Store } from "lucide-react";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+
+const MY_STATES = [
+  "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang",
+  "Perak", "Perlis", "Pulau Pinang", "Sabah", "Sarawak", "Selangor",
+  "Terengganu", "Kuala Lumpur", "Labuan", "Putrajaya",
+];
 
 export default function UserApplyMerchant() {
   const { user } = useAuth();
@@ -70,7 +77,15 @@ export default function UserApplyMerchant() {
           <div><Label>Address</Label><Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
           <div className="grid grid-cols-3 gap-2">
             <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-            <div><Label>State</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
+            <div>
+              <Label>State</Label>
+              <Select value={form.state} onValueChange={(v) => setForm({ ...form, state: v })}>
+                <SelectTrigger><SelectValue placeholder="Pilih" /></SelectTrigger>
+                <SelectContent>
+                  {MY_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div><Label>Postcode</Label><Input value={form.postcode} onChange={(e) => setForm({ ...form, postcode: e.target.value })} /></div>
           </div>
           <Button type="submit" className="w-full" disabled={busy}>{busy ? "Menghantar…" : "Hantar permohonan"}</Button>
