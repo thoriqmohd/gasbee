@@ -16,7 +16,22 @@ interface Props {
   expectedRoles?: AppRole[];
   showSignup?: boolean;
   signupLink?: string;
+  showDevPanel?: boolean;
 }
+
+const PORTAL_LINKS = [
+  { label: "Customer", path: "/user/login" },
+  { label: "Merchant", path: "/merchant/login" },
+  { label: "Rider", path: "/rider/login" },
+  { label: "Admin", path: "/admin/login" },
+];
+
+const DEMO_USERS = [
+  { role: "Customer", email: "demo.customer@gasbee.test", password: "Demo1234!" },
+  { role: "Merchant", email: "demo.merchant@gasbee.test", password: "Demo1234!" },
+  { role: "Rider", email: "demo.rider@gasbee.test", password: "Demo1234!" },
+  { role: "Admin", email: "demo.admin@gasbee.test", password: "Demo1234!" },
+];
 
 export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink }: Props) => {
   const nav = useNavigate();
