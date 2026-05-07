@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { Package, Store, Calendar, ChevronRight } from "lucide-react";
 
 export default function UserOrders() {
   const { user } = useAuth();
@@ -16,21 +16,43 @@ export default function UserOrders() {
   }, [user]);
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-lg font-bold">My Orders</h1>
-      {orders.map((o) => (
-        <Link key={o.id} to={`/user/orders/${o.id}`}>
-          <Card className="space-y-1 p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold">{o.code}</span>
-              <StatusBadge value={o.status} />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-bold">My Orders</h1>
+        <span className="text-[11px] text-muted-foreground">{orders.length} total</span>
+      </div>
+      <div className="space-y-2.5">
+        {orders.map((o) => (
+          <Link key={o.id} to={`/user/orders/${o.id}`} className="block">
+            <div className="glass-category-card group flex items-center gap-3 rounded-2xl p-3">
+              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/15">
+                <Package className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-semibold leading-tight">{o.code}</span>
+                  <StatusBadge value={o.status} />
+                </div>
+                <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Store className="h-3 w-3" />
+                  <span className="truncate">{o.merchants?.name ?? "—"}</span>
+                  <span className="text-muted-foreground/40">•</span>
+                  <Calendar className="h-3 w-3" />
+                  <span className="truncate">{new Date(o.created_at).toLocaleDateString()}</span>
+                </div>
+                <div className="mt-1 text-sm font-bold text-primary">RM {Number(o.total_amount).toFixed(2)}</div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-active:translate-x-0.5" />
             </div>
-            <div className="text-xs text-muted-foreground">{o.merchants?.name} · {new Date(o.created_at).toLocaleString()}</div>
-            <div className="text-sm font-bold text-primary">RM {Number(o.total_amount).toFixed(2)}</div>
-          </Card>
-        </Link>
-      ))}
-      {orders.length === 0 && <p className="text-sm text-muted-foreground">No orders yet.</p>}
+          </Link>
+        ))}
+        {orders.length === 0 && (
+          <div className="glass-category-card rounded-2xl p-6 text-center">
+            <Package className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">No orders yet.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
