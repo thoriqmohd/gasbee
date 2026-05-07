@@ -6,7 +6,7 @@ import { MapPin, Search, Fuel, Cylinder, Wrench, Factory, Package, Store } from 
 
 const categoryIcon = (c: any) => {
   const key = `${c.slug ?? ""} ${c.name ?? ""}`.toLowerCase();
-  if (key.includes("refill")) return Flame;
+  if (key.includes("refill")) return Fuel;
   if (key.includes("new") || key.includes("cylinder")) return Cylinder;
   if (key.includes("accessor")) return Wrench;
   if (key.includes("industrial")) return Factory;
