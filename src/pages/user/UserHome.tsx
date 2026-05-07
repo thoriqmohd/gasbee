@@ -2,15 +2,19 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, RefreshCw, Flame, CookingPot, Factory, Package, Store, Star, ChevronRight } from "lucide-react";
+import { MapPin, Search, Package, Store, Star, ChevronRight } from "lucide-react";
+import categoryRefill from "@/assets/category-refill.png";
+import categoryNew from "@/assets/category-new.png";
+import categoryAccessories from "@/assets/category-accessories.png";
+import categoryIndustrial from "@/assets/category-industrial.png";
 
-const categoryIcon = (c: any) => {
+const categoryImage = (c: any): string | null => {
   const key = `${c.slug ?? ""} ${c.name ?? ""}`.toLowerCase();
-  if (key.includes("refill")) return RefreshCw;
-  if (key.includes("new") || key.includes("cylinder")) return Flame;
-  if (key.includes("accessor")) return CookingPot;
-  if (key.includes("industrial")) return Factory;
-  return Package;
+  if (key.includes("refill")) return categoryRefill;
+  if (key.includes("new") || key.includes("cylinder")) return categoryNew;
+  if (key.includes("accessor")) return categoryAccessories;
+  if (key.includes("industrial")) return categoryIndustrial;
+  return null;
 };
 import { Link } from "react-router-dom";
 import { BannerCarousel } from "@/components/user/BannerCarousel";
@@ -51,12 +55,16 @@ export default function UserHome() {
         <h2 className="mb-3 text-sm font-semibold">Categories</h2>
         <div className="grid grid-cols-4 gap-3">
           {cats.map((c) => {
-            const Icon = categoryIcon(c);
+            const img = categoryImage(c);
             return (
               <Link key={c.id} to={`/user/products?category=${c.id}`}>
                 <div className="glass-category-card flex flex-col items-center gap-2 rounded-2xl p-3 text-center">
-                  <div className="glass-category-icon flex h-10 w-10 items-center justify-center rounded-xl">
-                    <Icon className="h-5 w-5 text-primary-foreground" />
+                  <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl">
+                    {img ? (
+                      <img src={img} alt={c.name} className="h-full w-full object-contain" />
+                    ) : (
+                      <Package className="h-6 w-6 text-primary" />
+                    )}
                   </div>
                   <div className="text-[11px] font-medium leading-tight">{c.name}</div>
                 </div>
