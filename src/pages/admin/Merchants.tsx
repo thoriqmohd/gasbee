@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Eye, EyeOff, Copy, RefreshCw, Pencil, Trash2 } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
 
 const genPassword = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
@@ -25,7 +26,7 @@ function EditMerchantDialog({ row, onDone }: { row: any; onDone: () => void }) {
   const [form, setForm] = useState<any>({
     name: row.name ?? "", slug: row.slug ?? "", email: row.email ?? "", phone: row.phone ?? "",
     address: row.address ?? "", city: row.city ?? "", state: row.state ?? "", postcode: row.postcode ?? "",
-    status: row.status ?? "active", commission_rate: row.commission_rate ?? 10,
+    status: row.status ?? "active", commission_rate: row.commission_rate ?? 10, logo_url: row.logo_url ?? null,
   });
   const [password, setPassword] = useState(genPassword());
   const [newEmail, setNewEmail] = useState("");
@@ -56,6 +57,16 @@ function EditMerchantDialog({ row, onDone }: { row: any; onDone: () => void }) {
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Edit merchant</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <div>
+            <Label>Logo</Label>
+            <ImageUpload
+              bucket="merchant-logos"
+              pathPrefix={row.id}
+              value={form.logo_url}
+              onChange={(url) => setForm({ ...form, logo_url: url })}
+              label="Upload logo"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <div><Label>Business name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div><Label>Slug</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>

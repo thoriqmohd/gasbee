@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { ImageUpload } from "@/components/ImageUpload";
+import { toast } from "sonner";
 
 export default function RiderDetail() {
   const { id } = useParams();
@@ -45,6 +47,22 @@ export default function RiderDetail() {
       </div>
 
       <Card className="p-4">
+        <p className="mb-2 font-semibold">Profile photo</p>
+        <ImageUpload
+          bucket="avatars"
+          pathPrefix={`riders/${r.id}`}
+          value={r.profile_image_url}
+          onChange={async (url) => {
+            const { error } = await supabase.from("riders").update({ profile_image_url: url }).eq("id", r.id);
+            if (error) return toast.error(error.message);
+            setR({ ...r, profile_image_url: url });
+            toast.success("Photo updated");
+          }}
+          label="Upload photo"
+        />
+      </Card>
+
+      <Card className="p-4">
         <p className="font-semibold">License</p>
         <div className="mt-2 grid gap-3 md:grid-cols-2">
           <div className="space-y-1 text-sm">
@@ -52,6 +70,21 @@ export default function RiderDetail() {
             <p>Expiry: <span className={expired ? "font-semibold text-destructive" : "font-medium"}>{r.license_expiry_date ? new Date(r.license_expiry_date).toLocaleDateString() : "—"}{expired ? " (expired)" : ""}</span></p>
           </div>
           {r.license_image_url ? <img src={r.license_image_url} className="rounded-md border" /> : <p className="text-sm text-muted-foreground">No license uploaded.</p>}
+        </div>
+        <div className="mt-3">
+          <ImageUpload
+            bucket="rider-docs"
+            pathPrefix={`licenses/${r.id}`}
+            value={r.license_image_url}
+            onChange={async (url) => {
+              const { error } = await supabase.from("riders").update({ license_image_url: url }).eq("id", r.id);
+              if (error) return toast.error(error.message);
+              setR({ ...r, license_image_url: url });
+              toast.success("License updated");
+            }}
+            label="Upload license"
+            aspect="wide"
+          />
         </div>
       </Card>
 
