@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { ImageUpload } from "@/components/ImageUpload";
+import { toast } from "sonner";
 
 export default function CustomerDetail() {
   const { id } = useParams();
@@ -35,6 +37,22 @@ export default function CustomerDetail() {
           <p className="text-sm text-muted-foreground">{p.phone ?? "—"} · joined {new Date(p.created_at).toLocaleDateString()}</p>
         </div>
       </div>
+
+      <Card className="p-4">
+        <p className="mb-2 font-semibold">Profile photo</p>
+        <ImageUpload
+          bucket="avatars"
+          pathPrefix={p.id}
+          value={p.avatar_url}
+          onChange={async (url) => {
+            const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", p.id);
+            if (error) return toast.error(error.message);
+            setP({ ...p, avatar_url: url });
+            toast.success("Photo updated");
+          }}
+          label="Upload photo"
+        />
+      </Card>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         <Card className="p-4"><p className="text-xs uppercase text-muted-foreground">Total orders</p><p className="text-2xl font-bold">{stats.total}</p></Card>
         <Card className="p-4"><p className="text-xs uppercase text-muted-foreground">Total spent (paid)</p><p className="text-2xl font-bold">{fmt(stats.spent)}</p></Card>

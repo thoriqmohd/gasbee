@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { ImageUpload } from "@/components/ImageUpload";
+import { toast } from "sonner";
 
 export default function RiderDetail() {
   const { id } = useParams();
@@ -43,6 +45,22 @@ export default function RiderDetail() {
         <Card className="p-4"><p className="text-xs uppercase text-muted-foreground">Delivered</p><p className="text-2xl font-bold">{stats.delivered}</p></Card>
         <Card className="p-4"><p className="text-xs uppercase text-muted-foreground">Earnings</p><p className="text-2xl font-bold">{fmt(stats.earnings)}</p></Card>
       </div>
+
+      <Card className="p-4">
+        <p className="mb-2 font-semibold">Profile photo</p>
+        <ImageUpload
+          bucket="avatars"
+          pathPrefix={`riders/${r.id}`}
+          value={r.profile_image_url}
+          onChange={async (url) => {
+            const { error } = await supabase.from("riders").update({ profile_image_url: url }).eq("id", r.id);
+            if (error) return toast.error(error.message);
+            setR({ ...r, profile_image_url: url });
+            toast.success("Photo updated");
+          }}
+          label="Upload photo"
+        />
+      </Card>
 
       <Card className="p-4">
         <p className="font-semibold">License</p>
