@@ -5,12 +5,18 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toast } from "sonner";
-import { Phone, Navigation } from "lucide-react";
+import { Phone, Navigation, Clock, CheckCircle2, Package, Truck, Home } from "lucide-react";
 import { MapPicker } from "@/components/MapPicker";
 import { OrderChat } from "@/components/OrderChat";
 import { OrderRating } from "@/components/user/OrderRating";
 
-const STEPS = ["pending", "confirmed", "preparing", "out_for_delivery", "delivered"];
+const STEPS = [
+  { key: "pending", label: "Pending", icon: Clock },
+  { key: "confirmed", label: "Confirmed", icon: CheckCircle2 },
+  { key: "preparing", label: "Preparing", icon: Package },
+  { key: "out_for_delivery", label: "On the way", icon: Truck },
+  { key: "delivered", label: "Delivered", icon: Home },
+];
 
 export default function UserOrderDetail() {
   const { id } = useParams();
@@ -49,7 +55,7 @@ export default function UserOrderDetail() {
 
   if (!o) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
-  const stepIdx = STEPS.indexOf(o.status);
+  const stepIdx = STEPS.findIndex((s) => s.key === o.status);
   const cancel = async () => {
     const { error } = await supabase.from("orders").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", o.id);
     if (error) toast.error(error.message); else { toast.success("Cancelled"); setO({ ...o, status: "cancelled" }); }
@@ -77,17 +83,53 @@ export default function UserOrderDetail() {
       )}
 
       {stepIdx >= 0 && o.status !== "cancelled" && (
-        <Card className="p-3">
-          <div className="mb-2 text-sm font-semibold">Tracking</div>
-          <div className="flex items-center justify-between">
-            {STEPS.map((s, i) => (
-              <div key={s} className="flex flex-1 flex-col items-center text-center">
-                <div className={`h-3 w-3 rounded-full ${i <= stepIdx ? "bg-primary" : "bg-muted"}`} />
-                <div className="mt-1 text-[10px] capitalize text-muted-foreground">{s.replace(/_/g, " ")}</div>
-              </div>
-            ))}
+        <div className="glass-category-card animate-fade-in rounded-2xl p-4">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-sm font-semibold">Order Tracking</div>
+            <div className="text-[11px] font-medium text-primary">
+              {Math.round(((stepIdx + 1) / STEPS.length) * 100)}% complete
+            </div>
           </div>
-        </Card>
+          <div className="relative">
+            {/* Progress line background */}
+            <div className="absolute left-5 right-5 top-5 h-1 -translate-y-1/2 rounded-full bg-muted" />
+            {/* Progress line filled */}
+            <div
+              className="absolute left-5 top-5 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700 ease-out"
+              style={{ width: `calc((100% - 2.5rem) * ${stepIdx / (STEPS.length - 1)})` }}
+            />
+            <div className="relative flex items-start justify-between">
+              {STEPS.map((s, i) => {
+                const Icon = s.icon;
+                const isActive = i === stepIdx;
+                const isDone = i <= stepIdx;
+                return (
+                  <div key={s.key} className="flex flex-1 flex-col items-center text-center">
+                    <div
+                      className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all duration-500 ${
+                        isDone
+                          ? "bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30"
+                          : "bg-muted text-muted-foreground"
+                      } ${isActive ? "scale-110 ring-4 ring-primary/20" : ""}`}
+                    >
+                      {isActive && (
+                        <span className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
+                      )}
+                      <Icon className="relative h-4 w-4" />
+                    </div>
+                    <div
+                      className={`mt-2 text-[10px] font-medium leading-tight transition-colors ${
+                        isDone ? "text-foreground" : "text-muted-foreground"
+                      }`}
+                    >
+                      {s.label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
       {trackable && markers.length > 0 && (
