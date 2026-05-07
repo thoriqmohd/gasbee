@@ -6,10 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Plus, Trash2, Star, Crosshair, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { MapPicker } from "@/components/MapPicker";
+
+const MY_STATES = [
+  "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang",
+  "Perak", "Perlis", "Pulau Pinang", "Sabah", "Sarawak", "Selangor",
+  "Terengganu", "Kuala Lumpur", "Labuan", "Putrajaya",
+];
 
 const schema = z.object({
   label: z.string().trim().max(50).optional(),
@@ -88,7 +95,15 @@ export default function UserAddresses() {
               <div className="grid grid-cols-3 gap-2">
                 <div><Label>Postcode</Label><Input value={form.postcode ?? ""} onChange={(e) => setForm({ ...form, postcode: e.target.value })} /></div>
                 <div><Label>City</Label><Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-                <div><Label>State</Label><Input value={form.state ?? ""} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
+                <div>
+                  <Label>State</Label>
+                  <Select value={form.state ?? ""} onValueChange={(v) => setForm({ ...form, state: v })}>
+                    <SelectTrigger><SelectValue placeholder="Pilih" /></SelectTrigger>
+                    <SelectContent>
+                      {MY_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div>
                 <div className="mb-2 flex items-center justify-between">
