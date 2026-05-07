@@ -48,16 +48,18 @@ export default function UserHome() {
       </div>
       <BannerCarousel banners={banners} />
       <div>
-        <h2 className="mb-2 text-sm font-semibold">Categories</h2>
-        <div className="grid grid-cols-4 gap-2">
+        <h2 className="mb-3 text-sm font-semibold">Categories</h2>
+        <div className="grid grid-cols-4 gap-3">
           {cats.map((c) => {
             const Icon = categoryIcon(c);
             return (
               <Link key={c.id} to={`/user/products?category=${c.id}`}>
-                <Card className="flex flex-col items-center gap-1 p-3 text-center">
-                  <Icon className="h-5 w-5 text-primary" />
-                  <div className="text-xs">{c.name}</div>
-                </Card>
+                <div className="glass-category-card flex flex-col items-center gap-2 rounded-2xl p-3 text-center">
+                  <div className="glass-category-icon flex h-10 w-10 items-center justify-center rounded-xl">
+                    <Icon className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div className="text-[11px] font-medium leading-tight">{c.name}</div>
+                </div>
               </Link>
             );
           })}
