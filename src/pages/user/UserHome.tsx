@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Flame, Cylinder, Wrench, Factory, Package, Store } from "lucide-react";
+import { MapPin, Search, Fuel, Cylinder, Wrench, Factory, Package, Store } from "lucide-react";
 
 const categoryIcon = (c: any) => {
   const key = `${c.slug ?? ""} ${c.name ?? ""}`.toLowerCase();
-  if (key.includes("refill")) return Flame;
+  if (key.includes("refill")) return Fuel;
   if (key.includes("new") || key.includes("cylinder")) return Cylinder;
   if (key.includes("accessor")) return Wrench;
   if (key.includes("industrial")) return Factory;
