@@ -71,6 +71,21 @@ export default function RiderDetail() {
           </div>
           {r.license_image_url ? <img src={r.license_image_url} className="rounded-md border" /> : <p className="text-sm text-muted-foreground">No license uploaded.</p>}
         </div>
+        <div className="mt-3">
+          <ImageUpload
+            bucket="rider-docs"
+            pathPrefix={`licenses/${r.id}`}
+            value={r.license_image_url}
+            onChange={async (url) => {
+              const { error } = await supabase.from("riders").update({ license_image_url: url }).eq("id", r.id);
+              if (error) return toast.error(error.message);
+              setR({ ...r, license_image_url: url });
+              toast.success("License updated");
+            }}
+            label="Upload license"
+            aspect="wide"
+          />
+        </div>
       </Card>
 
       <Card>
