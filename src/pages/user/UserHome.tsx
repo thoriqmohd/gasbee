@@ -66,22 +66,42 @@ export default function UserHome() {
         </div>
       </div>
       <div>
-        <h2 className="mb-2 text-sm font-semibold">Nearby merchants</h2>
-        <div className="space-y-2">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Nearby merchants</h2>
+          <span className="text-[11px] text-muted-foreground">{merchants.length} nearby</span>
+        </div>
+        <div className="space-y-2.5">
           {merchants.map((m) => (
-            <Link key={m.id} to={`/user/merchant/${m.id}`}>
-              <Card className="flex items-center gap-3 p-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
-                  {m.logo_url ? <img src={m.logo_url} alt={m.name} className="h-full w-full rounded-lg object-cover" /> : <Store className="h-5 w-5 text-primary" />}
+            <Link key={m.id} to={`/user/merchant/${m.id}`} className="block">
+              <div className="glass-category-card group flex items-center gap-3 rounded-2xl p-3">
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/15">
+                  {m.logo_url ? (
+                    <img src={m.logo_url} alt={m.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <Store className="h-6 w-6 text-primary" />
+                  )}
+                  <span className="absolute -right-0 -top-0 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-background" aria-label="Open" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{m.name}</div>
-                  <div className="text-xs text-muted-foreground">{m.city ?? "—"} · ★ {Number(m.rating ?? 0).toFixed(1)}</div>
+                  <div className="truncate font-semibold leading-tight">{m.name}</div>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    <span className="truncate">{m.city ?? "—"}</span>
+                    <span className="text-muted-foreground/40">•</span>
+                    <Star className="h-3 w-3 fill-primary text-primary" />
+                    <span className="font-medium text-foreground">{Number(m.rating ?? 0).toFixed(1)}</span>
+                  </div>
                 </div>
-              </Card>
+                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-active:translate-x-0.5" />
+              </div>
             </Link>
           ))}
-          {merchants.length === 0 && <p className="text-sm text-muted-foreground">No merchants nearby yet.</p>}
+          {merchants.length === 0 && (
+            <div className="glass-category-card rounded-2xl p-6 text-center">
+              <Store className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">No merchants nearby yet.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
