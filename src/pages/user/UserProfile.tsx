@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogOut, MapPin, ShoppingBag, LifeBuoy, Bell, Store, Building2 } from "lucide-react";
+import { LogOut, MapPin, ShoppingBag, LifeBuoy, Bell, Store, Building2, ChevronRight, User as UserIcon, Mail, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function UserProfile() {
@@ -25,32 +25,100 @@ export default function UserProfile() {
     if (error) toast.error(error.message); else toast.success("Saved");
   };
 
+  const initials = (profile.full_name || user?.email || "U")
+    .split(" ")
+    .map((s: string) => s[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-bold">Profile</h1>
-      <Card className="space-y-3 p-4">
-        <div><Label>Email</Label><Input value={user?.email ?? ""} disabled /></div>
-        <div><Label>Full name</Label><Input value={profile.full_name ?? ""} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} /></div>
-        <div><Label>Phone</Label><Input value={profile.phone ?? ""} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></div>
-        <Button onClick={save} className="w-full">Save</Button>
-      </Card>
+    <div className="space-y-5">
+      {/* Hero header */}
+      <div className="glass-category-card relative overflow-hidden rounded-3xl p-5">
+        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-2xl" />
+        <div className="relative flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-xl font-bold text-primary-foreground shadow-lg shadow-primary/30 ring-2 ring-background">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-base font-semibold">{profile.full_name || "Welcome"}</div>
+            <div className="mt-0.5 flex items-center gap-1 truncate text-xs text-muted-foreground">
+              <Mail className="h-3 w-3" />
+              <span className="truncate">{user?.email}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Card className="divide-y">
-        {[
-          { to: "/user/orders", icon: ShoppingBag, label: "My Orders" },
-          { to: "/user/addresses", icon: MapPin, label: "Addresses" },
-          { to: "/user/notifications", icon: Bell, label: "Notifications" },
-          { to: "/user/apply-merchant", icon: Store, label: "Apply as Merchant" },
-          { to: "/user/company-verification", icon: Building2, label: "Company Account (Industrial)" },
-          { to: "/user/support", icon: LifeBuoy, label: "Support" },
-        ].map((r) => (
-          <Link key={r.to} to={r.to} className="flex items-center gap-3 p-3 text-sm hover:bg-accent">
-            <r.icon className="h-4 w-4 text-primary" />{r.label}
-          </Link>
-        ))}
-      </Card>
+      {/* Personal info */}
+      <div className="glass-category-card space-y-4 rounded-2xl p-4">
+        <div className="flex items-center gap-2">
+          <UserIcon className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold">Personal Info</h2>
+        </div>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Email</Label>
+            <Input value={user?.email ?? ""} disabled className="rounded-xl" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Full name</Label>
+            <Input
+              value={profile.full_name ?? ""}
+              onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+              className="rounded-xl"
+              placeholder="Your name"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Phone</Label>
+            <Input
+              value={profile.phone ?? ""}
+              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+              className="rounded-xl"
+              placeholder="+60..."
+            />
+          </div>
+          <Button onClick={save} className="w-full rounded-xl shadow-md shadow-primary/20">
+            Save changes
+          </Button>
+        </div>
+      </div>
 
-      <Button variant="outline" className="w-full" onClick={async () => { await signOut(); nav("/user/login"); }}>
+      {/* Menu */}
+      <div className="space-y-2">
+        <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</h2>
+        <div className="space-y-2">
+          {[
+            { to: "/user/orders", icon: ShoppingBag, label: "My Orders", desc: "Track your gas deliveries" },
+            { to: "/user/addresses", icon: MapPin, label: "Addresses", desc: "Manage delivery locations" },
+            { to: "/user/notifications", icon: Bell, label: "Notifications", desc: "Updates and alerts" },
+            { to: "/user/apply-merchant", icon: Store, label: "Apply as Merchant", desc: "Sell on Gasbee" },
+            { to: "/user/company-verification", icon: Building2, label: "Company Account", desc: "For industrial buyers" },
+            { to: "/user/support", icon: LifeBuoy, label: "Support", desc: "We're here to help" },
+          ].map((r) => (
+            <Link key={r.to} to={r.to} className="block">
+              <div className="glass-category-card group flex items-center gap-3 rounded-2xl p-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/15">
+                  <r.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold leading-tight">{r.label}</div>
+                  <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{r.desc}</div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-active:translate-x-0.5" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <Button
+        variant="outline"
+        className="w-full rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        onClick={async () => { await signOut(); nav("/user/login"); }}
+      >
         <LogOut className="mr-2 h-4 w-4" />Sign out
       </Button>
     </div>
