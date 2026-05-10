@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingBag, Users, Store, FileCheck2, Bike,
   Package, Tags, Boxes, CreditCard, Undo2, Wallet, Percent,
-  Image as ImageIcon, Megaphone, BarChart3, Bell, LifeBuoy, Settings, ScrollText, LogOut,
+  Image as ImageIcon, Megaphone, BarChart3, Bell, LifeBuoy, Settings, ScrollText, LogOut, ShieldCheck,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +30,7 @@ const items = [
   { to: "/notifications", label: "Notifications", icon: Bell },
   { to: "/support-tickets", label: "Support", icon: LifeBuoy },
   { to: "/audit-logs", label: "Audit Logs", icon: ScrollText },
+  { to: "/admins", label: "Admin Users", icon: ShieldCheck },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
