@@ -78,6 +78,3 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
     </div>
   );
 };
-    </div>
-  );
-};
