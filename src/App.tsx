@@ -137,6 +137,7 @@ const App = () => (
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/support-tickets" element={<SupportTickets />} />
               <Route path="/audit-logs" element={<AuditLogs />} />
+              <Route path="/admins" element={<Admins />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
 
