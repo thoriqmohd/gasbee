@@ -30,6 +30,7 @@ const items = [
   { to: "/notifications", label: "Notifications", icon: Bell },
   { to: "/support-tickets", label: "Support", icon: LifeBuoy },
   { to: "/audit-logs", label: "Audit Logs", icon: ScrollText },
+  { to: "/admins", label: "Admin Users", icon: ShieldCheck },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
