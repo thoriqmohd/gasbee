@@ -16,18 +16,9 @@ interface Props {
   expectedRoles?: AppRole[];
   showSignup?: boolean;
   signupLink?: string;
-  showDevPanel?: boolean;
 }
 
-const PORTAL_LINKS = [
-  { label: "Customer", path: "/user/login" },
-  { label: "Merchant", path: "/merchant/login" },
-  { label: "Rider", path: "/rider/login" },
-  { label: "Admin", path: "/admin/login" },
-];
-
-
-export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showDevPanel = true }: Props) => {
+export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink }: Props) => {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,26 +73,6 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
           <p className="mt-4 text-center text-sm text-muted-foreground">
             New here? <a href={signupLink} className="font-medium text-primary hover:underline">Create an account</a>
           </p>
-        )}
-
-        {showDevPanel && (
-          <div className="mt-6 space-y-3 rounded-lg border border-dashed border-white/20 bg-background/40 p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Dev · Portals</span>
-              <span className="text-[10px] text-muted-foreground">temporary</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {PORTAL_LINKS.map((p) => (
-                <a
-                  key={p.path}
-                  href={p.path}
-                  className="rounded-md border border-white/10 bg-card/50 px-2 py-1.5 text-center text-xs font-medium hover:bg-primary/20 hover:text-primary transition-colors"
-                >
-                  {p.label}
-                </a>
-              ))}
-            </div>
-          </div>
         )}
       </Card>
     </div>
