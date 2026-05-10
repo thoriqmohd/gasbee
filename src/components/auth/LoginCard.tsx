@@ -16,18 +16,9 @@ interface Props {
   expectedRoles?: AppRole[];
   showSignup?: boolean;
   signupLink?: string;
-  showDevPanel?: boolean;
 }
 
-const PORTAL_LINKS = [
-  { label: "Customer", path: "/user/login" },
-  { label: "Merchant", path: "/merchant/login" },
-  { label: "Rider", path: "/rider/login" },
-  { label: "Admin", path: "/admin/login" },
-];
-
-
-export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showDevPanel = true }: Props) => {
+export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink }: Props) => {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
