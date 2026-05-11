@@ -12,6 +12,7 @@ export default function UserPayment() {
   const [order, setOrder] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const isPreviewFrame = window.self !== window.top;
 
   useEffect(() => {
     if (!id) return;
@@ -24,19 +25,25 @@ export default function UserPayment() {
     setCheckoutUrl(null);
 
     try {
-      const origin = window.location.origin;
+      const redirectOrigin = window.location.hostname.includes("lovableproject.com")
+        ? "https://gasbee.lovable.app"
+        : window.location.origin;
       const { data, error } = await supabase.functions.invoke("chip-create-purchase", {
         body: {
           order_id: order.id,
-          success_redirect: `${origin}/user/orders/${order.id}?payment=success`,
-          failure_redirect: `${origin}/user/orders/${order.id}?payment=failed`,
+          success_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=success`,
+          failure_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=failed`,
         },
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL");
 
       setCheckoutUrl(data.url);
-      toast.success("CHIP checkout is ready. Tap Continue to open it in a new tab.");
+      if (isPreviewFrame) {
+        toast.info("CHIP checkout cannot open inside Lovable preview. Copy the link and paste it in a normal browser tab.");
+      } else {
+        window.location.assign(data.url);
+      }
     } catch (e: any) {
       toast.error(e.message ?? "Failed to start payment");
     } finally {
@@ -91,7 +98,7 @@ export default function UserPayment() {
           Pay with CHIP
         </Button>
         {checkoutUrl && (
-          <Button variant="secondary" className="w-full" onClick={openCheckout}>
+          <Button variant="secondary" className="w-full" onClick={openCheckout} disabled={isPreviewFrame}>
             Continue to CHIP checkout
           </Button>
         )}
