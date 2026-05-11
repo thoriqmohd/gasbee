@@ -22,38 +22,39 @@ export default function UserPayment() {
     setBusy(true);
 
     try {
-      // Use the top-window origin so CHIP redirects back into the same app tab
+      // Use the published domain for redirects so CHIP returns to the live app
       // (works whether we're inside the Lovable preview iframe or on the published domain).
-      const topOrigin =
-        (() => {
-          try {
-            return window.top?.location?.origin ?? window.location.origin;
-          } catch {
-            return window.location.origin;
-          }
-        })();
+      let redirectOrigin = window.location.origin;
+      try {
+        if (window.top && window.top !== window.self) {
+          redirectOrigin = window.top.location.origin;
+        }
+      } catch {
+        redirectOrigin = window.location.hostname.includes("lovableproject.com")
+          ? "https://gasbee.lovable.app"
+          : window.location.origin;
+      }
 
       const { data, error } = await supabase.functions.invoke("chip-create-purchase", {
         body: {
           order_id: order.id,
-          success_redirect: `${topOrigin}/user/orders/${order.id}?payment=success`,
-          failure_redirect: `${topOrigin}/user/orders/${order.id}?payment=failed`,
+          success_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=success`,
+          failure_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=failed`,
         },
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL");
 
-      // Navigate the top-level window so checkout happens in the same app tab
-      // (no new tab, no iframe — CHIP blocks iframes).
-      try {
-        if (window.top) {
-          window.top.location.href = data.url;
-        } else {
-          window.location.href = data.url;
-        }
-      } catch {
-        window.location.href = data.url;
-      }
+      // Break out of any iframe (Lovable preview) by using a target="_top" anchor click.
+      // This works cross-origin where window.top.location assignment is blocked,
+      // and avoids loading CHIP in an iframe (which CHIP refuses via X-Frame-Options).
+      const a = document.createElement("a");
+      a.href = data.url;
+      a.target = "_top";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     } catch (e: any) {
       toast.error(e.message ?? "Failed to start payment");
       setBusy(false);
