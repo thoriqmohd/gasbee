@@ -31,7 +31,16 @@ export default function UserPayment() {
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL");
-      window.location.href = data.url;
+      // Try top-level navigation (production); fall back to new tab (preview iframe)
+      try {
+        if (window.top && window.top !== window.self) {
+          window.top.location.href = data.url;
+        } else {
+          window.location.href = data.url;
+        }
+      } catch {
+        window.open(data.url, "_blank", "noopener,noreferrer");
+      }
     } catch (e: any) {
       toast.error(e.message ?? "Failed to start payment");
       setBusy(false);
