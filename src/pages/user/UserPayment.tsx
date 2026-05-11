@@ -11,6 +11,7 @@ export default function UserPayment() {
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [busy, setBusy] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -20,6 +21,10 @@ export default function UserPayment() {
   const payNow = async () => {
     if (!order) return;
     setBusy(true);
+    setCheckoutUrl(null);
+
+    const checkoutWindow = window.open("about:blank", "_blank");
+
     try {
       const origin = window.location.origin;
       const { data, error } = await supabase.functions.invoke("chip-create-purchase", {
@@ -31,18 +36,19 @@ export default function UserPayment() {
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL");
-      // Try top-level navigation (production); fall back to new tab (preview iframe)
-      try {
-        if (window.top && window.top !== window.self) {
-          window.top.location.href = data.url;
-        } else {
-          window.location.href = data.url;
-        }
-      } catch {
-        window.open(data.url, "_blank", "noopener,noreferrer");
+
+      setCheckoutUrl(data.url);
+
+      if (checkoutWindow) {
+        checkoutWindow.opener = null;
+        checkoutWindow.location.href = data.url;
+      } else {
+        toast.info("Popup was blocked. Please open CHIP checkout manually.");
       }
     } catch (e: any) {
+      checkoutWindow?.close();
       toast.error(e.message ?? "Failed to start payment");
+    } finally {
       setBusy(false);
     }
   };
@@ -73,6 +79,13 @@ export default function UserPayment() {
           {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
           Pay with CHIP
         </Button>
+        {checkoutUrl && (
+          <Button asChild variant="secondary" className="w-full">
+            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer">
+              Open CHIP checkout
+            </a>
+          </Button>
+        )}
         <Button variant="outline" className="w-full" disabled={busy} onClick={() => nav(`/user/orders/${order.id}`)}>
           Cancel & back to order
         </Button>
