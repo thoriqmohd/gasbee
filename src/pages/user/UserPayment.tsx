@@ -4,15 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, CreditCard, Copy } from "lucide-react";
+import { Loader2, CreditCard } from "lucide-react";
 
 export default function UserPayment() {
   const { id } = useParams();
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [busy, setBusy] = useState(false);
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
-  const isPreviewFrame = window.self !== window.top;
 
   useEffect(() => {
     if (!id) return;
@@ -22,53 +20,44 @@ export default function UserPayment() {
   const payNow = async () => {
     if (!order) return;
     setBusy(true);
-    setCheckoutUrl(null);
 
     try {
-      const redirectOrigin = window.location.hostname.includes("lovableproject.com")
-        ? "https://gasbee.lovable.app"
-        : window.location.origin;
+      // Use the top-window origin so CHIP redirects back into the same app tab
+      // (works whether we're inside the Lovable preview iframe or on the published domain).
+      const topOrigin =
+        (() => {
+          try {
+            return window.top?.location?.origin ?? window.location.origin;
+          } catch {
+            return window.location.origin;
+          }
+        })();
+
       const { data, error } = await supabase.functions.invoke("chip-create-purchase", {
         body: {
           order_id: order.id,
-          success_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=success`,
-          failure_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=failed`,
+          success_redirect: `${topOrigin}/user/orders/${order.id}?payment=success`,
+          failure_redirect: `${topOrigin}/user/orders/${order.id}?payment=failed`,
         },
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL");
 
-      setCheckoutUrl(data.url);
-      if (isPreviewFrame) {
-        toast.info("CHIP checkout cannot open inside Lovable preview. Copy the link and paste it in a normal browser tab.");
-      } else {
-        window.location.assign(data.url);
+      // Navigate the top-level window so checkout happens in the same app tab
+      // (no new tab, no iframe — CHIP blocks iframes).
+      try {
+        if (window.top) {
+          window.top.location.href = data.url;
+        } else {
+          window.location.href = data.url;
+        }
+      } catch {
+        window.location.href = data.url;
       }
     } catch (e: any) {
       toast.error(e.message ?? "Failed to start payment");
-    } finally {
       setBusy(false);
     }
-  };
-
-  const openCheckout = () => {
-    if (!checkoutUrl) return;
-    const opened = window.open(checkoutUrl, "_blank");
-    if (!opened) {
-      navigator.clipboard?.writeText(checkoutUrl).catch(() => undefined);
-      toast.info("Popup blocked. Checkout link copied—paste it in a new browser tab.");
-    } else {
-      opened.opener = null;
-    }
-  };
-
-  const copyCheckoutLink = () => {
-    if (!checkoutUrl) return;
-    navigator.clipboard?.writeText(checkoutUrl).then(() => {
-      toast.success("CHIP checkout link copied.");
-    }).catch(() => {
-      toast.info("Copy this link manually and paste it in a new browser tab.");
-    });
   };
 
   if (!order) return <p className="p-4 text-sm text-muted-foreground">Loading…</p>;
@@ -97,24 +86,13 @@ export default function UserPayment() {
           {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
           Pay with CHIP
         </Button>
-        {checkoutUrl && (
-          <Button variant="secondary" className="w-full" onClick={openCheckout} disabled={isPreviewFrame}>
-            Continue to CHIP checkout
-          </Button>
-        )}
-        {checkoutUrl && (
-          <Button variant="outline" className="w-full" onClick={copyCheckoutLink}>
-            <Copy className="mr-2 h-4 w-4" />
-            Copy checkout link
-          </Button>
-        )}
         <Button variant="outline" className="w-full" disabled={busy} onClick={() => nav(`/user/orders/${order.id}`)}>
           Cancel & back to order
         </Button>
       </Card>
 
       <p className="text-center text-xs text-muted-foreground">
-        You will be redirected to CHIP secure checkout.
+        Selepas bayar, anda akan kembali ke halaman pesanan secara automatik.
       </p>
     </div>
   );
