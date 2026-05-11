@@ -36,11 +36,20 @@ export default function UserPayment() {
       if (!data?.url) throw new Error("No checkout URL");
 
       setCheckoutUrl(data.url);
-      toast.success("CHIP checkout is ready. Tap Continue to open it.");
+      toast.success("CHIP checkout is ready. Tap Continue to open it in a new tab.");
     } catch (e: any) {
       toast.error(e.message ?? "Failed to start payment");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const openCheckout = () => {
+    if (!checkoutUrl) return;
+    const opened = window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      navigator.clipboard?.writeText(checkoutUrl).catch(() => undefined);
+      toast.info("Popup blocked. Checkout link copied—paste it in a new browser tab.");
     }
   };
 
@@ -71,10 +80,8 @@ export default function UserPayment() {
           Pay with CHIP
         </Button>
         {checkoutUrl && (
-          <Button asChild variant="secondary" className="w-full">
-            <a href={checkoutUrl} target="_top">
-              Continue to CHIP checkout
-            </a>
+          <Button variant="secondary" className="w-full" onClick={openCheckout}>
+            Continue to CHIP checkout
           </Button>
         )}
         <Button variant="outline" className="w-full" disabled={busy} onClick={() => nav(`/user/orders/${order.id}`)}>
