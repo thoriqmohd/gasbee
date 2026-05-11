@@ -23,8 +23,6 @@ export default function UserPayment() {
     setBusy(true);
     setCheckoutUrl(null);
 
-    const checkoutWindow = window.open("about:blank", "_blank");
-
     try {
       const origin = window.location.origin;
       const { data, error } = await supabase.functions.invoke("chip-create-purchase", {
@@ -38,15 +36,8 @@ export default function UserPayment() {
       if (!data?.url) throw new Error("No checkout URL");
 
       setCheckoutUrl(data.url);
-
-      if (checkoutWindow) {
-        checkoutWindow.opener = null;
-        checkoutWindow.location.href = data.url;
-      } else {
-        toast.info("Popup was blocked. Please open CHIP checkout manually.");
-      }
+      toast.success("CHIP checkout is ready. Tap Continue to open it.");
     } catch (e: any) {
-      checkoutWindow?.close();
       toast.error(e.message ?? "Failed to start payment");
     } finally {
       setBusy(false);
@@ -81,8 +72,8 @@ export default function UserPayment() {
         </Button>
         {checkoutUrl && (
           <Button asChild variant="secondary" className="w-full">
-            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer">
-              Open CHIP checkout
+            <a href={checkoutUrl} target="_top">
+              Continue to CHIP checkout
             </a>
           </Button>
         )}
