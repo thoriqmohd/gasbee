@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, CreditCard } from "lucide-react";
+import { Loader2, CreditCard, Copy } from "lucide-react";
 
 export default function UserPayment() {
   const { id } = useParams();
@@ -46,11 +46,22 @@ export default function UserPayment() {
 
   const openCheckout = () => {
     if (!checkoutUrl) return;
-    const opened = window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+    const opened = window.open(checkoutUrl, "_blank");
     if (!opened) {
       navigator.clipboard?.writeText(checkoutUrl).catch(() => undefined);
       toast.info("Popup blocked. Checkout link copied—paste it in a new browser tab.");
+    } else {
+      opened.opener = null;
     }
+  };
+
+  const copyCheckoutLink = () => {
+    if (!checkoutUrl) return;
+    navigator.clipboard?.writeText(checkoutUrl).then(() => {
+      toast.success("CHIP checkout link copied.");
+    }).catch(() => {
+      toast.info("Copy this link manually and paste it in a new browser tab.");
+    });
   };
 
   if (!order) return <p className="p-4 text-sm text-muted-foreground">Loading…</p>;
@@ -82,6 +93,12 @@ export default function UserPayment() {
         {checkoutUrl && (
           <Button variant="secondary" className="w-full" onClick={openCheckout}>
             Continue to CHIP checkout
+          </Button>
+        )}
+        {checkoutUrl && (
+          <Button variant="outline" className="w-full" onClick={copyCheckoutLink}>
+            <Copy className="mr-2 h-4 w-4" />
+            Copy checkout link
           </Button>
         )}
         <Button variant="outline" className="w-full" disabled={busy} onClick={() => nav(`/user/orders/${order.id}`)}>
