@@ -4,36 +4,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Loader2, CreditCard } from "lucide-react";
 
 export default function UserPayment() {
   const { id } = useParams();
   const nav = useNavigate();
   const [order, setOrder] = useState<any>(null);
-  const [busy, setBusy] = useState<"success" | "fail" | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     supabase.from("orders").select("*").eq("id", id).maybeSingle().then(({ data }) => setOrder(data));
   }, [id]);
 
-  const finish = async (kind: "success" | "fail") => {
+  const payNow = async () => {
     if (!order) return;
-    setBusy(kind);
-    const payment_status = kind === "success" ? "paid" : "failed";
-    const { error } = await supabase.from("orders").update({ payment_status }).eq("id", order.id);
-    if (error) { toast.error(error.message); setBusy(null); return; }
-    await supabase.from("payments").insert({
-      order_id: order.id,
-      gateway: "dummy",
-      gateway_ref: `DUMMY-${Date.now()}`,
-      amount: order.total_amount,
-      status: payment_status,
-    } as any);
-    toast[kind === "success" ? "success" : "error"](
-      kind === "success" ? "Payment successful" : "Payment failed"
-    );
-    nav(`/user/orders/${order.id}`, { replace: true });
+    setBusy(true);
+    try {
+      const origin = window.location.origin;
+      const { data, error } = await supabase.functions.invoke("chip-create-purchase", {
+        body: {
+          order_id: order.id,
+          success_redirect: `${origin}/user/orders/${order.id}?payment=success`,
+          failure_redirect: `${origin}/user/orders/${order.id}?payment=failed`,
+        },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL");
+      window.location.href = data.url;
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to start payment");
+      setBusy(false);
+    }
   };
 
   if (!order) return <p className="p-4 text-sm text-muted-foreground">Loading…</p>;
@@ -41,8 +43,8 @@ export default function UserPayment() {
   return (
     <div className="mx-auto max-w-md space-y-4 p-2">
       <div className="rounded-lg bg-gradient-to-r from-primary to-primary/70 p-4 text-primary-foreground">
-        <div className="text-xs opacity-80">Sandbox Payment Gateway</div>
-        <div className="text-lg font-bold">Billplz (Demo)</div>
+        <div className="text-xs opacity-80">Secure Payment Gateway</div>
+        <div className="text-lg font-bold">CHIP</div>
       </div>
 
       <Card className="space-y-2 p-4">
@@ -58,36 +60,17 @@ export default function UserPayment() {
       </Card>
 
       <Card className="space-y-3 p-4">
-        <div className="text-sm font-semibold">Simulate payment outcome</div>
-        <Button
-          className="w-full"
-          disabled={!!busy}
-          onClick={() => finish("success")}
-        >
-          {busy === "success" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-          Pay successfully
+        <Button className="w-full" disabled={busy} onClick={payNow}>
+          {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+          Pay with CHIP
         </Button>
-        <Button
-          variant="destructive"
-          className="w-full"
-          disabled={!!busy}
-          onClick={() => finish("fail")}
-        >
-          {busy === "fail" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
-          Simulate failure
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full"
-          disabled={!!busy}
-          onClick={() => nav(`/user/orders/${order.id}`)}
-        >
+        <Button variant="outline" className="w-full" disabled={busy} onClick={() => nav(`/user/orders/${order.id}`)}>
           Cancel & back to order
         </Button>
       </Card>
 
       <p className="text-center text-xs text-muted-foreground">
-        Demo gateway — no real payment is processed.
+        You will be redirected to CHIP secure checkout.
       </p>
     </div>
   );
