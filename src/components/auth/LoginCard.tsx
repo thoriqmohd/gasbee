@@ -89,8 +89,14 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
           <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
         </form>
         {showSignup && signupLink && (
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            New here? <a href={signupLink} className="font-medium text-primary hover:underline">Create an account</a>
+          <p className="mt-4 text-center text-sm text-foreground/90">
+            New here?{" "}
+            <a
+              href={signupLink}
+              className="font-semibold text-primary underline underline-offset-4 hover:text-primary/80"
+            >
+              Create an account
+            </a>
           </p>
         )}
       </Card>
