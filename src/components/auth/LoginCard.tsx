@@ -93,7 +93,7 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
             New here?{" "}
             <a
               href={signupLink}
-              className="font-semibold text-primary underline underline-offset-4 hover:text-primary/80"
+              className="font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
             >
               Create an account
             </a>
