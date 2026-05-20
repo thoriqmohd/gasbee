@@ -94,7 +94,7 @@ export default function UserProductDetail() {
         <div className="mb-2 text-sm font-semibold">Order type</div>
         <div className="grid grid-cols-3 gap-2">
           {Number(p.refill_price) > 0 && <Button variant={type === "refill" ? "default" : "outline"} size="sm" onClick={() => setType("refill")}>Refill RM{Number(p.refill_price).toFixed(2)}</Button>}
-          {Number(p.selling_price) > 0 && <Button variant={type === "new" ? "default" : "outline"} size="sm" onClick={() => setType("new")}>New RM{Number(p.selling_price).toFixed(2)}</Button>}
+          {(Number(p.new_cylinder_price) > 0 || Number(p.selling_price) > 0) && <Button variant={type === "new" ? "default" : "outline"} size="sm" onClick={() => setType("new")}>New RM{newCylTotal.toFixed(2)}</Button>}
           {Number(p.deposit_amount) > 0 && <Button variant={type === "deposit" ? "default" : "outline"} size="sm" onClick={() => setType("deposit")}>Deposit RM{Number(p.deposit_amount).toFixed(2)}</Button>}
         </div>
       </div>
