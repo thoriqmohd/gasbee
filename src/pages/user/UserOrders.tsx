@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { Package, Store, Calendar, ChevronRight } from "lucide-react";
+import { Package, Store, Calendar, ChevronRight, Download } from "lucide-react";
+import { downloadReceipt } from "@/lib/receipt";
+import { toast } from "sonner";
 
 export default function UserOrders() {
   const { user } = useAuth();
