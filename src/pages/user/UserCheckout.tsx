@@ -47,8 +47,11 @@ export default function UserCheckout() {
   useEffect(() => {
     const mid = items[0]?.merchant_id;
     if (!mid) { setMerchant(null); return; }
-    supabase.from("merchants").select("id,latitude,longitude,name").eq("id", mid).maybeSingle().then(({ data }) => setMerchant(data));
+    supabase.from("merchants").select("id,latitude,longitude,name,delivery_radius_km").eq("id", mid).maybeSingle().then(({ data }) => setMerchant(data));
   }, [items[0]?.merchant_id]);
+
+  const radiusKm = Number(merchant?.delivery_radius_km ?? 10);
+  const outOfRange = distanceKm != null && distanceKm > radiusKm;
 
   const applyPromo = async () => {
     if (!promoCode.trim()) return;
