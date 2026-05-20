@@ -200,43 +200,59 @@ export default function UserHome() {
         </div>
       </div>
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Nearby merchants</h2>
-          <span className="text-[11px] text-muted-foreground">{merchants.length} nearby</span>
-        </div>
-        <div className="space-y-2.5">
-          {merchants.map((m) => (
-            <Link key={m.id} to={`/user/merchant/${m.id}`} className="block">
-              <div className="glass-category-card group flex items-center gap-3 rounded-2xl p-3">
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/15">
-                  {m.logo_url ? (
-                    <img src={m.logo_url} alt={m.name} className="h-full w-full object-cover" />
-                  ) : (
-                    <Store className="h-6 w-6 text-primary" />
-                  )}
-                  <span className="absolute -right-0 -top-0 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-background" aria-label="Open" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="truncate font-semibold leading-tight">{m.name}</div>
-                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                    <MapPin className="h-3 w-3" />
-                    <span className="truncate">{m.city ?? "—"}</span>
-                    <span className="text-muted-foreground/40">•</span>
-                    <Star className="h-3 w-3 fill-primary text-primary" />
-                    <span className="font-medium text-foreground">{Number(m.rating ?? 0).toFixed(1)}</span>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-active:translate-x-0.5" />
+        {(() => {
+          const visibleMerchants = merchants.filter((m) => {
+            if (!addr?.latitude || !addr?.longitude || m.latitude == null || m.longitude == null) return true;
+            const d = haversineKm(addr.latitude, addr.longitude, m.latitude, m.longitude);
+            return d == null ? true : d <= Number(m.delivery_radius_km ?? 10);
+          });
+          return (
+            <>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold">Nearby merchants</h2>
+                <span className="text-[11px] text-muted-foreground">{visibleMerchants.length} nearby</span>
               </div>
-            </Link>
-          ))}
-          {merchants.length === 0 && (
-            <div className="glass-category-card rounded-2xl p-6 text-center">
-              <Store className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">No merchants nearby yet.</p>
-            </div>
-          )}
-        </div>
+              <div className="space-y-2.5">
+                {visibleMerchants.map((m) => {
+                  const dKm = addr?.latitude && addr?.longitude && m.latitude != null && m.longitude != null
+                    ? haversineKm(addr.latitude, addr.longitude, m.latitude, m.longitude) : null;
+                  return (
+                  <Link key={m.id} to={`/user/merchant/${m.id}`} className="block">
+                    <div className="glass-category-card group flex items-center gap-3 rounded-2xl p-3">
+                      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/15">
+                        {m.logo_url ? (
+                          <img src={m.logo_url} alt={m.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <Store className="h-6 w-6 text-primary" />
+                        )}
+                        <span className="absolute -right-0 -top-0 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-background" aria-label="Open" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-semibold leading-tight">{m.name}</div>
+                        <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          <span className="truncate">{m.city ?? "—"}</span>
+                          <span className="text-muted-foreground/40">•</span>
+                          <Star className="h-3 w-3 fill-primary text-primary" />
+                          <span className="font-medium text-foreground">{Number(m.rating ?? 0).toFixed(1)}</span>
+                          {dKm != null && (<><span className="text-muted-foreground/40">•</span><span>{dKm.toFixed(1)} km</span></>)}
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-active:translate-x-0.5" />
+                    </div>
+                  </Link>
+                  );
+                })}
+                {visibleMerchants.length === 0 && (
+                  <div className="glass-category-card rounded-2xl p-6 text-center">
+                    <Store className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">No merchants deliver to your area yet.</p>
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
       </div>
     </div>
   );
