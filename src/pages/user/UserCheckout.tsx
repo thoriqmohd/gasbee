@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { MapPin } from "lucide-react";
 import { calcDeliveryFee, haversineKm, DEFAULT_FEE_CONFIG, type FeeConfig } from "@/lib/delivery";
@@ -27,6 +28,7 @@ export default function UserCheckout() {
   const [deliveryType, setDeliveryType] = useState<"immediate" | "scheduled">("immediate");
   const [scheduledAt, setScheduledAt] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [feeConfig, setFeeConfig] = useState<FeeConfig>(DEFAULT_FEE_CONFIG);
 
   useEffect(() => {
@@ -261,9 +263,31 @@ export default function UserCheckout() {
         </Card>
       )}
 
-      <Button className="w-full" onClick={placeOrder} disabled={busy || items.length === 0 || !addrId || outOfRange}>
+      <Button className="w-full" onClick={() => setConfirmOpen(true)} disabled={busy || items.length === 0 || !addrId || outOfRange}>
         {busy ? "Placing…" : `Place order · RM ${total.toFixed(2)}`}
       </Button>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ready to place your order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please confirm your delivery details, payment method and total amount before we process your order.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-1 rounded-md border bg-muted/30 p-3 text-sm">
+            {addr && (
+              <div><span className="text-muted-foreground">Deliver to: </span><span className="font-medium">{addr.label ?? "Address"} — {addr.address_line1}, {addr.postcode} {addr.city}</span></div>
+            )}
+            <div><span className="text-muted-foreground">Payment: </span><span className="font-medium uppercase">{paymentMethod}</span></div>
+            <div><span className="text-muted-foreground">Total: </span><span className="font-bold text-primary">RM {total.toFixed(2)}</span></div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Review again</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmOpen(false); placeOrder(); }}>Confirm & place order</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
