@@ -30,6 +30,8 @@ export default function UserCheckout() {
   const [busy, setBusy] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [feeConfig, setFeeConfig] = useState<FeeConfig>(DEFAULT_FEE_CONFIG);
+  const [credits, setCredits] = useState<any[]>([]);
+  const [useCredit, setUseCredit] = useState(true);
 
   useEffect(() => {
     supabase.from("app_settings").select("*").in("key", [
