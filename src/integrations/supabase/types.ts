@@ -751,6 +751,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          is_coming_soon: boolean
           low_stock_threshold: number
           merchant_id: string
           name: string
@@ -770,6 +771,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_coming_soon?: boolean
           low_stock_threshold?: number
           merchant_id: string
           name: string
@@ -789,6 +791,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_coming_soon?: boolean
           low_stock_threshold?: number
           merchant_id?: string
           name?: string
