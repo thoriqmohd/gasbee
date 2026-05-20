@@ -36,6 +36,7 @@ import Admins from "@/pages/admin/Admins";
 import UserLayout from "@/components/user/UserLayout";
 import UserLogin from "@/pages/user/UserLogin";
 import UserRegister from "@/pages/user/UserRegister";
+import UserResetPassword from "@/pages/user/UserResetPassword";
 import UserHome from "@/pages/user/UserHome";
 import UserProducts from "@/pages/user/UserProducts";
 import UserMerchants from "@/pages/user/UserMerchants";
