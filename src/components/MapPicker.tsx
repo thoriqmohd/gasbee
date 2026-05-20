@@ -58,12 +58,22 @@ export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update marker when prop changes externally (e.g. GPS update)
+  // Update marker AND recenter map when prop changes externally (e.g. GPS update)
   useEffect(() => {
     if (!mapRef.current || lat == null || lng == null) return;
     if (!markerRef.current) {
       markerRef.current = L.marker([lat, lng], { icon, draggable: !readOnly }).addTo(mapRef.current);
-    } else markerRef.current.setLatLng([lat, lng]);
+      if (!readOnly) {
+        markerRef.current.on("dragend", (e) => {
+          const p = (e.target as L.Marker).getLatLng();
+          onChange?.(p.lat, p.lng);
+        });
+      }
+    } else {
+      markerRef.current.setLatLng([lat, lng]);
+    }
+    const currentZoom = mapRef.current.getZoom();
+    mapRef.current.setView([lat, lng], Math.max(currentZoom, 16), { animate: true });
   }, [lat, lng, readOnly]);
 
   // Extra markers
