@@ -20,11 +20,10 @@ export default function MerchantProfile() {
   if (!form) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   const useMyLocation = () => {
-    if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
-    navigator.geolocation.getCurrentPosition(
-      (p) => setForm({ ...form, latitude: p.coords.latitude, longitude: p.coords.longitude }),
-      () => toast.error("Could not get location")
-    );
+    getMyLocation({
+      onSuccess: (latitude, longitude) =>
+        setForm({ ...form, latitude, longitude }),
+    });
   };
 
   const save = async () => {
