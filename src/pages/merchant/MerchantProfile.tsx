@@ -27,10 +27,13 @@ export default function MerchantProfile() {
   };
 
   const save = async () => {
+    const radius = Number(form.delivery_radius_km);
+    if (!Number.isFinite(radius) || radius <= 0) { toast.error("Delivery radius must be greater than 0 km"); return; }
     const { error } = await supabase.from("merchants").update({
       name: form.name, description: form.description, phone: form.phone, email: form.email,
       address: form.address, city: form.city, state: form.state, postcode: form.postcode, logo_url: form.logo_url,
       latitude: form.latitude, longitude: form.longitude,
+      delivery_radius_km: radius,
     }).eq("id", form.id);
     if (error) toast.error(error.message); else { toast.success("Saved"); refresh(); }
   };
