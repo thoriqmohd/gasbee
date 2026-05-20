@@ -9,6 +9,7 @@ import { Phone, Navigation, MapPin, Package, Home } from "lucide-react";
 import { ImageUpload } from "@/components/ImageUpload";
 
 const FLOW: Record<string, string> = {
+  assigned: "arrived_at_merchant",
   rider_accepted: "arrived_at_merchant",
   arrived_at_merchant: "picked_up",
   picked_up: "on_delivery",
@@ -16,7 +17,7 @@ const FLOW: Record<string, string> = {
   arrived_at_customer: "delivered",
 };
 
-const PRE_PICKUP = new Set(["rider_accepted", "arrived_at_merchant"]);
+const PRE_PICKUP = new Set(["assigned", "rider_accepted", "arrived_at_merchant"]);
 
 export default function RiderActive() {
   const { user } = useAuth();
