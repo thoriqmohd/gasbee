@@ -17,13 +17,15 @@ interface Props {
   height?: number;
   readOnly?: boolean;
   markers?: { lat: number; lng: number; label?: string; color?: string }[];
+  radiusKm?: number | null;
 }
 
-export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers }: Props) {
+export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers, radiusKm }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const extraRef = useRef<L.Marker[]>([]);
+  const circleRef = useRef<L.Circle | null>(null);
 
   useEffect(() => {
     if (!ref.current || mapRef.current) return;
@@ -80,6 +82,21 @@ export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers 
     (markers ?? []).forEach((m) => all.push([m.lat, m.lng]));
     if (all.length > 1) mapRef.current.fitBounds(L.latLngBounds(all as any), { padding: [40, 40] });
   }, [markers, lat, lng]);
+
+  // Coverage radius circle
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (circleRef.current) { circleRef.current.remove(); circleRef.current = null; }
+    if (lat == null || lng == null || !radiusKm || radiusKm <= 0) return;
+    circleRef.current = L.circle([lat, lng], {
+      radius: radiusKm * 1000,
+      color: "#2563eb",
+      weight: 2,
+      fillColor: "#3b82f6",
+      fillOpacity: 0.15,
+    }).addTo(mapRef.current);
+    mapRef.current.fitBounds(circleRef.current.getBounds(), { padding: [20, 20] });
+  }, [lat, lng, radiusKm]);
 
   return <div ref={ref} style={{ height, width: "100%" }} className="rounded-md border" />;
 }

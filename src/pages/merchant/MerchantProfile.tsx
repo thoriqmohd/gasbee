@@ -63,7 +63,7 @@ export default function MerchantProfile() {
             <Label>Pickup location (used for delivery fee distance)</Label>
             <Button type="button" size="sm" variant="outline" onClick={useMyLocation}><Crosshair className="mr-1 h-3 w-3" />Use current</Button>
           </div>
-          <MapPicker lat={form.latitude} lng={form.longitude} onChange={(la, ln) => setForm({ ...form, latitude: la, longitude: ln })} height={300} />
+          <MapPicker lat={form.latitude} lng={form.longitude} onChange={(la, ln) => setForm({ ...form, latitude: la, longitude: ln })} height={300} radiusKm={Number(form.delivery_radius_km) || 10} />
           {form.latitude != null && <p className="mt-1 text-[11px] text-muted-foreground">Pinned: {Number(form.latitude).toFixed(5)}, {Number(form.longitude).toFixed(5)}</p>}
         </div>
         <div>
