@@ -233,12 +233,24 @@ export default function UserCheckout() {
       <Card className="space-y-1 p-3 text-sm">
         <div className="flex justify-between"><span>Subtotal</span><span>RM {subtotal.toFixed(2)}</span></div>
         <div className="flex justify-between">
-          <span>Delivery {distanceKm != null && <span className="text-xs text-muted-foreground">({distanceKm.toFixed(1)} km · {totalKg} kg)</span>}</span>
+          <span>Service fee</span>
+          <span>RM {serviceFee.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Delivery fee {distanceKm != null && <span className="text-xs text-muted-foreground">({distanceKm.toFixed(1)} km)</span>}</span>
           <span>RM {deliveryFee.toFixed(2)}</span>
         </div>
         {subtotal > 0 && (
-          <div className="text-[10px] text-muted-foreground">Base RM{DELIVERY_RATE.BASE} + RM{DELIVERY_RATE.PER_KM}/km + RM{DELIVERY_RATE.PER_KG}/kg{distanceKm == null && " · estimated, set address coordinates for accurate fee"}</div>
+          <div className="text-[10px] text-muted-foreground">
+            RM{feeConfig.deliveryBaseFee.toFixed(2)} for first {feeConfig.deliveryBaseKm} km
+            {feeCalc.extraKm > 0 && <> · +{feeCalc.extraKm} km × RM{feeConfig.deliveryPerKm.toFixed(2)} = RM{feeCalc.breakdown.extra.toFixed(2)}</>}
+            {distanceKm == null && " · estimated, set address coordinates for accurate fee"}
+          </div>
         )}
+        <div className="flex justify-between">
+          <span>Processing fee</span>
+          <span>RM {processingFee.toFixed(2)}</span>
+        </div>
         {discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {discount.toFixed(2)}</span></div>}
         <div className="mt-1 flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {total.toFixed(2)}</span></div>
       </Card>
