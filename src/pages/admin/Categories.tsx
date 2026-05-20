@@ -31,7 +31,11 @@ function EditCategoryDialog({ row, onDone }: { row: any; onDone: () => void }) {
         <div className="space-y-3">
           <div><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
           <div><Label>Slug</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
-          <div><Label>Icon (emoji or url)</Label><Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} /></div>
+          <div><Label>Icon (emoji or url)</Label><Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="🔥 or https://…" /></div>
+          <div>
+            <Label>Or upload image</Label>
+            <ImageUpload bucket="category-icons" pathPrefix="icons" value={form.icon?.startsWith("http") ? form.icon : null} onChange={(url) => setForm({ ...form, icon: url ?? "" })} label="Upload icon" />
+          </div>
           <div><Label>Sort order</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} /></div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active
