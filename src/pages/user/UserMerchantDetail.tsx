@@ -1,22 +1,34 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Store, Flame, MapPin, Phone, AlertTriangle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Store, Flame, MapPin, Phone, AlertTriangle, X } from "lucide-react";
 import { haversineKm } from "@/lib/delivery";
 
 export default function UserMerchantDetail() {
   const { id } = useParams();
+  const [params, setParams] = useSearchParams();
+  const categoryId = params.get("category");
   const [m, setM] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [addr, setAddr] = useState<any>(null);
+  const [category, setCategory] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
     supabase.from("merchants").select("*").eq("id", id).maybeSingle().then(({ data }) => setM(data));
-    supabase.from("products").select("*").eq("merchant_id", id).eq("is_active", true).then(({ data }) => setProducts(data ?? []));
+    let qb = supabase.from("products").select("*").eq("merchant_id", id).eq("is_active", true);
+    if (categoryId) qb = qb.eq("category_id", categoryId);
+    qb.then(({ data }) => setProducts(data ?? []));
     supabase.from("addresses").select("*").eq("is_default", true).maybeSingle().then(({ data }) => setAddr(data));
-  }, [id]);
+    if (categoryId) {
+      supabase.from("categories").select("*").eq("id", categoryId).maybeSingle().then(({ data }) => setCategory(data));
+    } else {
+      setCategory(null);
+    }
+  }, [id, categoryId]);
+
 
   if (!m) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
