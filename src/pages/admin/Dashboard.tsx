@@ -79,10 +79,10 @@ export default function Dashboard() {
         ) : (
           <div className="space-y-2">
             {topMerchants.map((m) => (
-              <div key={m.id} className="flex items-center justify-between rounded-md border p-3">
+              <Link key={m.id} to={`/merchants/${m.id}`} className="flex items-center justify-between rounded-md border p-3 transition hover:bg-accent/40">
                 <div className="font-medium">{m.name}</div>
                 <div className="text-sm text-muted-foreground">{m.total_orders} orders · ★ {Number(m.rating ?? 0).toFixed(1)}</div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
