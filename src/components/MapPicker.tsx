@@ -90,10 +90,10 @@ export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers,
     if (lat == null || lng == null || !radiusKm || radiusKm <= 0) return;
     circleRef.current = L.circle([lat, lng], {
       radius: radiusKm * 1000,
-      color: "hsl(var(--primary))",
+      color: "#2563eb",
       weight: 2,
-      fillColor: "hsl(var(--primary))",
-      fillOpacity: 0.12,
+      fillColor: "#3b82f6",
+      fillOpacity: 0.15,
     }).addTo(mapRef.current);
     mapRef.current.fitBounds(circleRef.current.getBounds(), { padding: [20, 20] });
   }, [lat, lng, radiusKm]);
