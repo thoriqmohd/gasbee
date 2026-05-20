@@ -68,7 +68,7 @@ export default function UserHome() {
       setSearching(false);
     }, 250);
     return () => clearTimeout(t);
-  }, [search]);
+  }, [search, addr?.latitude, addr?.longitude]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
