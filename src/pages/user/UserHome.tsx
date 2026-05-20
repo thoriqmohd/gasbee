@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Package, Store, Star, ChevronRight } from "lucide-react";
+import { MapPin, Search, Package, Store, Star, ChevronRight, Flame, X } from "lucide-react";
 import categoryRefill from "@/assets/category-refill.png";
 import categoryNew from "@/assets/category-new.png";
 import categoryAccessories from "@/assets/category-accessories.png";
