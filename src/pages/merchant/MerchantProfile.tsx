@@ -66,6 +66,19 @@ export default function MerchantProfile() {
           <MapPicker lat={form.latitude} lng={form.longitude} onChange={(la, ln) => setForm({ ...form, latitude: la, longitude: ln })} height={300} />
           {form.latitude != null && <p className="mt-1 text-[11px] text-muted-foreground">Pinned: {Number(form.latitude).toFixed(5)}, {Number(form.longitude).toFixed(5)}</p>}
         </div>
+        <div>
+          <Label>Delivery radius (km)</Label>
+          <Input
+            type="number"
+            min={1}
+            step={0.5}
+            value={form.delivery_radius_km ?? 10}
+            onChange={(e) => setForm({ ...form, delivery_radius_km: e.target.value })}
+          />
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Customers outside this distance from your pickup location won't be able to order from your shop.
+          </p>
+        </div>
         <Button onClick={save}>Save</Button>
       </Card>
     </div>
