@@ -85,7 +85,7 @@ export default function Categories() {
         </Dialog>
       }
       columns={[
-        { key: "icon", label: "Icon", render: (r: any) => r.icon ? <span className="text-lg">{r.icon}</span> : "—" },
+        { key: "icon", label: "Icon", render: (r: any) => r.icon ? (r.icon.startsWith("http") ? <img src={r.icon} alt="" className="h-8 w-8 rounded object-cover" /> : <span className="text-lg">{r.icon}</span>) : "—" },
         { key: "name", label: "Name" },
         { key: "slug", label: "Slug" },
         { key: "sort_order", label: "Order" },
