@@ -125,9 +125,28 @@ export default function MerchantOrderDetail() {
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        {o.status === "pending" && <Button variant="destructive" onClick={reject}>Reject</Button>}
+        {o.status === "pending" && <Button variant="destructive" onClick={() => setRejectOpen(true)}>Reject</Button>}
         {NEXT[o.status] && <Button onClick={() => updateStatus(NEXT[o.status])}>Mark as {NEXT[o.status].replace(/_/g, " ")}</Button>}
       </div>
+
+      {o.failure_reason && (o.status === "cancelled" || o.rejected_at) && (
+        <Card className="p-4 border-destructive/40">
+          <h2 className="mb-1 font-semibold text-destructive">Rejection reason</h2>
+          <p className="text-sm">{o.failure_reason}</p>
+        </Card>
+      )}
+
+      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Reject order</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Please provide a reason for rejecting this order. The customer will see this note.</p>
+          <Textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Out of stock, outside delivery area…" rows={4} />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRejectOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={reject}>Confirm reject</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
