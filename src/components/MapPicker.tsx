@@ -83,5 +83,20 @@ export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers,
     if (all.length > 1) mapRef.current.fitBounds(L.latLngBounds(all as any), { padding: [40, 40] });
   }, [markers, lat, lng]);
 
+  // Coverage radius circle
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (circleRef.current) { circleRef.current.remove(); circleRef.current = null; }
+    if (lat == null || lng == null || !radiusKm || radiusKm <= 0) return;
+    circleRef.current = L.circle([lat, lng], {
+      radius: radiusKm * 1000,
+      color: "hsl(var(--primary))",
+      weight: 2,
+      fillColor: "hsl(var(--primary))",
+      fillOpacity: 0.12,
+    }).addTo(mapRef.current);
+    mapRef.current.fitBounds(circleRef.current.getBounds(), { padding: [20, 20] });
+  }, [lat, lng, radiusKm]);
+
   return <div ref={ref} style={{ height, width: "100%" }} className="rounded-md border" />;
 }
