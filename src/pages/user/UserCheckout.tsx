@@ -210,7 +210,13 @@ export default function UserCheckout() {
         <div className="mt-1 flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {total.toFixed(2)}</span></div>
       </Card>
 
-      <Button className="w-full" onClick={placeOrder} disabled={busy || items.length === 0 || !addrId}>
+      {outOfRange && (
+        <Card className="border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+          {merchant?.name ?? "This merchant"} only delivers within {radiusKm} km. Your selected address is {distanceKm!.toFixed(1)} km away — please choose a different address or merchant.
+        </Card>
+      )}
+
+      <Button className="w-full" onClick={placeOrder} disabled={busy || items.length === 0 || !addrId || outOfRange}>
         {busy ? "Placing…" : `Place order · RM ${total.toFixed(2)}`}
       </Button>
     </div>
