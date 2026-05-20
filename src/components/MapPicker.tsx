@@ -17,13 +17,15 @@ interface Props {
   height?: number;
   readOnly?: boolean;
   markers?: { lat: number; lng: number; label?: string; color?: string }[];
+  radiusKm?: number | null;
 }
 
-export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers }: Props) {
+export function MapPicker({ lat, lng, onChange, height = 260, readOnly, markers, radiusKm }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const extraRef = useRef<L.Marker[]>([]);
+  const circleRef = useRef<L.Circle | null>(null);
 
   useEffect(() => {
     if (!ref.current || mapRef.current) return;
