@@ -30,6 +30,8 @@ export default function UserCheckout() {
   const [busy, setBusy] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [feeConfig, setFeeConfig] = useState<FeeConfig>(DEFAULT_FEE_CONFIG);
+  const [credits, setCredits] = useState<any[]>([]);
+  const [useCredit, setUseCredit] = useState(true);
 
   useEffect(() => {
     supabase.from("app_settings").select("*").in("key", [
@@ -57,7 +59,13 @@ export default function UserCheckout() {
   const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
   const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
   const processingFee = subtotal > 0 ? feeConfig.processingFee : 0;
-  const total = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee - discount);
+  // Filter credits: must be from a DIFFERENT merchant than the current cart
+  const cartMerchantId = items[0]?.merchant_id;
+  const eligibleCredit = credits.find((c) => c.source_merchant_id !== cartMerchantId);
+  const grossTotal = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee - discount);
+  const creditApplied = useCredit && eligibleCredit ? Math.min(Number(eligibleCredit.amount), grossTotal) : 0;
+  const creditLeftover = useCredit && eligibleCredit ? Math.max(0, Number(eligibleCredit.amount) - creditApplied) : 0;
+  const total = Math.max(0, grossTotal - creditApplied);
 
   useEffect(() => {
     if (!user) return;
@@ -65,6 +73,14 @@ export default function UserCheckout() {
       setAddresses(data ?? []);
       const def = data?.find((a) => a.is_default) ?? data?.[0];
       if (def) setAddrId(def.id);
+    });
+    // Load active credits with source merchant id
+    supabase.from("order_credits").select("*").eq("user_id", user.id).eq("status", "active").then(async ({ data }) => {
+      if (!data || data.length === 0) { setCredits([]); return; }
+      const ids = data.map((c: any) => c.source_order_id);
+      const { data: ord } = await supabase.from("orders").select("id,merchant_id").in("id", ids);
+      const m = new Map((ord ?? []).map((o: any) => [o.id, o.merchant_id]));
+      setCredits(data.map((c: any) => ({ ...c, source_merchant_id: m.get(c.source_order_id) })));
     });
   }, [user]);
 
@@ -110,14 +126,14 @@ export default function UserCheckout() {
       delivery_fee: deliveryFee,
       service_fee: serviceFee,
       processing_fee: processingFee,
-      discount,
+      discount: discount + creditApplied,
       total_amount: total,
       payment_method: paymentMethod,
-      payment_status: "pending",
+      payment_status: total === 0 ? "paid" : "pending",
       status: "pending",
       delivery_type: deliveryType,
       scheduled_at: deliveryType === "scheduled" ? scheduledAt : null,
-      notes,
+      notes: [notes, creditApplied > 0 ? `Store credit applied: RM ${creditApplied.toFixed(2)} (from order ${eligibleCredit?.source_order_id?.slice(0,8)})` : null].filter(Boolean).join(" · "),
       promotion_code: promoCode || null,
     }).select().single();
 
@@ -136,10 +152,33 @@ export default function UserCheckout() {
     }));
     await supabase.from("order_items").insert(orderItems);
 
+    // Mark credit as used + create leftover refund if any
+    if (creditApplied > 0 && eligibleCredit) {
+      await supabase.from("order_credits").update({
+        status: "used",
+        used_order_id: order.id,
+        leftover_amount: creditLeftover,
+        notes: creditLeftover > 0 ? `Leftover RM ${creditLeftover.toFixed(2)} to be refunded by admin` : null,
+      }).eq("id", eligibleCredit.id);
+
+      if (creditLeftover > 0) {
+        await supabase.from("refunds").insert({
+          order_id: eligibleCredit.source_order_id,
+          requester_id: user.id,
+          reason: `Leftover credit refund (used RM ${creditApplied.toFixed(2)} on new order ${order.code})`,
+          reason_category: "credit_leftover",
+          amount: creditLeftover,
+          refund_amount: creditLeftover,
+          status: "requested",
+        });
+        toast.info(`Admin will refund the remaining RM ${creditLeftover.toFixed(2)}.`);
+      }
+    }
+
     clear();
 
     // Online payment via dummy gateway
-    if (paymentMethod !== "cod") {
+    if (total > 0 && paymentMethod !== "cod") {
       nav(`/user/payment/${order.id}`);
       return;
     }
@@ -254,6 +293,22 @@ export default function UserCheckout() {
           <span>RM {processingFee.toFixed(2)}</span>
         </div>
         {discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {discount.toFixed(2)}</span></div>}
+        {eligibleCredit && (
+          <div className="mt-1 rounded-md border border-primary/30 bg-primary/5 p-2">
+            <label className="flex items-start gap-2 text-xs">
+              <input type="checkbox" className="mt-0.5" checked={useCredit} onChange={(e) => setUseCredit(e.target.checked)} />
+              <span className="flex-1">
+                Apply store credit <span className="font-semibold">RM {Number(eligibleCredit.amount).toFixed(2)}</span> from rejected order.
+                {creditApplied > 0 && creditLeftover > 0 && (
+                  <span className="mt-1 block text-muted-foreground">Leftover RM {creditLeftover.toFixed(2)} will be refunded by admin.</span>
+                )}
+              </span>
+            </label>
+            {creditApplied > 0 && (
+              <div className="mt-1 flex justify-between font-medium text-primary"><span>Credit applied</span><span>- RM {creditApplied.toFixed(2)}</span></div>
+            )}
+          </div>
+        )}
         <div className="mt-1 flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {total.toFixed(2)}</span></div>
       </Card>
 
