@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,17 +11,19 @@ interface Stats {
   pending: number; completed: number; cancelled: number; refunds: number;
 }
 
-const Stat = ({ label, value, icon: Icon, hint }: { label: string; value: string|number; icon: any; hint?: string }) => (
-  <Card className="p-5">
-    <div className="flex items-start justify-between">
-      <div>
-        <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="mt-2 text-2xl font-bold">{value}</div>
-        {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
+const Stat = ({ label, value, icon: Icon, hint, to }: { label: string; value: string|number; icon: any; hint?: string; to: string }) => (
+  <Link to={to} className="block">
+    <Card className="p-5 transition hover:bg-accent/40 hover:shadow-md cursor-pointer">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+          <div className="mt-2 text-2xl font-bold">{value}</div>
+          {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
+        </div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground"><Icon className="h-5 w-5" /></div>
       </div>
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground"><Icon className="h-5 w-5" /></div>
-    </div>
-  </Card>
+    </Card>
+  </Link>
 );
 
 export default function Dashboard() {
