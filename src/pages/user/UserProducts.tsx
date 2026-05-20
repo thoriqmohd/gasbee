@@ -8,8 +8,13 @@ import { Link, useSearchParams } from "react-router-dom";
 export default function UserProducts() {
   const [params] = useSearchParams();
   const cat = params.get("category");
+  const initialQ = params.get("q") ?? "";
   const [items, setItems] = useState<any[]>([]);
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQ);
+
+  useEffect(() => {
+    setQ(initialQ);
+  }, [initialQ]);
 
   useEffect(() => {
     (async () => {
