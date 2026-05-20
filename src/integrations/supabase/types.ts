@@ -499,6 +499,45 @@ export type Database = {
         }
         Relationships: []
       }
+      order_credits: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          leftover_amount: number
+          notes: string | null
+          source_order_id: string
+          status: string
+          updated_at: string
+          used_order_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          leftover_amount?: number
+          notes?: string | null
+          source_order_id: string
+          status?: string
+          updated_at?: string
+          used_order_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          leftover_amount?: number
+          notes?: string | null
+          source_order_id?: string
+          status?: string
+          updated_at?: string
+          used_order_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
