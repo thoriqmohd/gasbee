@@ -133,7 +133,7 @@ export default function UserCheckout() {
       processing_fee: processingFee,
       discount: discount + creditApplied,
       total_amount: total,
-      payment_method: total === 0 ? "credit" as any : paymentMethod,
+      payment_method: paymentMethod,
       payment_status: total === 0 ? "paid" : "pending",
       status: "pending",
       delivery_type: deliveryType,
