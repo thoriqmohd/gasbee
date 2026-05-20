@@ -179,12 +179,12 @@ export default function UserCheckout() {
           {items.map((it) => (
             <div key={`${it.product_id}-${it.type}`} className="p-3 text-sm">
               <div className="flex justify-between">
-                <span>{it.name} × {it.quantity}{it.type === "new" && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">New</span>}</span>
+                <span>{it.name} × {it.quantity}</span>
                 <span>RM {(it.unit_price * it.quantity).toFixed(2)}</span>
               </div>
               {it.type === "new" && (it.new_cylinder_price != null || it.refill_price != null) && (
                 <div className="mt-1 space-y-0.5 pl-3 text-xs text-muted-foreground">
-                  <div className="flex justify-between"><span>· New cylinder</span><span>RM {(Number(it.new_cylinder_price ?? 0) * it.quantity).toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span>· New cylinder (tong)</span><span>RM {(Number(it.new_cylinder_price ?? 0) * it.quantity).toFixed(2)}</span></div>
                   <div className="flex justify-between"><span>· Refill (gas)</span><span>RM {(Number(it.refill_price ?? 0) * it.quantity).toFixed(2)}</span></div>
                 </div>
               )}
