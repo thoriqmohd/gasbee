@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, Briefcase, Truck, Bell, User, LogOut } from "lucide-react";
+import { Home, Truck, Bell, User, LogOut } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,6 @@ import { RiderJobAlert } from "@/components/merchant/RiderJobAlert";
 
 const tabs = [
   { to: "/merchant/rider-dashboard", label: "Home", icon: Home },
-  { to: "/merchant/rider/jobs", label: "Jobs", icon: Briefcase },
   { to: "/merchant/rider/active-delivery", label: "Active", icon: Truck },
   { to: "/merchant/rider/notifications", label: "Alerts", icon: Bell },
   { to: "/merchant/rider/profile", label: "Profile", icon: User },
