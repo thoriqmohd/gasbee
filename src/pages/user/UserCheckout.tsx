@@ -298,6 +298,22 @@ export default function UserCheckout() {
           <span>RM {processingFee.toFixed(2)}</span>
         </div>
         {discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {discount.toFixed(2)}</span></div>}
+        {eligibleCredit && (
+          <div className="mt-1 rounded-md border border-primary/30 bg-primary/5 p-2">
+            <label className="flex items-start gap-2 text-xs">
+              <input type="checkbox" className="mt-0.5" checked={useCredit} onChange={(e) => setUseCredit(e.target.checked)} />
+              <span className="flex-1">
+                Apply store credit <span className="font-semibold">RM {Number(eligibleCredit.amount).toFixed(2)}</span> from rejected order.
+                {creditApplied > 0 && creditLeftover > 0 && (
+                  <span className="mt-1 block text-muted-foreground">Leftover RM {creditLeftover.toFixed(2)} will be refunded by admin.</span>
+                )}
+              </span>
+            </label>
+            {creditApplied > 0 && (
+              <div className="mt-1 flex justify-between font-medium text-primary"><span>Credit applied</span><span>- RM {creditApplied.toFixed(2)}</span></div>
+            )}
+          </div>
+        )}
         <div className="mt-1 flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {total.toFixed(2)}</span></div>
       </Card>
 
