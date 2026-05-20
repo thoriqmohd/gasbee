@@ -123,7 +123,7 @@ export default function UserProductDetail() {
           <div className="text-xs text-muted-foreground">Total</div>
           <div className="text-lg font-bold text-primary">RM {(price * qty).toFixed(2)}</div>
         </div>
-        <Button onClick={addToCart} disabled={price <= 0 || blockedIndustrial}>Add to cart</Button>
+        <Button onClick={addToCart} disabled={price <= 0 || blockedIndustrial || p.is_coming_soon}>{p.is_coming_soon ? "Coming Soon" : "Add to cart"}</Button>
       </div>
     </div>
   );
