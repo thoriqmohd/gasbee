@@ -74,6 +74,19 @@ export default function UserCheckout() {
       const def = data?.find((a) => a.is_default) ?? data?.[0];
       if (def) setAddrId(def.id);
     });
+    // Load active credits with source merchant id
+    supabase.from("order_credits").select("*, orders!order_credits_source_order_id_fkey(merchant_id)")
+      .eq("user_id", user.id).eq("status", "active").then(async ({ data }) => {
+        // Fallback if FK not set in PostgREST: fetch separately
+        if (data && data.length > 0 && !(data as any)[0].orders) {
+          const ids = data.map((c: any) => c.source_order_id);
+          const { data: ord } = await supabase.from("orders").select("id,merchant_id").in("id", ids);
+          const m = new Map((ord ?? []).map((o: any) => [o.id, o.merchant_id]));
+          setCredits(data.map((c: any) => ({ ...c, source_merchant_id: m.get(c.source_order_id) })));
+        } else {
+          setCredits((data ?? []).map((c: any) => ({ ...c, source_merchant_id: c.orders?.merchant_id })));
+        }
+      });
   }, [user]);
 
   useEffect(() => {
