@@ -43,11 +43,10 @@ export default function UserAddresses() {
   useEffect(load, [user]);
 
   const useMyLocation = () => {
-    if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
-    navigator.geolocation.getCurrentPosition(
-      (p) => setForm((f: any) => ({ ...f, latitude: p.coords.latitude, longitude: p.coords.longitude })),
-      () => toast.error("Could not get location")
-    );
+    getMyLocation({
+      onSuccess: (latitude, longitude) =>
+        setForm((f: any) => ({ ...f, latitude, longitude })),
+    });
   };
 
   const openNew = () => { setForm(empty); setOpen(true); };
