@@ -63,14 +63,14 @@ export default function Dashboard() {
         <p className="text-sm text-muted-foreground">Live overview of Gasbee operations.</p>
       </div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Stat label="Total Orders" value={s?.totalOrders ?? "—"} icon={ShoppingBag} />
-        <Stat label="Revenue" value={s ? fmt(s.revenue) : "—"} icon={DollarSign} />
-        <Stat label="Active Merchants" value={s?.activeMerchants ?? "—"} icon={Store} />
-        <Stat label="Active Riders" value={s?.activeRiders ?? "—"} icon={Bike} />
-        <Stat label="Pending Orders" value={s?.pending ?? "—"} icon={Clock} />
-        <Stat label="Completed" value={s?.completed ?? "—"} icon={CheckCircle2} />
-        <Stat label="Cancelled" value={s?.cancelled ?? "—"} icon={XCircle} />
-        <Stat label="Refund Requests" value={s?.refunds ?? "—"} icon={RotateCcw} />
+        <Stat label="Total Orders" value={s?.totalOrders ?? "—"} icon={ShoppingBag} to="/orders" />
+        <Stat label="Revenue" value={s ? fmt(s.revenue) : "—"} icon={DollarSign} to="/payments" />
+        <Stat label="Active Merchants" value={s?.activeMerchants ?? "—"} icon={Store} to="/merchants" />
+        <Stat label="Active Riders" value={s?.activeRiders ?? "—"} icon={Bike} to="/riders" />
+        <Stat label="Pending Orders" value={s?.pending ?? "—"} icon={Clock} to="/orders?status=pending" />
+        <Stat label="Completed" value={s?.completed ?? "—"} icon={CheckCircle2} to="/orders?status=delivered" />
+        <Stat label="Cancelled" value={s?.cancelled ?? "—"} icon={XCircle} to="/orders?status=cancelled" />
+        <Stat label="Refund Requests" value={s?.refunds ?? "—"} icon={RotateCcw} to="/refunds" />
       </div>
       <Card className="p-5">
         <h2 className="mb-4 text-lg font-semibold">Top Merchants</h2>
