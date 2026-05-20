@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { MapPin } from "lucide-react";
-import { calcDeliveryFee, haversineKm, DELIVERY_RATE } from "@/lib/delivery";
+import { calcDeliveryFee, haversineKm, DEFAULT_FEE_CONFIG, type FeeConfig } from "@/lib/delivery";
 
 export default function UserCheckout() {
   const { user } = useAuth();
@@ -27,13 +27,35 @@ export default function UserCheckout() {
   const [deliveryType, setDeliveryType] = useState<"immediate" | "scheduled">("immediate");
   const [scheduledAt, setScheduledAt] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  const [feeConfig, setFeeConfig] = useState<FeeConfig>(DEFAULT_FEE_CONFIG);
 
-  const totalKg = items.reduce((a, it: any) => a + Number(it.cylinder_size_kg ?? 0) * it.quantity, 0);
+  useEffect(() => {
+    supabase.from("app_settings").select("*").in("key", [
+      "service_fee", "delivery_base_fee", "delivery_base_km", "delivery_per_km", "processing_fee",
+    ]).then(({ data }) => {
+      const m: Record<string, number> = {};
+      (data ?? []).forEach((r: any) => {
+        const raw = typeof r.value === "string" ? r.value : (r.value?.value ?? r.value);
+        const n = Number(raw);
+        if (Number.isFinite(n)) m[r.key] = n;
+      });
+      setFeeConfig({
+        serviceFee: m.service_fee ?? DEFAULT_FEE_CONFIG.serviceFee,
+        deliveryBaseFee: m.delivery_base_fee ?? DEFAULT_FEE_CONFIG.deliveryBaseFee,
+        deliveryBaseKm: m.delivery_base_km ?? DEFAULT_FEE_CONFIG.deliveryBaseKm,
+        deliveryPerKm: m.delivery_per_km ?? DEFAULT_FEE_CONFIG.deliveryPerKm,
+        processingFee: m.processing_fee ?? DEFAULT_FEE_CONFIG.processingFee,
+      });
+    });
+  }, []);
+
   const addr = addresses.find((a) => a.id === addrId);
   const distanceKm = haversineKm(addr?.latitude, addr?.longitude, merchant?.latitude, merchant?.longitude);
-  const feeCalc = calcDeliveryFee({ distanceKm, totalKg });
+  const feeCalc = calcDeliveryFee({ distanceKm, config: feeConfig });
   const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
-  const total = Math.max(0, subtotal + deliveryFee - discount);
+  const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
+  const processingFee = subtotal > 0 ? feeConfig.processingFee : 0;
+  const total = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee - discount);
 
   useEffect(() => {
     if (!user) return;
