@@ -397,6 +397,7 @@ export type Database = {
           city: string | null
           commission_rate: number
           created_at: string
+          delivery_radius_km: number
           description: string | null
           documents: Json | null
           email: string | null
@@ -420,6 +421,7 @@ export type Database = {
           city?: string | null
           commission_rate?: number
           created_at?: string
+          delivery_radius_km?: number
           description?: string | null
           documents?: Json | null
           email?: string | null
@@ -443,6 +445,7 @@ export type Database = {
           city?: string | null
           commission_rate?: number
           created_at?: string
+          delivery_radius_km?: number
           description?: string | null
           documents?: Json | null
           email?: string | null

@@ -47,8 +47,11 @@ export default function UserCheckout() {
   useEffect(() => {
     const mid = items[0]?.merchant_id;
     if (!mid) { setMerchant(null); return; }
-    supabase.from("merchants").select("id,latitude,longitude,name").eq("id", mid).maybeSingle().then(({ data }) => setMerchant(data));
+    supabase.from("merchants").select("id,latitude,longitude,name,delivery_radius_km").eq("id", mid).maybeSingle().then(({ data }) => setMerchant(data));
   }, [items[0]?.merchant_id]);
+
+  const radiusKm = Number(merchant?.delivery_radius_km ?? 10);
+  const outOfRange = distanceKm != null && distanceKm > radiusKm;
 
   const applyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -62,6 +65,7 @@ export default function UserCheckout() {
 
   const placeOrder = async () => {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
+    if (outOfRange) { toast.error(`${merchant?.name ?? "This merchant"} only delivers within ${radiusKm} km. You are ${distanceKm!.toFixed(1)} km away.`); return; }
     if (deliveryType === "scheduled" && (!scheduledAt || new Date(scheduledAt) <= new Date())) { toast.error("Pick a future date/time for scheduled delivery"); return; }
     // Cart limit guards (defensive)
     const cyl = items.filter((it: any) => it.category_slug === "cylinder" || it.category_slug === "lpg-refill").reduce((a, x) => a + x.quantity, 0);
@@ -206,7 +210,13 @@ export default function UserCheckout() {
         <div className="mt-1 flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {total.toFixed(2)}</span></div>
       </Card>
 
-      <Button className="w-full" onClick={placeOrder} disabled={busy || items.length === 0 || !addrId}>
+      {outOfRange && (
+        <Card className="border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+          {merchant?.name ?? "This merchant"} only delivers within {radiusKm} km. Your selected address is {distanceKm!.toFixed(1)} km away — please choose a different address or merchant.
+        </Card>
+      )}
+
+      <Button className="w-full" onClick={placeOrder} disabled={busy || items.length === 0 || !addrId || outOfRange}>
         {busy ? "Placing…" : `Place order · RM ${total.toFixed(2)}`}
       </Button>
     </div>

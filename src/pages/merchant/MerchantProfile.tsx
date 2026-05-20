@@ -27,10 +27,13 @@ export default function MerchantProfile() {
   };
 
   const save = async () => {
+    const radius = Number(form.delivery_radius_km);
+    if (!Number.isFinite(radius) || radius <= 0) { toast.error("Delivery radius must be greater than 0 km"); return; }
     const { error } = await supabase.from("merchants").update({
       name: form.name, description: form.description, phone: form.phone, email: form.email,
       address: form.address, city: form.city, state: form.state, postcode: form.postcode, logo_url: form.logo_url,
       latitude: form.latitude, longitude: form.longitude,
+      delivery_radius_km: radius,
     }).eq("id", form.id);
     if (error) toast.error(error.message); else { toast.success("Saved"); refresh(); }
   };
@@ -62,6 +65,19 @@ export default function MerchantProfile() {
           </div>
           <MapPicker lat={form.latitude} lng={form.longitude} onChange={(la, ln) => setForm({ ...form, latitude: la, longitude: ln })} height={300} />
           {form.latitude != null && <p className="mt-1 text-[11px] text-muted-foreground">Pinned: {Number(form.latitude).toFixed(5)}, {Number(form.longitude).toFixed(5)}</p>}
+        </div>
+        <div>
+          <Label>Delivery radius (km)</Label>
+          <Input
+            type="number"
+            min={1}
+            step={0.5}
+            value={form.delivery_radius_km ?? 10}
+            onChange={(e) => setForm({ ...form, delivery_radius_km: e.target.value })}
+          />
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Customers outside this distance from your pickup location won't be able to order from your shop.
+          </p>
         </div>
         <Button onClick={save}>Save</Button>
       </Card>
