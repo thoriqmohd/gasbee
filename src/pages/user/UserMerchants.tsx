@@ -4,16 +4,27 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, Store } from "lucide-react";
 import { Link } from "react-router-dom";
+import { haversineKm } from "@/lib/delivery";
 
 export default function UserMerchants() {
   const [items, setItems] = useState<any[]>([]);
+  const [addr, setAddr] = useState<any>(null);
   const [q, setQ] = useState("");
 
   useEffect(() => {
     supabase.from("merchants").select("*").eq("status", "active").then(({ data }) => setItems(data ?? []));
+    supabase.from("addresses").select("*").eq("is_default", true).maybeSingle().then(({ data }) => setAddr(data));
   }, []);
 
-  const filtered = items.filter((m) => m.name.toLowerCase().includes(q.toLowerCase()));
+  const withDistance = items.map((m) => {
+    const d = addr?.latitude && addr?.longitude && m.latitude != null && m.longitude != null
+      ? haversineKm(addr.latitude, addr.longitude, m.latitude, m.longitude) : null;
+    const inRange = d == null ? true : d <= Number(m.delivery_radius_km ?? 10);
+    return { ...m, _distance: d, _inRange: inRange };
+  });
+  const filtered = withDistance
+    .filter((m) => m.name.toLowerCase().includes(q.toLowerCase()))
+    .filter((m) => m._inRange);
 
   return (
     <div className="space-y-4">
@@ -31,12 +42,15 @@ export default function UserMerchants() {
               </div>
               <div className="flex-1">
                 <div className="font-medium">{m.name}</div>
-                <div className="text-xs text-muted-foreground">{m.city ?? "—"} · ★ {Number(m.rating ?? 0).toFixed(1)}</div>
+                <div className="text-xs text-muted-foreground">
+                  {m.city ?? "—"} · ★ {Number(m.rating ?? 0).toFixed(1)}
+                  {m._distance != null && <> · {m._distance.toFixed(1)} km</>}
+                </div>
               </div>
             </Card>
           </Link>
         ))}
-        {filtered.length === 0 && <p className="text-sm text-muted-foreground">No merchants found.</p>}
+        {filtered.length === 0 && <p className="text-sm text-muted-foreground">No merchants deliver to your area.</p>}
       </div>
     </div>
   );
