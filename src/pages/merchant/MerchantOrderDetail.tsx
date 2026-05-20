@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 const NEXT: Record<string, string> = {
@@ -20,6 +22,8 @@ export default function MerchantOrderDetail() {
   const [items, setItems] = useState<any[]>([]);
   const [riders, setRiders] = useState<any[]>([]);
   const [riderId, setRiderId] = useState<string>("");
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   const load = async () => {
     if (!id) return;
@@ -65,9 +69,12 @@ export default function MerchantOrderDetail() {
     if (error) toast.error(error.message); else { toast.success("Updated"); load(); }
   };
   const reject = async () => {
-    const { error } = await supabase.from("orders").update({ status: "cancelled", rejected_at: new Date().toISOString(), failure_reason: "Rejected by merchant" }).eq("id", o.id);
-    if (error) toast.error(error.message); else { toast.success("Rejected"); load(); }
+    const reason = rejectReason.trim();
+    if (reason.length < 3) { toast.error("Please enter a rejection reason"); return; }
+    const { error } = await supabase.from("orders").update({ status: "cancelled", rejected_at: new Date().toISOString(), failure_reason: reason }).eq("id", o.id);
+    if (error) toast.error(error.message); else { toast.success("Rejected"); setRejectOpen(false); setRejectReason(""); load(); }
   };
+
 
   return (
     <div className="space-y-4">
@@ -118,9 +125,28 @@ export default function MerchantOrderDetail() {
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        {o.status === "pending" && <Button variant="destructive" onClick={reject}>Reject</Button>}
+        {o.status === "pending" && <Button variant="destructive" onClick={() => setRejectOpen(true)}>Reject</Button>}
         {NEXT[o.status] && <Button onClick={() => updateStatus(NEXT[o.status])}>Mark as {NEXT[o.status].replace(/_/g, " ")}</Button>}
       </div>
+
+      {o.failure_reason && (o.status === "cancelled" || o.rejected_at) && (
+        <Card className="p-4 border-destructive/40">
+          <h2 className="mb-1 font-semibold text-destructive">Rejection reason</h2>
+          <p className="text-sm">{o.failure_reason}</p>
+        </Card>
+      )}
+
+      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Reject order</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Please provide a reason for rejecting this order. The customer will see this note.</p>
+          <Textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Out of stock, outside delivery area…" rows={4} />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRejectOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={reject}>Confirm reject</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
