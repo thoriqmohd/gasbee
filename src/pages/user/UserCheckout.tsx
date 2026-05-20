@@ -131,14 +131,14 @@ export default function UserCheckout() {
       delivery_fee: deliveryFee,
       service_fee: serviceFee,
       processing_fee: processingFee,
-      discount,
+      discount: discount + creditApplied,
       total_amount: total,
-      payment_method: paymentMethod,
-      payment_status: "pending",
+      payment_method: total === 0 ? "credit" as any : paymentMethod,
+      payment_status: total === 0 ? "paid" : "pending",
       status: "pending",
       delivery_type: deliveryType,
       scheduled_at: deliveryType === "scheduled" ? scheduledAt : null,
-      notes,
+      notes: [notes, creditApplied > 0 ? `Store credit applied: RM ${creditApplied.toFixed(2)} (from order ${eligibleCredit?.source_order_id?.slice(0,8)})` : null].filter(Boolean).join(" · "),
       promotion_code: promoCode || null,
     }).select().single();
 
@@ -157,10 +157,33 @@ export default function UserCheckout() {
     }));
     await supabase.from("order_items").insert(orderItems);
 
+    // Mark credit as used + create leftover refund if any
+    if (creditApplied > 0 && eligibleCredit) {
+      await supabase.from("order_credits").update({
+        status: "used",
+        used_order_id: order.id,
+        leftover_amount: creditLeftover,
+        notes: creditLeftover > 0 ? `Leftover RM ${creditLeftover.toFixed(2)} to be refunded by admin` : null,
+      }).eq("id", eligibleCredit.id);
+
+      if (creditLeftover > 0) {
+        await supabase.from("refunds").insert({
+          order_id: eligibleCredit.source_order_id,
+          requester_id: user.id,
+          reason: `Leftover credit refund (used RM ${creditApplied.toFixed(2)} on new order ${order.code})`,
+          reason_category: "credit_leftover",
+          amount: creditLeftover,
+          refund_amount: creditLeftover,
+          status: "requested",
+        });
+        toast.info(`Admin will refund the remaining RM ${creditLeftover.toFixed(2)}.`);
+      }
+    }
+
     clear();
 
     // Online payment via dummy gateway
-    if (paymentMethod !== "cod") {
+    if (total > 0 && paymentMethod !== "cod") {
       nav(`/user/payment/${order.id}`);
       return;
     }
