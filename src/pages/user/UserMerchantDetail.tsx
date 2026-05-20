@@ -77,18 +77,21 @@ export default function UserMerchantDetail() {
       </div>
       <div className="grid grid-cols-2 gap-3">
         {products.map((p) => {
+          const cs = p.is_coming_soon;
+          const disabled = outOfRange || cs;
           const inner = (
-            <Card className={`overflow-hidden ${outOfRange ? "opacity-50" : ""}`}>
+            <Card className={`overflow-hidden relative ${disabled ? "opacity-60 grayscale" : ""}`}>
               <div className="flex h-24 items-center justify-center bg-muted">
                 {p.image_url ? <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" /> : <Flame className="h-8 w-8 text-primary" />}
               </div>
+              {cs && <span className="absolute right-1 top-1 rounded bg-muted-foreground/80 px-1.5 py-0.5 text-[10px] font-medium text-background">Coming Soon</span>}
               <div className="p-2">
                 <div className="line-clamp-1 text-sm font-medium">{p.name}</div>
                 <div className="mt-1 text-sm font-bold text-primary">RM {Number(p.refill_price || p.selling_price).toFixed(2)}</div>
               </div>
             </Card>
           );
-          return outOfRange ? (
+          return disabled ? (
             <div key={p.id} aria-disabled className="cursor-not-allowed">{inner}</div>
           ) : (
             <Link key={p.id} to={`/user/product/${p.id}`}>{inner}</Link>
