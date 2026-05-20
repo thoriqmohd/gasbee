@@ -11,6 +11,7 @@ import { MapPin, Plus, Trash2, Star, Crosshair, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { MapPicker } from "@/components/MapPicker";
+import { getMyLocation } from "@/lib/geolocation";
 
 const MY_STATES = [
   "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang",
