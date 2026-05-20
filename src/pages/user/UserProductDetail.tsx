@@ -69,7 +69,7 @@ export default function UserProductDetail() {
       </Card>
       <div>
         <div className="text-xs text-muted-foreground">{p.merchants?.name} {p.categories?.name && <>· {p.categories.name}</>}</div>
-        <h1 className="text-xl font-bold">{p.name}</h1>
+        <h1 className="text-xl font-bold">{p.name}{p.is_coming_soon && <span className="ml-2 rounded bg-muted px-2 py-0.5 align-middle text-xs font-medium text-muted-foreground">Coming Soon</span>}</h1>
         {p.cylinder_size_kg && <div className="text-sm text-muted-foreground">{p.cylinder_size_kg} kg cylinder</div>}
         {p.description && <p className="mt-2 text-sm">{p.description}</p>}
       </div>
