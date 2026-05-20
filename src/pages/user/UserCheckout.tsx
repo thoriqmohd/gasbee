@@ -106,6 +106,8 @@ export default function UserCheckout() {
       address_snapshot: addr2 as any,
       items_subtotal: subtotal,
       delivery_fee: deliveryFee,
+      service_fee: serviceFee,
+      processing_fee: processingFee,
       discount,
       total_amount: total,
       payment_method: paymentMethod,
