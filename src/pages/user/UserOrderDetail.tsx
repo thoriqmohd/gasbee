@@ -208,6 +208,18 @@ export default function UserOrderDetail() {
 
       {o.status === "delivered" && <OrderRating orderId={o.id} hasRider={!!o.rider_id} />}
 
+      {o.status === "cancelled" && o.rejected_at && o.failure_reason && (
+        <Card className="space-y-3 border-destructive/40 bg-destructive/5 p-4">
+          <div>
+            <div className="text-sm font-semibold text-destructive">Order rejected by merchant</div>
+            <p className="mt-1 text-sm">{o.failure_reason}</p>
+          </div>
+          {o.payment_status === "paid" && (
+            <RejectedOptions order={o} />
+          )}
+        </Card>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={cancel}>Cancel</Button>}
         {o.payment_status === "paid" && (
