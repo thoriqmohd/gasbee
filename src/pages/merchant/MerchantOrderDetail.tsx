@@ -69,9 +69,12 @@ export default function MerchantOrderDetail() {
     if (error) toast.error(error.message); else { toast.success("Updated"); load(); }
   };
   const reject = async () => {
-    const { error } = await supabase.from("orders").update({ status: "cancelled", rejected_at: new Date().toISOString(), failure_reason: "Rejected by merchant" }).eq("id", o.id);
-    if (error) toast.error(error.message); else { toast.success("Rejected"); load(); }
+    const reason = rejectReason.trim();
+    if (reason.length < 3) { toast.error("Please enter a rejection reason"); return; }
+    const { error } = await supabase.from("orders").update({ status: "cancelled", rejected_at: new Date().toISOString(), failure_reason: reason }).eq("id", o.id);
+    if (error) toast.error(error.message); else { toast.success("Rejected"); setRejectOpen(false); setRejectReason(""); load(); }
   };
+
 
   return (
     <div className="space-y-4">
