@@ -24,6 +24,13 @@ export default function UserHome() {
   const [cats, setCats] = useState<any[]>([]);
   const [merchants, setMerchants] = useState<any[]>([]);
   const [addr, setAddr] = useState<any>(null);
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [productResults, setProductResults] = useState<any[]>([]);
+  const [merchantResults, setMerchantResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const nav = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -36,6 +43,41 @@ export default function UserHome() {
       setBanners(b.data ?? []); setCats(c.data ?? []); setMerchants(m.data ?? []); setAddr(a.data);
     })();
   }, []);
+
+  useEffect(() => {
+    const term = search.trim();
+    if (!term) {
+      setProductResults([]); setMerchantResults([]); setSearching(false);
+      return;
+    }
+    setSearching(true);
+    const t = setTimeout(async () => {
+      const like = `%${term}%`;
+      const [p, m] = await Promise.all([
+        supabase.from("products").select("id, name, image_url, refill_price, selling_price, merchants(name, status)").eq("is_active", true).ilike("name", like).limit(6),
+        supabase.from("merchants").select("id, name, logo_url, city, rating").eq("status", "active").ilike("name", like).limit(4),
+      ]);
+      setProductResults((p.data ?? []).filter((x: any) => x.merchants?.status === "active"));
+      setMerchantResults(m.data ?? []);
+      setSearching(false);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  const submitSearch = () => {
+    const term = search.trim();
+    if (!term) return;
+    setSearchOpen(false);
+    nav(`/user/products?q=${encodeURIComponent(term)}`);
+  };
 
   return (
     <div className="space-y-5">
