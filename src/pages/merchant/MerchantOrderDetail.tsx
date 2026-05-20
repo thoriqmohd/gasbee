@@ -22,6 +22,8 @@ export default function MerchantOrderDetail() {
   const [items, setItems] = useState<any[]>([]);
   const [riders, setRiders] = useState<any[]>([]);
   const [riderId, setRiderId] = useState<string>("");
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   const load = async () => {
     if (!id) return;
