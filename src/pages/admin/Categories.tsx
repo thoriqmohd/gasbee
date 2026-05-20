@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
 
 function EditCategoryDialog({ row, onDone }: { row: any; onDone: () => void }) {
   const [open, setOpen] = useState(false);
