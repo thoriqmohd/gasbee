@@ -605,11 +605,13 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           picked_up_at: string | null
+          processing_fee: number
           promotion_code: string | null
           proof_of_delivery_url: string | null
           rejected_at: string | null
           rider_id: string | null
           scheduled_at: string | null
+          service_fee: number
           status: Database["public"]["Enums"]["order_status"]
           total_amount: number
           updated_at: string
@@ -635,11 +637,13 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           picked_up_at?: string | null
+          processing_fee?: number
           promotion_code?: string | null
           proof_of_delivery_url?: string | null
           rejected_at?: string | null
           rider_id?: string | null
           scheduled_at?: string | null
+          service_fee?: number
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
           updated_at?: string
@@ -665,11 +669,13 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           picked_up_at?: string | null
+          processing_fee?: number
           promotion_code?: string | null
           proof_of_delivery_url?: string | null
           rejected_at?: string | null
           rider_id?: string | null
           scheduled_at?: string | null
+          service_fee?: number
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
           updated_at?: string

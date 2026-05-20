@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { MapPin } from "lucide-react";
-import { calcDeliveryFee, haversineKm, DELIVERY_RATE } from "@/lib/delivery";
+import { calcDeliveryFee, haversineKm, DEFAULT_FEE_CONFIG, type FeeConfig } from "@/lib/delivery";
 
 export default function UserCheckout() {
   const { user } = useAuth();
@@ -27,13 +27,35 @@ export default function UserCheckout() {
   const [deliveryType, setDeliveryType] = useState<"immediate" | "scheduled">("immediate");
   const [scheduledAt, setScheduledAt] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  const [feeConfig, setFeeConfig] = useState<FeeConfig>(DEFAULT_FEE_CONFIG);
 
-  const totalKg = items.reduce((a, it: any) => a + Number(it.cylinder_size_kg ?? 0) * it.quantity, 0);
+  useEffect(() => {
+    supabase.from("app_settings").select("*").in("key", [
+      "service_fee", "delivery_base_fee", "delivery_base_km", "delivery_per_km", "processing_fee",
+    ]).then(({ data }) => {
+      const m: Record<string, number> = {};
+      (data ?? []).forEach((r: any) => {
+        const raw = typeof r.value === "string" ? r.value : (r.value?.value ?? r.value);
+        const n = Number(raw);
+        if (Number.isFinite(n)) m[r.key] = n;
+      });
+      setFeeConfig({
+        serviceFee: m.service_fee ?? DEFAULT_FEE_CONFIG.serviceFee,
+        deliveryBaseFee: m.delivery_base_fee ?? DEFAULT_FEE_CONFIG.deliveryBaseFee,
+        deliveryBaseKm: m.delivery_base_km ?? DEFAULT_FEE_CONFIG.deliveryBaseKm,
+        deliveryPerKm: m.delivery_per_km ?? DEFAULT_FEE_CONFIG.deliveryPerKm,
+        processingFee: m.processing_fee ?? DEFAULT_FEE_CONFIG.processingFee,
+      });
+    });
+  }, []);
+
   const addr = addresses.find((a) => a.id === addrId);
   const distanceKm = haversineKm(addr?.latitude, addr?.longitude, merchant?.latitude, merchant?.longitude);
-  const feeCalc = calcDeliveryFee({ distanceKm, totalKg });
+  const feeCalc = calcDeliveryFee({ distanceKm, config: feeConfig });
   const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
-  const total = Math.max(0, subtotal + deliveryFee - discount);
+  const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
+  const processingFee = subtotal > 0 ? feeConfig.processingFee : 0;
+  const total = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee - discount);
 
   useEffect(() => {
     if (!user) return;
@@ -84,6 +106,8 @@ export default function UserCheckout() {
       address_snapshot: addr2 as any,
       items_subtotal: subtotal,
       delivery_fee: deliveryFee,
+      service_fee: serviceFee,
+      processing_fee: processingFee,
       discount,
       total_amount: total,
       payment_method: paymentMethod,
@@ -153,13 +177,22 @@ export default function UserCheckout() {
         <div className="mb-2 text-sm font-semibold">Items</div>
         <Card className="divide-y">
           {items.map((it) => (
-            <div key={`${it.product_id}-${it.type}`} className="flex justify-between p-3 text-sm">
-              <span>{it.name} × {it.quantity}</span>
-              <span>RM {(it.unit_price * it.quantity).toFixed(2)}</span>
+            <div key={`${it.product_id}-${it.type}`} className="p-3 text-sm">
+              <div className="flex justify-between">
+                <span>{it.name} × {it.quantity}{it.type === "new" && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">New</span>}</span>
+                <span>RM {(it.unit_price * it.quantity).toFixed(2)}</span>
+              </div>
+              {it.type === "new" && (it.new_cylinder_price != null || it.refill_price != null) && (
+                <div className="mt-1 space-y-0.5 pl-3 text-xs text-muted-foreground">
+                  <div className="flex justify-between"><span>· New cylinder</span><span>RM {(Number(it.new_cylinder_price ?? 0) * it.quantity).toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span>· Refill (gas)</span><span>RM {(Number(it.refill_price ?? 0) * it.quantity).toFixed(2)}</span></div>
+                </div>
+              )}
             </div>
           ))}
         </Card>
       </div>
+
 
       <div>
         <div className="mb-2 text-sm font-semibold">Promo code</div>
@@ -200,12 +233,24 @@ export default function UserCheckout() {
       <Card className="space-y-1 p-3 text-sm">
         <div className="flex justify-between"><span>Subtotal</span><span>RM {subtotal.toFixed(2)}</span></div>
         <div className="flex justify-between">
-          <span>Delivery {distanceKm != null && <span className="text-xs text-muted-foreground">({distanceKm.toFixed(1)} km · {totalKg} kg)</span>}</span>
+          <span>Service fee</span>
+          <span>RM {serviceFee.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Delivery fee {distanceKm != null && <span className="text-xs text-muted-foreground">({distanceKm.toFixed(1)} km)</span>}</span>
           <span>RM {deliveryFee.toFixed(2)}</span>
         </div>
         {subtotal > 0 && (
-          <div className="text-[10px] text-muted-foreground">Base RM{DELIVERY_RATE.BASE} + RM{DELIVERY_RATE.PER_KM}/km + RM{DELIVERY_RATE.PER_KG}/kg{distanceKm == null && " · estimated, set address coordinates for accurate fee"}</div>
+          <div className="text-[10px] text-muted-foreground">
+            RM{feeConfig.deliveryBaseFee.toFixed(2)} for first {feeConfig.deliveryBaseKm} km
+            {feeCalc.extraKm > 0 && <> · +{feeCalc.extraKm} km × RM{feeConfig.deliveryPerKm.toFixed(2)} = RM{feeCalc.breakdown.extra.toFixed(2)}</>}
+            {distanceKm == null && " · estimated, set address coordinates for accurate fee"}
+          </div>
         )}
+        <div className="flex justify-between">
+          <span>Processing fee</span>
+          <span>RM {processingFee.toFixed(2)}</span>
+        </div>
         {discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {discount.toFixed(2)}</span></div>}
         <div className="mt-1 flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {total.toFixed(2)}</span></div>
       </Card>
