@@ -15,13 +15,11 @@ export default function UserProductDetail() {
   const { status: verifStatus, isApproved } = useCompanyVerification();
   const [p, setP] = useState<any>(null);
   const [qty, setQty] = useState(1);
-  const [type, setType] = useState<"refill" | "new" | "deposit">("refill");
 
   useEffect(() => {
     if (!id) return;
     supabase.from("products").select("*, merchants(name), categories(slug,name)").eq("id", id).maybeSingle().then(({ data }) => {
       setP(data);
-      if (data && Number(data.refill_price) === 0 && Number(data.selling_price) > 0) setType("new");
     });
   }, [id]);
 
@@ -31,8 +29,15 @@ export default function UserProductDetail() {
   const isIndustrial = slug === "industrial-gas";
   const blockedIndustrial = isIndustrial && !isApproved;
 
-  const newCylTotal = Number(p.new_cylinder_price || p.selling_price || 0) + Number(p.refill_price || 0);
-  const price = type === "refill" ? Number(p.refill_price) : type === "new" ? newCylTotal : Number(p.deposit_amount);
+  const newCylinderPrice = Number(p.new_cylinder_price || p.selling_price || 0);
+  const refillPrice = Number(p.refill_price || 0);
+  const depositAmount = Number(p.deposit_amount || 0);
+  const newCylTotal = newCylinderPrice + refillPrice;
+
+  // Auto-detect: prefer "new" if a new cylinder price is set, else refill, else deposit
+  const type: "refill" | "new" | "deposit" =
+    newCylinderPrice > 0 ? "new" : refillPrice > 0 ? "refill" : "deposit";
+  const price = type === "refill" ? refillPrice : type === "new" ? newCylTotal : depositAmount;
 
   const addToCart = () => {
     if (blockedIndustrial) {
@@ -47,8 +52,8 @@ export default function UserProductDetail() {
       type, cylinder_size_kg: p.cylinder_size_kg,
       unit_price: price, quantity: qty,
       category_slug: slug ?? null,
-      new_cylinder_price: type === "new" ? Number(p.new_cylinder_price || p.selling_price || 0) : null,
-      refill_price: type === "new" ? Number(p.refill_price || 0) : null,
+      new_cylinder_price: type === "new" ? newCylinderPrice : null,
+      refill_price: type === "new" ? refillPrice : null,
     });
     if (!res.ok) { toast.error(res.error!); return; }
     toast.success("Added to cart");
@@ -90,14 +95,19 @@ export default function UserProductDetail() {
         </Card>
       )}
 
-      <div>
-        <div className="mb-2 text-sm font-semibold">Order type</div>
-        <div className="grid grid-cols-3 gap-2">
-          {Number(p.refill_price) > 0 && <Button variant={type === "refill" ? "default" : "outline"} size="sm" onClick={() => setType("refill")}>Refill RM{Number(p.refill_price).toFixed(2)}</Button>}
-          {(Number(p.new_cylinder_price) > 0 || Number(p.selling_price) > 0) && <Button variant={type === "new" ? "default" : "outline"} size="sm" onClick={() => setType("new")}>New RM{newCylTotal.toFixed(2)}</Button>}
-          {Number(p.deposit_amount) > 0 && <Button variant={type === "deposit" ? "default" : "outline"} size="sm" onClick={() => setType("deposit")}>Deposit RM{Number(p.deposit_amount).toFixed(2)}</Button>}
-        </div>
-      </div>
+      {type === "new" && (
+        <Card className="space-y-1 p-3 text-sm">
+          <div className="flex justify-between"><span className="text-muted-foreground">New cylinder (tong)</span><span>RM {newCylinderPrice.toFixed(2)}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Refill (gas)</span><span>RM {refillPrice.toFixed(2)}</span></div>
+          <div className="flex justify-between border-t pt-1 font-semibold"><span>Unit price</span><span className="text-primary">RM {newCylTotal.toFixed(2)}</span></div>
+        </Card>
+      )}
+      {type === "refill" && (
+        <div className="text-sm"><span className="text-muted-foreground">Unit price: </span><span className="font-semibold text-primary">RM {refillPrice.toFixed(2)}</span></div>
+      )}
+      {type === "deposit" && (
+        <div className="text-sm"><span className="text-muted-foreground">Deposit: </span><span className="font-semibold text-primary">RM {depositAmount.toFixed(2)}</span></div>
+      )}
 
       <div className="flex items-center justify-between">
         <div className="text-sm">Quantity</div>
