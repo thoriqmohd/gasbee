@@ -66,7 +66,15 @@ export default function UserMerchantDetail() {
         </Card>
       )}
 
-      <h2 className="text-sm font-semibold">Products</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold">Products{category && <> · {category.name}</>}</h2>
+        {category && (
+          <Badge variant="secondary" className="gap-1">
+            {category.name}
+            <button onClick={() => { params.delete("category"); setParams(params); }} className="ml-1 rounded-full hover:bg-muted-foreground/20"><X className="h-3 w-3" /></button>
+          </Badge>
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-3">
         {products.map((p) => {
           const inner = (
