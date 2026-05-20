@@ -55,11 +55,16 @@ export default function UserHome() {
     const t = setTimeout(async () => {
       const like = `%${term}%`;
       const [p, m] = await Promise.all([
-        supabase.from("products").select("id, name, image_url, refill_price, selling_price, merchants(name, status)").eq("is_active", true).ilike("name", like).limit(6),
-        supabase.from("merchants").select("id, name, logo_url, city, rating").eq("status", "active").ilike("name", like).limit(4),
+        supabase.from("products").select("id, name, image_url, refill_price, selling_price, merchants(id, name, status, latitude, longitude, delivery_radius_km)").eq("is_active", true).ilike("name", like).limit(20),
+        supabase.from("merchants").select("id, name, logo_url, city, rating, latitude, longitude, delivery_radius_km").eq("status", "active").ilike("name", like).limit(20),
       ]);
-      setProductResults((p.data ?? []).filter((x: any) => x.merchants?.status === "active"));
-      setMerchantResults(m.data ?? []);
+      const inRange = (lat: any, lng: any, r: any) => {
+        if (!addr?.latitude || !addr?.longitude || lat == null || lng == null) return true;
+        const d = haversineKm(addr.latitude, addr.longitude, lat, lng);
+        return d == null ? true : d <= Number(r ?? 10);
+      };
+      setProductResults((p.data ?? []).filter((x: any) => x.merchants?.status === "active" && inRange(x.merchants?.latitude, x.merchants?.longitude, x.merchants?.delivery_radius_km)).slice(0, 6));
+      setMerchantResults((m.data ?? []).filter((x: any) => inRange(x.latitude, x.longitude, x.delivery_radius_km)).slice(0, 4));
       setSearching(false);
     }, 250);
     return () => clearTimeout(t);
