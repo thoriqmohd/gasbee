@@ -18,6 +18,7 @@ const categoryImage = (c: any): string | null => {
 };
 import { Link, useNavigate } from "react-router-dom";
 import { BannerCarousel } from "@/components/user/BannerCarousel";
+import { haversineKm } from "@/lib/delivery";
 
 export default function UserHome() {
   const [banners, setBanners] = useState<any[]>([]);
