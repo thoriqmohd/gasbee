@@ -16,7 +16,7 @@ const categoryImage = (c: any): string | null => {
   if (key.includes("industrial")) return categoryIndustrial;
   return null;
 };
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BannerCarousel } from "@/components/user/BannerCarousel";
 
 export default function UserHome() {
