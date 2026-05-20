@@ -10,6 +10,7 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { MapPicker } from "@/components/MapPicker";
 import { Crosshair } from "lucide-react";
 import { toast } from "sonner";
+import { getMyLocation } from "@/lib/geolocation";
 
 export default function MerchantProfile() {
   const { merchant, refresh } = useMerchantContext();
