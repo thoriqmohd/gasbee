@@ -59,7 +59,13 @@ export default function UserCheckout() {
   const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
   const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
   const processingFee = subtotal > 0 ? feeConfig.processingFee : 0;
-  const total = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee - discount);
+  // Filter credits: must be from a DIFFERENT merchant than the current cart
+  const cartMerchantId = items[0]?.merchant_id;
+  const eligibleCredit = credits.find((c) => c.source_merchant_id !== cartMerchantId);
+  const grossTotal = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee - discount);
+  const creditApplied = useCredit && eligibleCredit ? Math.min(Number(eligibleCredit.amount), grossTotal) : 0;
+  const creditLeftover = useCredit && eligibleCredit ? Math.max(0, Number(eligibleCredit.amount) - creditApplied) : 0;
+  const total = Math.max(0, grossTotal - creditApplied);
 
   useEffect(() => {
     if (!user) return;
