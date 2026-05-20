@@ -208,8 +208,17 @@ export default function UserOrderDetail() {
 
       {o.status === "delivered" && <OrderRating orderId={o.id} hasRider={!!o.rider_id} />}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={cancel}>Cancel</Button>}
+        {o.payment_status === "paid" && (
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => downloadReceipt(o.id).catch((e) => toast.error(e.message))}
+          >
+            <Download className="mr-1 h-4 w-4" />Download receipt
+          </Button>
+        )}
         {o.payment_status === "paid" && o.status !== "cancelled" && (
           <Button asChild variant="outline" className="flex-1"><Link to={`/user/refund?order=${o.id}`}>Request refund</Link></Button>
         )}
