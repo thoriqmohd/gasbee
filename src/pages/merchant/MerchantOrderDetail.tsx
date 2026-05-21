@@ -59,7 +59,7 @@ export default function MerchantOrderDetail() {
     const { error } = await supabase.from("orders").update({
       rider_id: rid || null,
       assigned_at: rid ? new Date().toISOString() : null,
-      status: rid ? "assigned" : o.status,
+      status: rid && (o.status === "accepted" || o.status === "preparing") ? "assigned" : o.status,
     }).eq("id", o.id);
     if (error) { toast.error(error.message); return; }
     if (rid) {
