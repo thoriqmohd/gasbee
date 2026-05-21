@@ -39,6 +39,22 @@ export default function MerchantOrderDetail() {
     supabase.from("riders").select("id,full_name,phone,is_active").eq("merchant_id", merchant.id).eq("is_active", true).then(({ data }) => setRiders(data ?? []));
   }, [merchant?.id]);
 
+  // Live updates on this order (e.g. rider accepts, status changes)
+  useEffect(() => {
+    if (!id) return;
+    const ch = supabase
+      .channel(`order-${id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` }, (p) => {
+        const nu: any = p.new; const ol: any = p.old;
+        setO((prev: any) => prev ? { ...prev, ...nu } : nu);
+        if (nu.status === "rider_accepted" && ol.status !== "rider_accepted") {
+          toast.success("Rider accepted the job");
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [id]);
+
   const assignRider = async (rid: string) => {
     const { error } = await supabase.from("orders").update({
       rider_id: rid || null,
