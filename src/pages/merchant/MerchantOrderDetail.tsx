@@ -117,6 +117,16 @@ export default function MerchantOrderDetail() {
           <Button onClick={() => assignRider(riderId)}>{o.rider_id ? "Update" : "Assign"}</Button>
         </div>
         {riders.length === 0 && <p className="mt-2 text-xs text-muted-foreground">No active riders. Add riders in the Riders page.</p>}
+        {o.rider_id && (() => {
+          const ar = riders.find((x) => x.id === o.rider_id);
+          const accepted = ["rider_accepted","arrived_at_merchant","picked_up","on_delivery","arrived_at_customer","delivered"].includes(o.status);
+          return (
+            <div className={`mt-3 rounded border p-3 text-sm ${accepted ? "border-primary bg-primary/5" : "border-amber-500/40 bg-amber-500/10"}`}>
+              <div className="font-semibold">{ar ? `${ar.full_name} · ${ar.phone}` : "Rider"}</div>
+              <div className="text-xs">{accepted ? "✓ Rider has accepted the job" : "⏳ Waiting for rider to accept…"}</div>
+            </div>
+          );
+        })()}
       </Card>
 
       <Card>
