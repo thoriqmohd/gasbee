@@ -49,6 +49,23 @@ export default function RiderActive() {
   };
   useEffect(() => { load(); }, [user?.id]);
 
+  // Realtime: refresh when an order is assigned to / updated for this rider
+  useEffect(() => {
+    if (!rider?.id) return;
+    const ch = supabase
+      .channel(`rider-active-${rider.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `rider_id=eq.${rider.id}` }, (p) => {
+        const nu: any = p.new; const ol: any = p.old;
+        if (ol?.rider_id !== nu.rider_id) {
+          toast.success(`🛵 New job assigned: ${nu.code}`);
+        }
+        load();
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders", filter: `rider_id=eq.${rider.id}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [rider?.id]);
+
   useEffect(() => {
     if (!rider || orders.length === 0 || !navigator.geolocation) return;
     const id = navigator.geolocation.watchPosition(
