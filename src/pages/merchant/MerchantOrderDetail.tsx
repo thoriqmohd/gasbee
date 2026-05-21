@@ -59,16 +59,12 @@ export default function MerchantOrderDetail() {
     const { error } = await supabase.from("orders").update({
       rider_id: rid || null,
       assigned_at: rid ? new Date().toISOString() : null,
-      status: rid && o.status === "preparing" ? "assigned" : o.status,
+      status: rid ? "assigned" : o.status,
     }).eq("id", o.id);
     if (error) { toast.error(error.message); return; }
     if (rid) {
       const r = riders.find((x) => x.id === rid);
-      const { data: rider } = await supabase.from("riders").select("user_id").eq("id", rid).maybeSingle();
-      if (rider?.user_id) {
-        await supabase.from("notifications").insert({ user_id: rider.user_id, title: `New job ${o.code}`, body: `Pickup at merchant`, type: "order", link: `/merchant/rider/jobs/${o.id}` });
-      }
-      toast.success(`Assigned to ${r?.full_name}`);
+      toast.success(`Assigned to ${r?.full_name}. Waiting for rider to accept…`);
     } else toast.success("Unassigned");
     load();
   };
