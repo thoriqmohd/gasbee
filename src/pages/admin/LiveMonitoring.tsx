@@ -7,8 +7,7 @@ import {
 import { MapContainer, TileLayer, CircleMarker, Tooltip as LTooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import {
-  Activity, TrendingUp, DollarSign, Package, Bike, Store, Boxes, Wallet,
-  Users, Clock, AlertTriangle, Sparkles, Maximize2, RefreshCw,
+  AlertTriangle, Maximize2, RefreshCw,
 } from "lucide-react";
 
 const fmtMYR = (n: number) =>
@@ -17,14 +16,11 @@ const fmtNum = (n: number) => new Intl.NumberFormat("en-MY").format(n || 0);
 
 const COLORS = ["#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6", "#ec4899", "#14b8a6"];
 
-function Panel({ title, icon: Icon, children, className = "", action }: any) {
+function Panel({ title, children, className = "", action }: any) {
   return (
     <div className={`flex min-h-0 flex-col rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-950/90 backdrop-blur p-2 shadow-xl ${className}`}>
       <div className="mb-1.5 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-1.5 text-amber-400">
-          {Icon && <Icon className="h-3 w-3" />}
-          <h3 className="text-[10px] font-bold uppercase tracking-widest">{title}</h3>
-        </div>
+        <h3 className="text-[10px] font-bold uppercase tracking-widest text-amber-400">{title}</h3>
         {action}
       </div>
       <div className="flex-1 min-h-0">{children}</div>
