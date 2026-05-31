@@ -59,7 +59,9 @@ export default function MerchantRiders() {
   };
 
   const toggle = async (r: any, next: boolean) => {
-    const { error } = await supabase.from("riders").update({ is_active: next }).eq("id", r.id);
+    const { error } = await supabase.from("riders")
+      .update({ is_active: next, status: next ? "active" : "inactive" })
+      .eq("id", r.id);
     if (error) toast.error(error.message); else load();
   };
 
