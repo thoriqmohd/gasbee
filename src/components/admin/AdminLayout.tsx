@@ -23,6 +23,8 @@ const items = [
   { to: "/categories", label: "Categories", icon: Tags },
   { to: "/inventory-overview", label: "Inventory", icon: Boxes },
   { to: "/payments", label: "Payments", icon: CreditCard },
+  { to: "/payment-gateway", label: "Payment Gateway", icon: CreditCard },
+
   { to: "/refunds", label: "Refunds", icon: Undo2 },
   { to: "/settlements", label: "Settlements", icon: Wallet },
   { to: "/commissions", label: "Commissions", icon: Percent },
