@@ -32,6 +32,7 @@ import SupportTickets from "@/pages/admin/SupportTickets";
 import AuditLogs from "@/pages/admin/AuditLogs";
 import Settings from "@/pages/admin/Settings";
 import Admins from "@/pages/admin/Admins";
+import LiveMonitoring from "@/pages/admin/LiveMonitoring";
 
 import UserLayout from "@/components/user/UserLayout";
 import UserLogin from "@/pages/user/UserLogin";
@@ -113,6 +114,7 @@ const App = () => (
           <Routes>
             {/* ===== ADMIN ===== */}
             <Route path="/login" element={<AdminLogin />} />
+            <Route path="/live-monitoring" element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><LiveMonitoring /></ProtectedRoute>} />
             <Route element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout /></ProtectedRoute>}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />

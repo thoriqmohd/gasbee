@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingBag, Users, Store, FileCheck2, Bike,
   Package, Tags, Boxes, CreditCard, Undo2, Wallet, Percent,
-  Image as ImageIcon, Megaphone, BarChart3, Bell, LifeBuoy, Settings, ScrollText, LogOut, ShieldCheck, Menu,
+  Image as ImageIcon, Megaphone, BarChart3, Bell, LifeBuoy, Settings, ScrollText, LogOut, ShieldCheck, Menu, MonitorPlay,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const items = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/live-monitoring", label: "Live Monitoring", icon: MonitorPlay },
   { to: "/orders", label: "Orders", icon: ShoppingBag },
   { to: "/customers", label: "Customers", icon: Users },
   { to: "/merchants", label: "Merchants", icon: Store },
