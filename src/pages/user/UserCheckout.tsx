@@ -268,10 +268,15 @@ export default function UserCheckout() {
       <div>
         <div className="mb-2 text-sm font-semibold">Payment method</div>
         <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="grid grid-cols-2 gap-2">
-          {["cod","fpx","card","ewallet"].map((m) => (
-            <Card key={m} className="flex items-center gap-2 p-3">
-              <RadioGroupItem value={m} id={m} />
-              <Label htmlFor={m} className="cursor-pointer text-sm capitalize">{m}</Label>
+          {[
+            { id: "cod", label: "COD" },
+            { id: "fpx", label: "FPX (Online Transfer)" },
+            { id: "card", label: "Card" },
+            { id: "ewallet", label: "E-Wallet" }
+          ].map((m) => (
+            <Card key={m.id} className="flex items-center gap-2 p-3">
+              <RadioGroupItem value={m.id} id={m.id} />
+              <Label htmlFor={m.id} className="cursor-pointer text-sm">{m.label}</Label>
             </Card>
           ))}
         </RadioGroup>
@@ -345,7 +350,7 @@ export default function UserCheckout() {
             {addr && (
               <div><span className="text-muted-foreground">Deliver to: </span><span className="font-medium">{addr.label ?? "Address"} — {addr.address_line1}, {addr.postcode} {addr.city}</span></div>
             )}
-            <div><span className="text-muted-foreground">Payment: </span><span className="font-medium uppercase">{paymentMethod}</span></div>
+            <div><span className="text-muted-foreground">Payment: </span><span className="font-medium">{paymentMethod === "fpx" ? "FPX (Online Transfer)" : paymentMethod.toUpperCase()}</span></div>
             <div><span className="text-muted-foreground">Total: </span><span className="font-bold text-primary">RM {total.toFixed(2)}</span></div>
           </div>
           <AlertDialogFooter>
