@@ -427,7 +427,27 @@ export default function LiveMonitoring() {
           </div>
         </Panel>
 
-        {/* Row 3: revenue area | inventory | financial | customer | sla | AI */}
+        {/* Row 3: AI forecast | revenue area | inventory | financial | customer | sla */}
+        <Panel
+          title="AI Predictions"
+          className="col-span-2 border-amber-500/30"
+          action={<span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">AI</span>}
+        >
+          <div className="grid grid-cols-3 gap-1 mb-1">
+            <StatPill label="Tomorrow" value={fmtNum(predictions.predictedOrdersTomorrow)} tone="amber" />
+            <StatPill label="Riders" value={fmtNum(predictions.predictedRiders)} tone="violet" />
+            <StatPill label="Refills" value={fmtNum(predictions.predictedRefills)} tone="green" />
+          </div>
+          <div className="space-y-1 overflow-hidden">
+            {predictions.alerts.slice(0, 2).map((a, i) => (
+              <div key={i} className="flex items-start gap-1 rounded-md border border-amber-500/20 bg-amber-500/5 p-1 text-[9px] leading-tight">
+                <AlertTriangle className="h-2.5 w-2.5 mt-0.5 shrink-0 text-amber-400" />
+                <span className="line-clamp-2">{a}</span>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
         <Panel title="Revenue by Area" className="col-span-3">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={revByArea} layout="vertical" margin={{ top: 0, right: 4, bottom: 0, left: 0 }}>
@@ -479,27 +499,6 @@ export default function LiveMonitoring() {
           <div className="flex flex-col gap-1 h-full">
             <StatPill label="Resp" value={`${slaStats.avgResp}m`} tone="blue" />
             <StatPill label="Late" value={`${slaStats.latePct.toFixed(0)}%`} tone={slaStats.latePct > 15 ? "red" : "green"} />
-          </div>
-        </Panel>
-
-        <Panel
-          title="AI Predictions"
-         
-          className="col-span-2 border-amber-500/30"
-          action={<span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">AI</span>}
-        >
-          <div className="grid grid-cols-3 gap-1 mb-1">
-            <StatPill label="Tomorrow" value={fmtNum(predictions.predictedOrdersTomorrow)} tone="amber" />
-            <StatPill label="Riders" value={fmtNum(predictions.predictedRiders)} tone="violet" />
-            <StatPill label="Refills" value={fmtNum(predictions.predictedRefills)} tone="green" />
-          </div>
-          <div className="space-y-1 overflow-hidden">
-            {predictions.alerts.slice(0, 2).map((a, i) => (
-              <div key={i} className="flex items-start gap-1 rounded-md border border-amber-500/20 bg-amber-500/5 p-1 text-[9px] leading-tight">
-                <AlertTriangle className="h-2.5 w-2.5 mt-0.5 shrink-0 text-amber-400" />
-                <span className="line-clamp-2">{a}</span>
-              </div>
-            ))}
           </div>
         </Panel>
       </div>
