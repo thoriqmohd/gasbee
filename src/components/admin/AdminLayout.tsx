@@ -122,7 +122,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 export default function AdminLayout({ children }: { children?: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
-  const current = items.find((i) => i.to === pathname)?.label ?? "Admin";
+  const current = allItems.find((i) => i.to === pathname)?.label ?? "Admin";
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 md:flex">
