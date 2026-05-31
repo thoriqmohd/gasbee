@@ -11,10 +11,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const apiKey = Deno.env.get("CHIP_API_KEY");
-    const brandId = Deno.env.get("CHIP_BRAND_ID");
-    if (!apiKey || !brandId) throw new Error("CHIP not configured");
-
     const auth = req.headers.get("Authorization");
     if (!auth) throw new Error("Unauthorized");
 
@@ -23,6 +19,21 @@ Deno.serve(async (req) => {
     });
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Unauthorized");
+
+    const adminClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Load gateway config from DB (preferred), fall back to env
+    const { data: gw } = await adminClient
+      .from("payment_gateways")
+      .select("enabled, mode, config")
+      .eq("provider", "chip")
+      .maybeSingle();
+
+    const cfg = (gw?.config ?? {}) as Record<string, string>;
+    const apiKey = cfg.api_key || Deno.env.get("CHIP_API_KEY");
+    const brandId = cfg.brand_id || Deno.env.get("CHIP_BRAND_ID");
+    if (gw && gw.enabled === false) throw new Error("Chip-in payments are disabled by admin");
+    if (!apiKey || !brandId) throw new Error("CHIP not configured");
 
     const { order_id, success_redirect, failure_redirect } = await req.json();
     if (!order_id) throw new Error("order_id required");
@@ -34,6 +45,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle();
 
     const callbackUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/chip-webhook`;
+
     const amountCents = Math.round(Number(order.total_amount) * 100);
 
     const payload = {
