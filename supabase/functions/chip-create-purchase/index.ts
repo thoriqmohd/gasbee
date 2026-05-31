@@ -51,8 +51,9 @@ Deno.serve(async (req) => {
     const payload = {
       brand_id: brandId,
       success_callback: callbackUrl,
-      success_redirect: success_redirect || undefined,
-      failure_redirect: failure_redirect || undefined,
+      success_redirect: success_redirect || cfg.success_redirect || undefined,
+      failure_redirect: failure_redirect || cfg.failure_redirect || undefined,
+
       reference: order.id,
       purchase: {
         currency: "MYR",
