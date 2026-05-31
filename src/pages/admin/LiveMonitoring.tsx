@@ -367,14 +367,29 @@ export default function LiveMonitoring() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-lg border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 px-2.5 py-1 text-sky-200">
-              <span className="text-xl leading-none">{weatherIcon(weather?.code)}</span>
-              <div className="leading-tight">
-                <div className="text-sm font-bold tabular-nums">{weather ? `${weather.temp}°C` : "—"}</div>
-                <div className="text-[9px] uppercase tracking-widest opacity-80">
-                  {weatherLabel(weather?.code)}{weather ? ` · ${weather.min}°/${weather.max}°` : ""}
+              <div className="flex items-center gap-1.5">
+                <span className="text-base leading-none">{weatherIcon(weather?.morning?.code)}</span>
+                <div className="leading-tight">
+                  <div className="text-[9px] uppercase tracking-widest opacity-80">Morning</div>
+                  <div className="text-xs font-bold tabular-nums">
+                    {weather?.morning ? `${weather.morning.temp}°C` : "—"}
+                    <span className="ml-1 font-normal opacity-80">{weatherLabel(weather?.morning?.code)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-6 w-px bg-sky-500/30" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-base leading-none">{weatherIcon(weather?.evening?.code)}</span>
+                <div className="leading-tight">
+                  <div className="text-[9px] uppercase tracking-widest opacity-80">Evening</div>
+                  <div className="text-xs font-bold tabular-nums">
+                    {weather?.evening ? `${weather.evening.temp}°C` : "—"}
+                    <span className="ml-1 font-normal opacity-80">{weatherLabel(weather?.evening?.code)}</span>
+                  </div>
                 </div>
               </div>
             </div>
+
             <div className="text-right">
               <div className="text-lg font-bold tabular-nums leading-tight">{now.toLocaleTimeString("en-MY")}</div>
               <div className="text-[9px] uppercase tracking-widest opacity-70 leading-tight">
