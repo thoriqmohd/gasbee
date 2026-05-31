@@ -144,6 +144,8 @@ const App = () => (
               <Route path="/audit-logs" element={<AuditLogs />} />
               <Route path="/admins" element={<Admins />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/payment-gateway" element={<PaymentGateway />} />
+
             </Route>
 
             {/* ===== USER (BUYER) ===== */}
