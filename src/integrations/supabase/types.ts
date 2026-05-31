@@ -1010,12 +1010,15 @@ export type Database = {
       }
       promotions: {
         Row: {
+          applies_to: string
           code: string
           created_at: string
           description: string | null
           ends_at: string | null
           id: string
           is_active: boolean
+          max_discount: number | null
+          merchant_id: string | null
           min_order_amount: number
           starts_at: string | null
           type: Database["public"]["Enums"]["promotion_type"]
@@ -1025,12 +1028,15 @@ export type Database = {
           value: number
         }
         Insert: {
+          applies_to?: string
           code: string
           created_at?: string
           description?: string | null
           ends_at?: string | null
           id?: string
           is_active?: boolean
+          max_discount?: number | null
+          merchant_id?: string | null
           min_order_amount?: number
           starts_at?: string | null
           type?: Database["public"]["Enums"]["promotion_type"]
@@ -1040,12 +1046,15 @@ export type Database = {
           value?: number
         }
         Update: {
+          applies_to?: string
           code?: string
           created_at?: string
           description?: string | null
           ends_at?: string | null
           id?: string
           is_active?: boolean
+          max_discount?: number | null
+          merchant_id?: string | null
           min_order_amount?: number
           starts_at?: string | null
           type?: Database["public"]["Enums"]["promotion_type"]
