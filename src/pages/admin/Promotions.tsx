@@ -18,7 +18,7 @@ type Promo = {
   id: string;
   code: string;
   description: string | null;
-  type: "percent" | "fixed";
+  type: "percent" | "flat";
   value: number;
   min_order_amount: number;
   max_discount: number | null;
@@ -35,7 +35,7 @@ const emptyForm = {
   id: "",
   code: "",
   description: "",
-  type: "percent" as "percent" | "fixed",
+  type: "percent" as "percent" | "flat",
   value: "10",
   min_order_amount: "0",
   max_discount: "",
@@ -172,7 +172,7 @@ export default function Promotions() {
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="percent">Percent (%)</SelectItem>
-                      <SelectItem value="fixed">Fixed (RM)</SelectItem>
+                      <SelectItem value="flat">Flat (RM)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
