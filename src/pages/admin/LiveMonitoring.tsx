@@ -352,12 +352,22 @@ export default function LiveMonitoring() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 rounded-lg border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 px-2.5 py-1 text-sky-200">
+              <span className="text-xl leading-none">{weatherIcon(weather?.code)}</span>
+              <div className="leading-tight">
+                <div className="text-sm font-bold tabular-nums">{weather ? `${weather.temp}°C` : "—"}</div>
+                <div className="text-[9px] uppercase tracking-widest opacity-80">
+                  {weatherLabel(weather?.code)}{weather ? ` · ${weather.min}°/${weather.max}°` : ""}
+                </div>
+              </div>
+            </div>
             <div className="text-right">
               <div className="text-lg font-bold tabular-nums leading-tight">{now.toLocaleTimeString("en-MY")}</div>
               <div className="text-[9px] uppercase tracking-widest opacity-70 leading-tight">
                 {now.toLocaleDateString("en-MY", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}
               </div>
             </div>
+
             <button onClick={load} className="rounded-lg border border-white/10 bg-white/5 p-1.5 hover:bg-white/10" title="Refresh">
               <RefreshCw className="h-3 w-3" />
             </button>
