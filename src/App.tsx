@@ -31,6 +31,8 @@ import Notifications from "@/pages/admin/Notifications";
 import SupportTickets from "@/pages/admin/SupportTickets";
 import AuditLogs from "@/pages/admin/AuditLogs";
 import Settings from "@/pages/admin/Settings";
+import PaymentGateway from "@/pages/admin/PaymentGateway";
+
 import Admins from "@/pages/admin/Admins";
 import LiveMonitoring from "@/pages/admin/LiveMonitoring";
 
