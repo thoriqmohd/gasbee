@@ -224,7 +224,7 @@ export async function generateReceiptPdf(
     M,
     footY + 32
   );
-  doc.text("gasbee.lovable.app", pageW - M, footY + 32, { align: "right" });
+  doc.text("gasbee.com.my", pageW - M, footY + 32, { align: "right" });
 
   return doc;
 }
