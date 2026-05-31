@@ -71,12 +71,58 @@ export default function LiveMonitoring() {
   const [refunds, setRefunds] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = useState<{ temp: number; code: number; max: number; min: number } | null>(null);
 
   // Clock
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
+
+  // Weather (Selangor) — Open-Meteo, no API key
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=3.0738&longitude=101.5183&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FKuala_Lumpur&forecast_days=1"
+        );
+        const j = await res.json();
+        setWeather({
+          temp: Math.round(j.current?.temperature_2m),
+          code: j.current?.weather_code,
+          max: Math.round(j.daily?.temperature_2m_max?.[0]),
+          min: Math.round(j.daily?.temperature_2m_min?.[0]),
+        });
+      } catch {}
+    };
+    fetchWeather();
+    const t = setInterval(fetchWeather, 15 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const weatherLabel = (code?: number) => {
+    if (code == null) return "—";
+    if (code === 0) return "Cerah";
+    if ([1, 2].includes(code)) return "Cerah berawan";
+    if (code === 3) return "Mendung";
+    if ([45, 48].includes(code)) return "Berkabus";
+    if ([51, 53, 55, 56, 57].includes(code)) return "Hujan renyai";
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "Hujan";
+    if ([95, 96, 99].includes(code)) return "Ribut petir";
+    return "Berawan";
+  };
+  const weatherIcon = (code?: number) => {
+    if (code == null) return "·";
+    if (code === 0) return "☀️";
+    if ([1, 2].includes(code)) return "🌤️";
+    if (code === 3) return "☁️";
+    if ([45, 48].includes(code)) return "🌫️";
+    if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "🌧️";
+    if ([95, 96, 99].includes(code)) return "⛈️";
+    return "🌥️";
+  };
+
 
   const load = async () => {
     const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
