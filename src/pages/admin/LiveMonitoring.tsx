@@ -19,15 +19,15 @@ const COLORS = ["#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6", "#ec4899"
 
 function Panel({ title, icon: Icon, children, className = "", action }: any) {
   return (
-    <div className={`rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-950/90 backdrop-blur p-4 shadow-xl ${className}`}>
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-amber-400">
-          {Icon && <Icon className="h-4 w-4" />}
-          <h3 className="text-xs font-bold uppercase tracking-widest">{title}</h3>
+    <div className={`flex min-h-0 flex-col rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-950/90 backdrop-blur p-2 shadow-xl ${className}`}>
+      <div className="mb-1.5 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-1.5 text-amber-400">
+          {Icon && <Icon className="h-3 w-3" />}
+          <h3 className="text-[10px] font-bold uppercase tracking-widest">{title}</h3>
         </div>
         {action}
       </div>
-      {children}
+      <div className="flex-1 min-h-0">{children}</div>
     </div>
   );
 }
@@ -41,10 +41,10 @@ function StatPill({ label, value, sub, tone = "amber" }: any) {
     violet: "from-violet-500/20 to-violet-500/5 text-violet-300 border-violet-500/30",
   };
   return (
-    <div className={`rounded-xl border bg-gradient-to-br p-3 ${tones[tone]}`}>
-      <div className="text-[10px] uppercase tracking-wider opacity-80">{label}</div>
-      <div className="mt-1 text-2xl font-bold tabular-nums">{value}</div>
-      {sub && <div className="mt-0.5 text-[10px] opacity-70">{sub}</div>}
+    <div className={`rounded-lg border bg-gradient-to-br px-2 py-1.5 ${tones[tone]}`}>
+      <div className="text-[9px] uppercase tracking-wider opacity-80 leading-tight">{label}</div>
+      <div className="mt-0.5 text-lg font-bold tabular-nums leading-tight">{value}</div>
+      {sub && <div className="text-[9px] opacity-70 leading-tight truncate">{sub}</div>}
     </div>
   );
 }
