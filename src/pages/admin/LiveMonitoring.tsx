@@ -7,19 +7,21 @@ import {
 import { MapContainer, TileLayer, CircleMarker, Tooltip as LTooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 
+// Selangor, Malaysia bounding box
+const SELANGOR_BOUNDS = L.latLngBounds(
+  [2.6, 100.8] as [number, number],
+  [3.85, 101.95] as [number, number],
+);
+const SELANGOR_CENTER: [number, number] = [3.0738, 101.5183];
+
 function FitBounds({ points }: { points: { lat: number; lng: number }[] }) {
   const map = useMap();
   useEffect(() => {
-    if (!points.length) return;
-    if (points.length === 1) {
-      map.setView([points[0].lat, points[0].lng], 12, { animate: false });
-      return;
-    }
-    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng] as [number, number]));
-    map.fitBounds(bounds, { padding: [20, 20], maxZoom: 13, animate: false });
-  }, [points, map]);
+    map.fitBounds(SELANGOR_BOUNDS, { padding: [20, 20], animate: false });
+  }, [map]);
   return null;
 }
+
 import "leaflet/dist/leaflet.css";
 import {
   AlertTriangle, Maximize2, RefreshCw,
