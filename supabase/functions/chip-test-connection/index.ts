@@ -34,10 +34,10 @@ Deno.serve(async (req) => {
     if (!api_key) throw new Error("api_key required");
     if (!brand_id) throw new Error("brand_id required");
 
-    const base = mode === "live"
-      ? "https://gate.chip-in.asia/api/v1"
-      : "https://gate.chip-in.asia/api/v1"; // CHIP uses same host; sandbox = test brand/key
-    const res = await fetch(`${base}/account/json/`, {
+    const base = "https://gate.chip-in.asia/api/v1";
+    // Validate by listing payment methods for the brand — lightweight and brand-scoped
+    const url = `${base}/payment_methods/?brand_id=${encodeURIComponent(brand_id)}&currency=MYR`;
+    const res = await fetch(url, {
       headers: { Authorization: `Bearer ${api_key}` },
     });
     const text = await res.text();
@@ -49,12 +49,11 @@ Deno.serve(async (req) => {
     }
     let parsed: any = null;
     try { parsed = JSON.parse(text); } catch {}
+    const methods = parsed?.available_payment_methods ?? parsed?.by_country?.MY ?? [];
     return new Response(
       JSON.stringify({
         ok: true,
-        message: parsed?.email
-          ? `Connected as ${parsed.email}`
-          : "Credentials valid — CHIP responded successfully.",
+        message: `Connected to CHIP (${mode}). ${Array.isArray(methods) ? methods.length : 0} payment method(s) available.`,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
