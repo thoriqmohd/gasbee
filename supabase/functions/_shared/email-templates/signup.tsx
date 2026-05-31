@@ -9,8 +9,10 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -21,6 +23,8 @@ interface SignupEmailProps {
   confirmationUrl: string
 }
 
+const LOGO = 'https://dkxjykxvljppdiaekvwk.supabase.co/storage/v1/object/public/email-assets/gasbee-logo.png'
+
 export const SignupEmail = ({
   siteName,
   siteUrl,
@@ -29,29 +33,27 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Confirm your email for {siteName}</Preview>
+    <Preview>Confirm your email to start using {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Img src={LOGO} alt={siteName} style={logo} />
+        <Text style={tagline}>BE READY · BEE DELIVERS</Text>
         <Heading style={h1}>Confirm your email</Heading>
         <Text style={text}>
-          Thanks for signing up for{' '}
+          Welcome to{' '}
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
           </Link>
-          !
+          ! Please confirm <strong>{recipient}</strong> to activate your account
+          and start ordering LPG with a tap.
         </Text>
-        <Text style={text}>
-          Please confirm your email address (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ) by clicking the button below:
-        </Text>
-        <Button style={button} href={confirmationUrl}>
-          Verify Email
-        </Button>
+        <Section style={buttonWrap}>
+          <Button style={button} href={confirmationUrl}>
+            Confirm email
+          </Button>
+        </Section>
         <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
+          If you didn't sign up for Gasbee, you can safely ignore this email.
         </Text>
       </Container>
     </Body>
@@ -60,27 +62,13 @@ export const SignupEmail = ({
 
 export default SignupEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const link = { color: 'inherit', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const main = { backgroundColor: '#ffffff', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', margin: 0, padding: '40px 16px' }
+const container = { padding: '36px 32px', maxWidth: '480px', margin: '0 auto', backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '14px' }
+const logo = { display: 'block', margin: '0 auto 12px', height: '44px' }
+const tagline = { fontSize: '11px', color: '#f59e0b', textAlign: 'center' as const, fontWeight: '700' as const, letterSpacing: '2px', margin: '0 0 18px' }
+const h1 = { fontSize: '22px', fontWeight: '700' as const, color: '#0f172a', margin: '0 0 16px', textAlign: 'center' as const }
+const text = { fontSize: '15px', color: '#475569', lineHeight: '1.6', margin: '0 0 16px' }
+const link = { color: '#b45309', textDecoration: 'underline' }
+const buttonWrap = { textAlign: 'center' as const, margin: '28px 0' }
+const button = { backgroundColor: '#f59e0b', color: '#0f172a', fontSize: '15px', fontWeight: '600' as const, borderRadius: '10px', padding: '14px 28px', textDecoration: 'none', display: 'inline-block' }
+const footer = { fontSize: '12px', color: '#94a3b8', margin: '24px 0 0', textAlign: 'center' as const }
