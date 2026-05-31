@@ -128,7 +128,7 @@ export default function MerchantRiders() {
                 <td className="p-3"><StatusBadge value={r.status} /></td>
                 <td className="p-3 text-right">
                   <span className="mr-3 inline-flex items-center gap-2 align-middle">
-                    <Switch checked={!!r.is_active} onCheckedChange={() => toggle(r)} className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-muted-foreground/40" />
+                    <Switch checked={!!r.is_active} onCheckedChange={(v) => toggle(r, v)} className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-muted-foreground/40" />
                   </span>
                   <Button size="icon" variant="ghost" onClick={() => setEditing(r)}><Pencil className="h-4 w-4" /></Button>
                   <Button size="icon" variant="ghost" onClick={() => del(r)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
