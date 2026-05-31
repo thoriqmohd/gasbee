@@ -382,6 +382,7 @@ export default function LiveMonitoring() {
           <div className="h-full w-full overflow-hidden rounded-lg">
             <MapContainer center={mapCenter} zoom={7} style={{ height: "100%", width: "100%", background: "#0a0f1e" }} scrollWheelZoom={false} zoomControl={false} attributionControl={false}>
               <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+              <FitBounds points={heatPoints} />
               {heatPoints.map((p, i) => (
                 <CircleMarker key={i} center={[p.lat, p.lng]} radius={Math.min(24, 5 + p.count * 1.5)} pathOptions={{ color: "#f59e0b", fillColor: "#f59e0b", fillOpacity: 0.45, weight: 1 }}>
                   <LTooltip>{p.city} · {p.count} orders</LTooltip>
