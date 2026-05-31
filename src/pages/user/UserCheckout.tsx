@@ -271,7 +271,7 @@ export default function UserCheckout() {
           {[
             { id: "cod", label: "COD" },
             { id: "fpx", label: "FPX (Online Transfer)" },
-            { id: "card", label: "Card" },
+            { id: "card", label: "Credit Card" },
             { id: "ewallet", label: "E-Wallet" }
           ].map((m) => (
             <Card key={m.id} className="flex items-center gap-2 p-3">
@@ -350,7 +350,7 @@ export default function UserCheckout() {
             {addr && (
               <div><span className="text-muted-foreground">Deliver to: </span><span className="font-medium">{addr.label ?? "Address"} — {addr.address_line1}, {addr.postcode} {addr.city}</span></div>
             )}
-            <div><span className="text-muted-foreground">Payment: </span><span className="font-medium">{paymentMethod === "fpx" ? "FPX (Online Transfer)" : paymentMethod.toUpperCase()}</span></div>
+            <div><span className="text-muted-foreground">Payment: </span><span className="font-medium">{paymentMethod === "fpx" ? "FPX (Online Transfer)" : (paymentMethod === "card" ? "Credit Card" : paymentMethod.toUpperCase())}</span></div>
             <div><span className="text-muted-foreground">Total: </span><span className="font-bold text-primary">RM {total.toFixed(2)}</span></div>
           </div>
           <AlertDialogFooter>

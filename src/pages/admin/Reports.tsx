@@ -55,7 +55,7 @@ export default function Reports() {
     });
     autoTable(doc, {
       head: [["Order", "Date", "Method", "Amount"]],
-      body: paid.map((r) => [r.code, new Date(r.created_at).toLocaleDateString(), r.payment_method === "fpx" ? "FPX (Online Transfer)" : (r.payment_method ?? "—").toUpperCase(), fmt(Number(r.total_amount))]),
+      body: paid.map((r) => [r.code, new Date(r.created_at).toLocaleDateString(), r.payment_method === "fpx" ? "FPX (Online Transfer)" : (r.payment_method === "card" ? "Credit Card" : (r.payment_method ?? "—").toUpperCase()), fmt(Number(r.total_amount))]),
     });
     doc.save(`gasbee-report-${from}-to-${to}.pdf`);
   };
@@ -118,7 +118,7 @@ export default function Reports() {
               <tr key={i} className="border-t">
                 <td className="p-3 font-mono text-xs">{r.code}</td>
                 <td className="p-3 text-xs">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="p-3">{r.payment_method === "fpx" ? "FPX (Online Transfer)" : (r.payment_method ?? "—").toUpperCase()}</td>
+                <td className="p-3">{r.payment_method === "fpx" ? "FPX (Online Transfer)" : (r.payment_method === "card" ? "Credit Card" : (r.payment_method ?? "—").toUpperCase())}</td>
                 <td className="p-3">{fmt(Number(r.total_amount))}</td>
               </tr>
             ))}
