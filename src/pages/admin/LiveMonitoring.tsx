@@ -4,7 +4,22 @@ import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from "recharts";
-import { MapContainer, TileLayer, CircleMarker, Tooltip as LTooltip } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Tooltip as LTooltip, useMap } from "react-leaflet";
+import L from "leaflet";
+
+function FitBounds({ points }: { points: { lat: number; lng: number }[] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!points.length) return;
+    if (points.length === 1) {
+      map.setView([points[0].lat, points[0].lng], 12, { animate: false });
+      return;
+    }
+    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng] as [number, number]));
+    map.fitBounds(bounds, { padding: [20, 20], maxZoom: 13, animate: false });
+  }, [points, map]);
+  return null;
+}
 import "leaflet/dist/leaflet.css";
 import {
   AlertTriangle, Maximize2, RefreshCw,
