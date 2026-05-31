@@ -78,7 +78,7 @@ export default function UserPayment() {
           <span className="text-lg font-bold text-primary">RM {Number(order.total_amount).toFixed(2)}</span>
         </div>
         <div className="text-xs uppercase tracking-wide text-muted-foreground">
-          Method: {order.payment_method?.toUpperCase()}
+          Method: {order.payment_method === "fpx" ? "FPX (Online Transfer)" : order.payment_method?.toUpperCase()}
         </div>
       </Card>
 
