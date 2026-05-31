@@ -31,7 +31,7 @@ export default function UserPayment() {
         }
       } catch {
         redirectOrigin = window.location.hostname.includes("lovableproject.com")
-          ? "https://gasbee.lovable.app"
+          ? "https://gasbee.com.my"
           : window.location.origin;
       }
 
