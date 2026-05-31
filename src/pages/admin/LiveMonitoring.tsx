@@ -71,7 +71,12 @@ export default function LiveMonitoring() {
   const [refunds, setRefunds] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [weather, setWeather] = useState<{ temp: number; code: number; max: number; min: number } | null>(null);
+  const [weather, setWeather] = useState<{
+    morning: { temp: number; code: number } | null;
+    evening: { temp: number; code: number } | null;
+    max: number;
+    min: number;
+  } | null>(null);
 
   // Clock
   useEffect(() => {
@@ -84,12 +89,20 @@ export default function LiveMonitoring() {
     const fetchWeather = async () => {
       try {
         const res = await fetch(
-          "https://api.open-meteo.com/v1/forecast?latitude=3.0738&longitude=101.5183&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FKuala_Lumpur&forecast_days=1"
+          "https://api.open-meteo.com/v1/forecast?latitude=3.0738&longitude=101.5183&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FKuala_Lumpur&forecast_days=1"
         );
         const j = await res.json();
+        const times: string[] = j.hourly?.time || [];
+        const temps: number[] = j.hourly?.temperature_2m || [];
+        const codes: number[] = j.hourly?.weather_code || [];
+        const pick = (hour: number) => {
+          const idx = times.findIndex((t) => t.endsWith(`T${String(hour).padStart(2, "0")}:00`));
+          if (idx < 0) return null;
+          return { temp: Math.round(temps[idx]), code: codes[idx] };
+        };
         setWeather({
-          temp: Math.round(j.current?.temperature_2m),
-          code: j.current?.weather_code,
+          morning: pick(8),
+          evening: pick(18),
           max: Math.round(j.daily?.temperature_2m_max?.[0]),
           min: Math.round(j.daily?.temperature_2m_min?.[0]),
         });
@@ -102,14 +115,14 @@ export default function LiveMonitoring() {
 
   const weatherLabel = (code?: number) => {
     if (code == null) return "—";
-    if (code === 0) return "Cerah";
-    if ([1, 2].includes(code)) return "Cerah berawan";
-    if (code === 3) return "Mendung";
-    if ([45, 48].includes(code)) return "Berkabus";
-    if ([51, 53, 55, 56, 57].includes(code)) return "Hujan renyai";
-    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "Hujan";
-    if ([95, 96, 99].includes(code)) return "Ribut petir";
-    return "Berawan";
+    if (code === 0) return "Clear";
+    if ([1, 2].includes(code)) return "Partly cloudy";
+    if (code === 3) return "Overcast";
+    if ([45, 48].includes(code)) return "Foggy";
+    if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "Rain";
+    if ([95, 96, 99].includes(code)) return "Thunderstorm";
+    return "Cloudy";
   };
   const weatherIcon = (code?: number) => {
     if (code == null) return "·";
@@ -122,6 +135,7 @@ export default function LiveMonitoring() {
     if ([95, 96, 99].includes(code)) return "⛈️";
     return "🌥️";
   };
+
 
 
   const load = async () => {
@@ -353,14 +367,29 @@ export default function LiveMonitoring() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-lg border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 px-2.5 py-1 text-sky-200">
-              <span className="text-xl leading-none">{weatherIcon(weather?.code)}</span>
-              <div className="leading-tight">
-                <div className="text-sm font-bold tabular-nums">{weather ? `${weather.temp}°C` : "—"}</div>
-                <div className="text-[9px] uppercase tracking-widest opacity-80">
-                  {weatherLabel(weather?.code)}{weather ? ` · ${weather.min}°/${weather.max}°` : ""}
+              <div className="flex items-center gap-1.5">
+                <span className="text-base leading-none">{weatherIcon(weather?.morning?.code)}</span>
+                <div className="leading-tight">
+                  <div className="text-[9px] uppercase tracking-widest opacity-80">Morning</div>
+                  <div className="text-xs font-bold tabular-nums">
+                    {weather?.morning ? `${weather.morning.temp}°C` : "—"}
+                    <span className="ml-1 font-normal opacity-80">{weatherLabel(weather?.morning?.code)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-6 w-px bg-sky-500/30" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-base leading-none">{weatherIcon(weather?.evening?.code)}</span>
+                <div className="leading-tight">
+                  <div className="text-[9px] uppercase tracking-widest opacity-80">Evening</div>
+                  <div className="text-xs font-bold tabular-nums">
+                    {weather?.evening ? `${weather.evening.temp}°C` : "—"}
+                    <span className="ml-1 font-normal opacity-80">{weatherLabel(weather?.evening?.code)}</span>
+                  </div>
                 </div>
               </div>
             </div>
+
             <div className="text-right">
               <div className="text-lg font-bold tabular-nums leading-tight">{now.toLocaleTimeString("en-MY")}</div>
               <div className="text-[9px] uppercase tracking-widest opacity-70 leading-tight">
