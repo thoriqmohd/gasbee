@@ -382,7 +382,7 @@ export default function LiveMonitoring() {
         {/* Row 2: heatmap | top riders | merchant ranking */}
         <Panel title="Delivery Heatmap" className="col-span-5">
           <div className="h-full w-full overflow-hidden rounded-lg">
-            <MapContainer center={mapCenter} zoom={7} style={{ height: "100%", width: "100%", background: "#0a0f1e" }} scrollWheelZoom={false} zoomControl={false} attributionControl={false}>
+            <MapContainer center={SELANGOR_CENTER} zoom={10} minZoom={8} maxZoom={16} maxBounds={SELANGOR_BOUNDS} maxBoundsViscosity={0.8} style={{ height: "100%", width: "100%", background: "#0a0f1e" }} scrollWheelZoom={true} zoomControl={true} attributionControl={false}>
               <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
               <FitBounds points={heatPoints} />
               {heatPoints.map((p, i) => (
