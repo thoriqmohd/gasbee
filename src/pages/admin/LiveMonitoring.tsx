@@ -19,15 +19,15 @@ const COLORS = ["#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6", "#ec4899"
 
 function Panel({ title, icon: Icon, children, className = "", action }: any) {
   return (
-    <div className={`rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-950/90 backdrop-blur p-4 shadow-xl ${className}`}>
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-amber-400">
-          {Icon && <Icon className="h-4 w-4" />}
-          <h3 className="text-xs font-bold uppercase tracking-widest">{title}</h3>
+    <div className={`flex min-h-0 flex-col rounded-xl border border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-950/90 backdrop-blur p-2 shadow-xl ${className}`}>
+      <div className="mb-1.5 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-1.5 text-amber-400">
+          {Icon && <Icon className="h-3 w-3" />}
+          <h3 className="text-[10px] font-bold uppercase tracking-widest">{title}</h3>
         </div>
         {action}
       </div>
-      {children}
+      <div className="flex-1 min-h-0">{children}</div>
     </div>
   );
 }
@@ -41,10 +41,10 @@ function StatPill({ label, value, sub, tone = "amber" }: any) {
     violet: "from-violet-500/20 to-violet-500/5 text-violet-300 border-violet-500/30",
   };
   return (
-    <div className={`rounded-xl border bg-gradient-to-br p-3 ${tones[tone]}`}>
-      <div className="text-[10px] uppercase tracking-wider opacity-80">{label}</div>
-      <div className="mt-1 text-2xl font-bold tabular-nums">{value}</div>
-      {sub && <div className="mt-0.5 text-[10px] opacity-70">{sub}</div>}
+    <div className={`rounded-lg border bg-gradient-to-br px-2 py-1.5 ${tones[tone]}`}>
+      <div className="text-[9px] uppercase tracking-wider opacity-80 leading-tight">{label}</div>
+      <div className="mt-0.5 text-lg font-bold tabular-nums leading-tight">{value}</div>
+      {sub && <div className="text-[9px] opacity-70 leading-tight truncate">{sub}</div>}
     </div>
   );
 }
@@ -278,40 +278,41 @@ export default function LiveMonitoring() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070d] text-slate-100">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#05070d] text-slate-100 text-xs">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 px-6 py-3">
+      <div className="shrink-0 border-b border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 px-4 py-1.5">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-3 w-3">
+          <div className="flex items-center gap-2">
+            <div className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </div>
             <div>
-              <div className="text-lg font-bold tracking-wide">Gasbee · Live Operations</div>
-              <div className="text-[11px] uppercase tracking-widest text-amber-400/80">Real-time monitoring</div>
+              <div className="text-sm font-bold tracking-wide leading-tight">Gasbee · Live Operations</div>
+              <div className="text-[9px] uppercase tracking-widest text-amber-400/80 leading-tight">Real-time monitoring</div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className="text-2xl font-bold tabular-nums">{now.toLocaleTimeString("en-MY")}</div>
-              <div className="text-[11px] uppercase tracking-widest opacity-70">
-                {now.toLocaleDateString("en-MY", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}
+              <div className="text-lg font-bold tabular-nums leading-tight">{now.toLocaleTimeString("en-MY")}</div>
+              <div className="text-[9px] uppercase tracking-widest opacity-70 leading-tight">
+                {now.toLocaleDateString("en-MY", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}
               </div>
             </div>
-            <button onClick={load} className="rounded-lg border border-white/10 bg-white/5 p-2 hover:bg-white/10" title="Refresh">
-              <RefreshCw className="h-4 w-4" />
+            <button onClick={load} className="rounded-lg border border-white/10 bg-white/5 p-1.5 hover:bg-white/10" title="Refresh">
+              <RefreshCw className="h-3 w-3" />
             </button>
-            <button onClick={toggleFullscreen} className="rounded-lg border border-white/10 bg-white/5 p-2 hover:bg-white/10" title="Fullscreen">
-              <Maximize2 className="h-4 w-4" />
+            <button onClick={toggleFullscreen} className="rounded-lg border border-white/10 bg-white/5 p-1.5 hover:bg-white/10" title="Fullscreen">
+              <Maximize2 className="h-3 w-3" />
             </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-4 p-4">
-        {/* Top KPIs */}
-        <div className="col-span-12 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
+      {/* TV grid — fits in one viewport */}
+      <div className="flex-1 min-h-0 grid grid-cols-12 grid-rows-[auto_1.1fr_1.1fr_1fr] gap-2 p-2">
+        {/* Row 0: KPI strip */}
+        <div className="col-span-12 grid grid-cols-6 gap-2">
           <StatPill label="Orders Today" value={fmtNum(todayOrders.length)} sub={`Peak ${peakHour?.hour} · ${peakHour?.orders}`} tone="amber" />
           <StatPill label="Revenue Today" value={fmtMYR(revenueToday)} sub={`Month ${fmtMYR(revenueMonth)}`} tone="green" />
           <StatPill label="In Transit" value={fmtNum(inTransit.length)} sub={`${pending.length} pending`} tone="blue" />
@@ -320,10 +321,10 @@ export default function LiveMonitoring() {
           <StatPill label="Low Stock SKUs" value={fmtNum(lowStock.length)} sub={`${pendingSettlements.length} settlements pending`} tone={lowStock.length ? "red" : "green"} />
         </div>
 
-        {/* Row 1 */}
-        <Panel title="Order Trend (Today · Hourly)" icon={Activity} className="col-span-12 xl:col-span-8">
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={hourly}>
+        {/* Row 1: hourly | daily | status pie */}
+        <Panel title="Order Trend · Hourly" icon={Activity} className="col-span-5">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={hourly} margin={{ top: 2, right: 6, bottom: 0, left: -20 }}>
               <defs>
                 <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.7} />
@@ -331,68 +332,47 @@ export default function LiveMonitoring() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="hour" stroke="#64748b" fontSize={10} />
-              <YAxis stroke="#64748b" fontSize={10} />
-              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8 }} />
+              <XAxis dataKey="hour" stroke="#64748b" fontSize={9} interval={2} />
+              <YAxis stroke="#64748b" fontSize={9} />
+              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 11 }} />
               <Area type="monotone" dataKey="orders" stroke="#f59e0b" fill="url(#g1)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Order Status" icon={Package} className="col-span-12 md:col-span-6 xl:col-span-4">
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie data={statusDist} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
-                {statusDist.map((s, i) => <Cell key={i} fill={s.color} />)}
-              </Pie>
-              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8 }} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </Panel>
-
-        {/* Row 2 */}
-        <Panel title="Daily Revenue · Last 14 Days" icon={DollarSign} className="col-span-12 xl:col-span-8">
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={daily}>
+        <Panel title="Revenue · Last 14 Days" icon={DollarSign} className="col-span-5">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={daily} margin={{ top: 2, right: 6, bottom: 0, left: -20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="day" stroke="#64748b" fontSize={10} />
-              <YAxis stroke="#64748b" fontSize={10} />
-              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8 }} formatter={(v: any, n: any) => n === "revenue" ? fmtMYR(v) : v} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <XAxis dataKey="day" stroke="#64748b" fontSize={9} interval={1} />
+              <YAxis stroke="#64748b" fontSize={9} />
+              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 11 }} formatter={(v: any, n: any) => n === "revenue" ? fmtMYR(v) : v} />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
               <Line type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Revenue by Area" icon={TrendingUp} className="col-span-12 md:col-span-6 xl:col-span-4">
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={revByArea} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis type="number" stroke="#64748b" fontSize={10} />
-              <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={10} width={80} />
-              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8 }} formatter={(v: any) => fmtMYR(v)} />
-              <Bar dataKey="total" fill="#f59e0b" radius={[0, 4, 4, 0]} />
-            </BarChart>
+        <Panel title="Order Status" icon={Package} className="col-span-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={statusDist} dataKey="value" nameKey="name" innerRadius="45%" outerRadius="75%" paddingAngle={2}>
+                {statusDist.map((s, i) => <Cell key={i} fill={s.color} />)}
+              </Pie>
+              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 11 }} />
+              <Legend wrapperStyle={{ fontSize: 9 }} iconSize={6} />
+            </PieChart>
           </ResponsiveContainer>
         </Panel>
 
-        {/* Row 3: Heatmap + Rider Leaderboard */}
-        <Panel title="Delivery Heatmap" icon={Activity} className="col-span-12 xl:col-span-8">
-          <div className="overflow-hidden rounded-lg" style={{ height: 360 }}>
-            <MapContainer center={mapCenter} zoom={7} style={{ height: "100%", width: "100%", background: "#0a0f1e" }} scrollWheelZoom={false}>
-              <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                attribution='&copy; OpenStreetMap &copy; CARTO'
-              />
+        {/* Row 2: heatmap | top riders | merchant ranking */}
+        <Panel title="Delivery Heatmap" icon={Activity} className="col-span-5">
+          <div className="h-full w-full overflow-hidden rounded-lg">
+            <MapContainer center={mapCenter} zoom={7} style={{ height: "100%", width: "100%", background: "#0a0f1e" }} scrollWheelZoom={false} zoomControl={false} attributionControl={false}>
+              <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
               {heatPoints.map((p, i) => (
-                <CircleMarker
-                  key={i}
-                  center={[p.lat, p.lng]}
-                  radius={Math.min(30, 6 + p.count * 2)}
-                  pathOptions={{ color: "#f59e0b", fillColor: "#f59e0b", fillOpacity: 0.45, weight: 1 }}
-                >
+                <CircleMarker key={i} center={[p.lat, p.lng]} radius={Math.min(24, 5 + p.count * 1.5)} pathOptions={{ color: "#f59e0b", fillColor: "#f59e0b", fillOpacity: 0.45, weight: 1 }}>
                   <LTooltip>{p.city} · {p.count} orders</LTooltip>
                 </CircleMarker>
               ))}
@@ -400,122 +380,112 @@ export default function LiveMonitoring() {
           </div>
         </Panel>
 
-        <Panel title="Top Riders" icon={Bike} className="col-span-12 md:col-span-6 xl:col-span-4">
-          <div className="space-y-2 max-h-[360px] overflow-auto">
-            {riderPerf.slice(0, 8).map((r, i) => (
-              <div key={r.id} className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/5 p-2">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${i === 0 ? "bg-amber-500 text-slate-900" : "bg-white/10"}`}>{i + 1}</div>
+        <Panel title="Top Riders" icon={Bike} className="col-span-3">
+          <div className="space-y-1 h-full overflow-hidden">
+            {riderPerf.slice(0, 5).map((r, i) => (
+              <div key={r.id} className="flex items-center gap-2 rounded-md border border-white/5 bg-white/5 px-2 py-1">
+                <div className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${i === 0 ? "bg-amber-500 text-slate-900" : "bg-white/10"}`}>{i + 1}</div>
                 <div className="flex-1 min-w-0">
-                  <div className="truncate text-sm font-semibold">{r.name}</div>
-                  <div className="text-[10px] text-slate-400">⭐ {Number(r.rating).toFixed(1)} · {r.avgMin || 0} min avg</div>
+                  <div className="truncate text-[11px] font-semibold leading-tight">{r.name}</div>
+                  <div className="text-[9px] text-slate-400 leading-tight">⭐ {Number(r.rating).toFixed(1)} · {r.avgMin || 0}m</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-bold text-emerald-400">{r.delivered}</div>
-                  <div className="text-[10px] text-rose-400">{r.failed} failed</div>
+                  <div className="text-[11px] font-bold text-emerald-400 leading-tight">{r.delivered}</div>
+                  <div className="text-[9px] text-rose-400 leading-tight">{r.failed} fail</div>
                 </div>
               </div>
             ))}
-            {riderPerf.length === 0 && <div className="text-center text-xs text-slate-500 py-8">No rider data</div>}
+            {riderPerf.length === 0 && <div className="text-center text-[10px] text-slate-500 py-4">No rider data</div>}
           </div>
         </Panel>
 
-        {/* Row 4: Merchants + Revenue by Merchant */}
-        <Panel title="Top Merchants by Revenue" icon={Store} className="col-span-12 md:col-span-6">
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={revByMerchant}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="name" stroke="#64748b" fontSize={9} angle={-15} textAnchor="end" height={50} />
-              <YAxis stroke="#64748b" fontSize={10} />
-              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8 }} formatter={(v: any) => fmtMYR(v)} />
-              <Bar dataKey="total" fill="#10b981" radius={[6, 6, 0, 0]} />
+        <Panel title="Top Merchants" icon={Store} className="col-span-4">
+          <div className="space-y-1 h-full overflow-hidden">
+            {merchantPerf.slice(0, 5).map((m, i) => (
+              <div key={m.id} className="flex items-center gap-2 rounded-md border border-white/5 bg-white/5 px-2 py-1">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold">{i + 1}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="truncate text-[11px] font-semibold leading-tight">{m.name}</div>
+                  <div className="text-[9px] text-slate-400 leading-tight">{m.orders} ord · ⭐{Number(m.rating || 0).toFixed(1)} · rpt {m.repeatRate.toFixed(0)}%</div>
+                </div>
+                <div className="text-[11px] font-bold text-amber-400 whitespace-nowrap">{fmtMYR(m.revenue)}</div>
+              </div>
+            ))}
+            {merchantPerf.length === 0 && <div className="text-center text-[10px] text-slate-500 py-4">No merchant data</div>}
+          </div>
+        </Panel>
+
+        {/* Row 3: revenue area | inventory | financial | customer | sla | AI */}
+        <Panel title="Revenue by Area" icon={TrendingUp} className="col-span-3">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={revByArea} layout="vertical" margin={{ top: 0, right: 4, bottom: 0, left: 0 }}>
+              <XAxis type="number" stroke="#64748b" fontSize={9} />
+              <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={9} width={60} />
+              <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 11 }} formatter={(v: any) => fmtMYR(v)} />
+              <Bar dataKey="total" fill="#f59e0b" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Merchant Ranking" icon={Store} className="col-span-12 md:col-span-6">
-          <div className="space-y-2 max-h-[240px] overflow-auto">
-            {merchantPerf.slice(0, 6).map((m, i) => (
-              <div key={m.id} className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/5 p-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-xs font-bold">{i + 1}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="truncate text-sm font-semibold">{m.name}</div>
-                  <div className="text-[10px] text-slate-400">{m.orders} orders · ⭐ {Number(m.rating || 0).toFixed(1)} · repeat {m.repeatRate.toFixed(0)}%</div>
+        <Panel title="Low Stock" icon={Boxes} className="col-span-2">
+          <div className="space-y-1 h-full overflow-hidden">
+            {lowStock.slice(0, 4).map((p) => (
+              <div key={p.id} className="flex items-center justify-between rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1">
+                <div className="min-w-0">
+                  <div className="text-[11px] font-semibold leading-tight truncate">{p.name}</div>
+                  <div className="text-[9px] text-slate-400 leading-tight truncate">{merchants.find((m) => m.id === p.merchant_id)?.name || "—"}</div>
                 </div>
-                <div className="text-sm font-bold text-amber-400">{fmtMYR(m.revenue)}</div>
-              </div>
-            ))}
-            {merchantPerf.length === 0 && <div className="text-center text-xs text-slate-500 py-8">No merchant data</div>}
-          </div>
-        </Panel>
-
-        {/* Row 5: Inventory + Financial + Customer */}
-        <Panel title="Inventory · Low Stock" icon={Boxes} className="col-span-12 md:col-span-6 xl:col-span-4">
-          <div className="space-y-2 max-h-[240px] overflow-auto">
-            {lowStock.slice(0, 8).map((p) => (
-              <div key={p.id} className="flex items-center justify-between rounded-lg border border-rose-500/20 bg-rose-500/10 p-2">
-                <div>
-                  <div className="text-sm font-semibold">{p.name}</div>
-                  <div className="text-[10px] text-slate-400">{merchants.find((m) => m.id === p.merchant_id)?.name || "—"}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg font-bold text-rose-300">{p.stock_qty}</div>
-                  <div className="text-[10px] text-slate-400">≤ {p.low_stock_threshold}</div>
+                <div className="text-right shrink-0 ml-1">
+                  <div className="text-sm font-bold text-rose-300 leading-tight">{p.stock_qty}</div>
+                  <div className="text-[9px] text-slate-400 leading-tight">≤ {p.low_stock_threshold}</div>
                 </div>
               </div>
             ))}
-            {lowStock.length === 0 && <div className="text-center text-xs text-emerald-400 py-8">✓ Semua stok mencukupi</div>}
+            {lowStock.length === 0 && <div className="text-center text-[10px] text-emerald-400 py-4">✓ Stok OK</div>}
           </div>
         </Panel>
 
-        <Panel title="Financial · 30 Days" icon={Wallet} className="col-span-12 md:col-span-6 xl:col-span-4">
-          <div className="grid grid-cols-2 gap-2">
+        <Panel title="Financial · 30D" icon={Wallet} className="col-span-2">
+          <div className="grid grid-cols-2 gap-1 h-full">
             <StatPill label="Commission" value={fmtMYR(totalCommission)} tone="amber" />
-            <StatPill label="Net Payout" value={fmtMYR(totalPayout)} tone="green" />
-            <StatPill label="Pending Settle." value={fmtNum(pendingSettlements.length)} tone="blue" />
-            <StatPill label="Refunds" value={fmtNum(refunds.length)} sub={fmtMYR(refunds.reduce((s, x) => s + Number(x.amount || 0), 0))} tone="violet" />
-          </div>
-          <div className="mt-3 text-[11px] text-slate-400">
-            Cashflow: gross sales {fmtMYR(orders.filter((o) => o.payment_status === "paid").reduce((s, o) => s + Number(o.total_amount || 0), 0))} dalam 30 hari.
+            <StatPill label="Payout" value={fmtMYR(totalPayout)} tone="green" />
+            <StatPill label="Pending" value={fmtNum(pendingSettlements.length)} tone="blue" />
+            <StatPill label="Refunds" value={fmtNum(refunds.length)} tone="violet" />
           </div>
         </Panel>
 
-        <Panel title="Customer Analytics" icon={Users} className="col-span-12 md:col-span-12 xl:col-span-4">
-          <div className="grid grid-cols-2 gap-2">
-            <StatPill label="New Customers" value={fmtNum(customerStats.newC)} tone="blue" />
+        <Panel title="Customers" icon={Users} className="col-span-2">
+          <div className="grid grid-cols-2 gap-1 h-full">
+            <StatPill label="New" value={fmtNum(customerStats.newC)} tone="blue" />
             <StatPill label="Repeat" value={fmtNum(customerStats.repeat)} tone="green" />
             <StatPill label="Retention" value={`${customerStats.retention.toFixed(0)}%`} tone="violet" />
-            <StatPill label="Avg Order Value" value={fmtMYR(customerStats.aov)} tone="amber" />
+            <StatPill label="AOV" value={fmtMYR(customerStats.aov)} tone="amber" />
           </div>
         </Panel>
 
-        {/* Row 6: SLA + AI */}
-        <Panel title="SLA & Operations" icon={Clock} className="col-span-12 md:col-span-6">
-          <div className="grid grid-cols-3 gap-2">
-            <StatPill label="Avg Response" value={`${slaStats.avgResp}m`} sub="Order → Accept" tone="blue" />
-            <StatPill label="Late Delivery" value={`${slaStats.latePct.toFixed(1)}%`} sub=">60 min" tone={slaStats.latePct > 15 ? "red" : "green"} />
-            <StatPill label="Failed Order" value={`${failedPct.toFixed(1)}%`} tone={failedPct > 10 ? "red" : "green"} />
-          </div>
-          <div className="mt-3 text-[11px] text-slate-400">
-            Avg delivery time: <span className="text-slate-200 font-semibold">{avgDelivery ? Math.round(avgDelivery) : 0} minit</span> · Total delivered (30d): {totalDelivered}
+        <Panel title="SLA" icon={Clock} className="col-span-1">
+          <div className="flex flex-col gap-1 h-full">
+            <StatPill label="Resp" value={`${slaStats.avgResp}m`} tone="blue" />
+            <StatPill label="Late" value={`${slaStats.latePct.toFixed(0)}%`} tone={slaStats.latePct > 15 ? "red" : "green"} />
           </div>
         </Panel>
 
         <Panel
-          title="AI Predictions & Alerts"
+          title="AI Predictions"
           icon={Sparkles}
-          className="col-span-12 md:col-span-6 border-amber-500/30"
-          action={<span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">PREMIUM</span>}
+          className="col-span-2 border-amber-500/30"
+          action={<span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">AI</span>}
         >
-          <div className="grid grid-cols-3 gap-2">
-            <StatPill label="Forecast Orders" value={fmtNum(predictions.predictedOrdersTomorrow)} sub={`${predictions.trendPct >= 0 ? "+" : ""}${predictions.trendPct.toFixed(0)}% vs prev wk`} tone="amber" />
-            <StatPill label="Rider Required" value={fmtNum(predictions.predictedRiders)} sub="tomorrow" tone="violet" />
-            <StatPill label="Refills Forecast" value={fmtNum(predictions.predictedRefills)} sub="tank units" tone="green" />
+          <div className="grid grid-cols-3 gap-1 mb-1">
+            <StatPill label="Tomorrow" value={fmtNum(predictions.predictedOrdersTomorrow)} tone="amber" />
+            <StatPill label="Riders" value={fmtNum(predictions.predictedRiders)} tone="violet" />
+            <StatPill label="Refills" value={fmtNum(predictions.predictedRefills)} tone="green" />
           </div>
-          <div className="mt-3 space-y-1.5">
-            {predictions.alerts.map((a, i) => (
-              <div key={i} className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-2 text-[11px]">
-                <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-amber-400" />
-                <span>{a}</span>
+          <div className="space-y-1 overflow-hidden">
+            {predictions.alerts.slice(0, 2).map((a, i) => (
+              <div key={i} className="flex items-start gap-1 rounded-md border border-amber-500/20 bg-amber-500/5 p-1 text-[9px] leading-tight">
+                <AlertTriangle className="h-2.5 w-2.5 mt-0.5 shrink-0 text-amber-400" />
+                <span className="line-clamp-2">{a}</span>
               </div>
             ))}
           </div>
