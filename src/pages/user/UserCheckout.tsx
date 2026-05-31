@@ -270,7 +270,7 @@ export default function UserCheckout() {
         <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="grid grid-cols-2 gap-2">
           {[
             { id: "cod", label: <>COD <br />(Cash on Delivery)</> },
-            { id: "fpx", label: "FPX (Online Transfer)" },
+            { id: "fpx", label: <>FPX <br />(Online Transfer)</> },
             { id: "card", label: "Credit Card" },
             { id: "ewallet", label: "E-Wallet" }
           ].map((m) => (
