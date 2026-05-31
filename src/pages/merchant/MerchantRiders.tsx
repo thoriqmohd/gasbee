@@ -58,10 +58,11 @@ export default function MerchantRiders() {
     load();
   };
 
-  const toggle = async (r: any) => {
-    const { error } = await supabase.from("riders").update({ is_active: !r.is_active }).eq("id", r.id);
+  const toggle = async (r: any, next: boolean) => {
+    const { error } = await supabase.from("riders").update({ is_active: next }).eq("id", r.id);
     if (error) toast.error(error.message); else load();
   };
+
   const del = async (r: any) => {
     if (!confirm(`Remove rider ${r.full_name}?`)) return;
     const { error } = await supabase.from("riders").delete().eq("id", r.id);
