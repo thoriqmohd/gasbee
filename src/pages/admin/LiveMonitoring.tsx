@@ -318,7 +318,7 @@ export default function LiveMonitoring() {
         </div>
 
         {/* Row 1: hourly | daily | status pie */}
-        <Panel title="Order Trend · Hourly" icon={Activity} className="col-span-5">
+        <Panel title="Order Trend · Hourly" className="col-span-5">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={hourly} margin={{ top: 2, right: 6, bottom: 0, left: -20 }}>
               <defs>
@@ -336,7 +336,7 @@ export default function LiveMonitoring() {
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Revenue · Last 14 Days" icon={DollarSign} className="col-span-5">
+        <Panel title="Revenue · Last 14 Days" className="col-span-5">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={daily} margin={{ top: 2, right: 6, bottom: 0, left: -20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -350,7 +350,7 @@ export default function LiveMonitoring() {
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Order Status" icon={Package} className="col-span-2">
+        <Panel title="Order Status" className="col-span-2">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={statusDist} dataKey="value" nameKey="name" innerRadius="45%" outerRadius="75%" paddingAngle={2}>
@@ -363,7 +363,7 @@ export default function LiveMonitoring() {
         </Panel>
 
         {/* Row 2: heatmap | top riders | merchant ranking */}
-        <Panel title="Delivery Heatmap" icon={Activity} className="col-span-5">
+        <Panel title="Delivery Heatmap" className="col-span-5">
           <div className="h-full w-full overflow-hidden rounded-lg">
             <MapContainer center={mapCenter} zoom={7} style={{ height: "100%", width: "100%", background: "#0a0f1e" }} scrollWheelZoom={false} zoomControl={false} attributionControl={false}>
               <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
@@ -376,7 +376,7 @@ export default function LiveMonitoring() {
           </div>
         </Panel>
 
-        <Panel title="Top Riders" icon={Bike} className="col-span-3">
+        <Panel title="Top Riders" className="col-span-3">
           <div className="space-y-1 h-full overflow-hidden">
             {riderPerf.slice(0, 5).map((r, i) => (
               <div key={r.id} className="flex items-center gap-2 rounded-md border border-white/5 bg-white/5 px-2 py-1">
@@ -395,7 +395,7 @@ export default function LiveMonitoring() {
           </div>
         </Panel>
 
-        <Panel title="Top Merchants" icon={Store} className="col-span-4">
+        <Panel title="Top Merchants" className="col-span-4">
           <div className="space-y-1 h-full overflow-hidden">
             {merchantPerf.slice(0, 5).map((m, i) => (
               <div key={m.id} className="flex items-center gap-2 rounded-md border border-white/5 bg-white/5 px-2 py-1">
@@ -412,7 +412,7 @@ export default function LiveMonitoring() {
         </Panel>
 
         {/* Row 3: revenue area | inventory | financial | customer | sla | AI */}
-        <Panel title="Revenue by Area" icon={TrendingUp} className="col-span-3">
+        <Panel title="Revenue by Area" className="col-span-3">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={revByArea} layout="vertical" margin={{ top: 0, right: 4, bottom: 0, left: 0 }}>
               <XAxis type="number" stroke="#64748b" fontSize={9} />
@@ -423,7 +423,7 @@ export default function LiveMonitoring() {
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="Low Stock" icon={Boxes} className="col-span-2">
+        <Panel title="Low Stock" className="col-span-2">
           <div className="space-y-1 h-full overflow-hidden">
             {lowStock.slice(0, 4).map((p) => (
               <div key={p.id} className="flex items-center justify-between rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1">
@@ -441,7 +441,7 @@ export default function LiveMonitoring() {
           </div>
         </Panel>
 
-        <Panel title="Financial · 30D" icon={Wallet} className="col-span-2">
+        <Panel title="Financial · 30D" className="col-span-2">
           <div className="grid grid-cols-2 gap-1 h-full">
             <StatPill label="Commission" value={fmtMYR(totalCommission)} tone="amber" />
             <StatPill label="Payout" value={fmtMYR(totalPayout)} tone="green" />
@@ -450,7 +450,7 @@ export default function LiveMonitoring() {
           </div>
         </Panel>
 
-        <Panel title="Customers" icon={Users} className="col-span-2">
+        <Panel title="Customers" className="col-span-2">
           <div className="grid grid-cols-2 gap-1 h-full">
             <StatPill label="New" value={fmtNum(customerStats.newC)} tone="blue" />
             <StatPill label="Repeat" value={fmtNum(customerStats.repeat)} tone="green" />
@@ -459,7 +459,7 @@ export default function LiveMonitoring() {
           </div>
         </Panel>
 
-        <Panel title="SLA" icon={Clock} className="col-span-1">
+        <Panel title="SLA" className="col-span-1">
           <div className="flex flex-col gap-1 h-full">
             <StatPill label="Resp" value={`${slaStats.avgResp}m`} tone="blue" />
             <StatPill label="Late" value={`${slaStats.latePct.toFixed(0)}%`} tone={slaStats.latePct > 15 ? "red" : "green"} />
@@ -468,7 +468,7 @@ export default function LiveMonitoring() {
 
         <Panel
           title="AI Predictions"
-          icon={Sparkles}
+         
           className="col-span-2 border-amber-500/30"
           action={<span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">AI</span>}
         >
