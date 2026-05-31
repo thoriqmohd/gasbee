@@ -112,7 +112,7 @@ export default function PaymentGateway() {
                 <Badge variant={enabled ? "default" : "secondary"}>{enabled ? "Active" : "Inactive"}</Badge>
                 <Badge variant="outline">{mode === "live" ? "Live" : "Sandbox"}</Badge>
               </div>
-              <p className="text-xs text-muted-foreground">Malaysian payment gateway — FPX (Online Transfer), cards, e-wallets.</p>
+              <p className="text-xs text-muted-foreground">Malaysian payment gateway — FPX (Online Transfer), Credit Cards, e-wallets.</p>
             </div>
           </div>
           <Switch checked={enabled} onCheckedChange={setEnabled} />

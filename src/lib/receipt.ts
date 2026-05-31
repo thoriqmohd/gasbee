@@ -198,7 +198,7 @@ export async function generateReceiptPdf(
   // === PAYMENT BADGE ===
   y += 14;
   const status = (order.payment_status ?? "-").toUpperCase();
-  const method = order.payment_method === "fpx" ? "FPX (Online Transfer)" : (order.payment_method ?? "-").toUpperCase();
+  const method = order.payment_method === "fpx" ? "FPX (Online Transfer)" : (order.payment_method === "card" ? "Credit Card" : (order.payment_method ?? "-").toUpperCase());
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...BRAND.muted);
