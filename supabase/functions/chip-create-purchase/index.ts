@@ -86,8 +86,7 @@ Deno.serve(async (req) => {
       throw new Error(`CHIP: ${JSON.stringify(data)}`);
     }
 
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    await admin.from("payments").insert({
+    await adminClient.from("payments").insert({
       order_id: order.id,
       gateway: "chip",
       gateway_ref: data.id,
@@ -95,6 +94,7 @@ Deno.serve(async (req) => {
       status: "pending",
       raw_payload: data,
     });
+
 
     return new Response(JSON.stringify({ url: data.checkout_url, purchase_id: data.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
