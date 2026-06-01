@@ -31,12 +31,14 @@ interface AdminRow {
 }
 
 export default function Admins() {
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
+  const callerIsSuper = roles.includes("super_admin" as any);
   const [rows, setRows] = useState<AdminRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [openCreate, setOpenCreate] = useState(false);
   const [editing, setEditing] = useState<AdminRow | null>(null);
   const [resetting, setResetting] = useState<AdminRow | null>(null);
+  const [deleting, setDeleting] = useState<AdminRow | null>(null);
   const [busy, setBusy] = useState(false);
 
   const [createForm, setCreateForm] = useState({
