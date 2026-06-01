@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Pencil, KeyRound, ShieldOff, ShieldCheck } from "lucide-react";
+import { Plus, Pencil, KeyRound, ShieldOff, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const ADMIN_ROLE_OPTIONS = [
   { value: "super_admin", label: "Super Admin" },
