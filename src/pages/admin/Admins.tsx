@@ -123,6 +123,22 @@ export default function Admins() {
     toast({ title: row.is_active ? "Admin disabled" : "Admin enabled" });
     load();
   };
+  const removeAdmin = async () => {
+    if (!deleting) return;
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("admin-manage-admins", {
+      body: { action: "delete", user_id: deleting.id },
+    });
+    setBusy(false);
+    if (error || data?.error) {
+      toast({ title: "Failed", description: error?.message ?? data?.error, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Admin deleted" });
+    setDeleting(null);
+    load();
+  };
+
 
   return (
     <div className="space-y-6">
