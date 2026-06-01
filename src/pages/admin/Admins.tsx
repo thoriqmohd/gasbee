@@ -200,6 +200,11 @@ export default function Admins() {
                       {r.is_active ? <ShieldOff className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
                     </Button>
                   )}
+                  {r.id !== user?.id && (r.role !== "super_admin" || callerIsSuper) && (
+                    <Button size="sm" variant="outline" onClick={() => setDeleting(r)}>
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
