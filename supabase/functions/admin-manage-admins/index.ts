@@ -37,6 +37,12 @@ Deno.serve(async (req) => {
     const callerRoles = (rolesRows ?? []).map((r: { role: string }) => r.role);
     const isAdmin = callerRoles.some((r) => ADMIN_ROLES.includes(r));
     if (!isAdmin) return json({ error: "Admin only" }, 403);
+    const callerIsSuper = callerRoles.includes("super_admin");
+
+    const targetIsSuper = async (uid: string) => {
+      const { data } = await admin.from("user_roles").select("role").eq("user_id", uid).eq("role", "super_admin").maybeSingle();
+      return !!data;
+    };
 
     const body = await req.json().catch(() => ({}));
     const action = body?.action as string;
