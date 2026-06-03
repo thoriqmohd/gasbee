@@ -29,15 +29,27 @@ export default function UserProductDetail() {
   const isIndustrial = slug === "industrial-gas";
   const blockedIndustrial = isIndustrial && !isApproved;
 
-  const newCylinderPrice = Number(p.new_cylinder_price || p.selling_price || 0);
-  const refillPrice = Number(p.refill_price || 0);
+  const isLpgRefill = slug === "lpg-refill";
+  const isAccessories = slug === "accessories";
+  const rawNewCylinder = Number(p.new_cylinder_price || 0);
+  // LPG Refill: never include new-cylinder cost. Accessories: use selling_price only.
+  const newCylinderPrice = isLpgRefill ? 0 : (isAccessories ? 0 : (rawNewCylinder || Number(p.selling_price || 0)));
+  const refillPrice = isAccessories ? 0 : Number(p.refill_price || 0);
   const depositAmount = Number(p.deposit_amount || 0);
+  const accessoryPrice = isAccessories ? Number(p.selling_price || 0) : 0;
   const newCylTotal = newCylinderPrice + refillPrice;
 
-  // Auto-detect: prefer "new" if a new cylinder price is set, else refill, else deposit
+  // Auto-detect type by category first
   const type: "refill" | "new" | "deposit" =
-    newCylinderPrice > 0 ? "new" : refillPrice > 0 ? "refill" : "deposit";
-  const price = type === "refill" ? refillPrice : type === "new" ? newCylTotal : depositAmount;
+    isLpgRefill ? "refill"
+    : isAccessories ? "new"
+    : newCylinderPrice > 0 ? "new"
+    : refillPrice > 0 ? "refill"
+    : "deposit";
+  const price = isAccessories ? accessoryPrice
+    : type === "refill" ? refillPrice
+    : type === "new" ? newCylTotal
+    : depositAmount;
 
   const addToCart = () => {
     if (blockedIndustrial) {
