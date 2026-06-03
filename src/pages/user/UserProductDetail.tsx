@@ -107,17 +107,17 @@ export default function UserProductDetail() {
         </Card>
       )}
 
-      {type === "new" && (
+      {isAccessories ? (
+        <div className="text-sm"><span className="text-muted-foreground">Unit price: </span><span className="font-semibold text-primary">RM {accessoryPrice.toFixed(2)}</span></div>
+      ) : type === "new" ? (
         <Card className="space-y-1 p-3 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">New cylinder (tong)</span><span>RM {newCylinderPrice.toFixed(2)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Refill (gas)</span><span>RM {refillPrice.toFixed(2)}</span></div>
           <div className="flex justify-between border-t pt-1 font-semibold"><span>Unit price</span><span className="text-primary">RM {newCylTotal.toFixed(2)}</span></div>
         </Card>
-      )}
-      {type === "refill" && (
+      ) : type === "refill" ? (
         <div className="text-sm"><span className="text-muted-foreground">Unit price: </span><span className="font-semibold text-primary">RM {refillPrice.toFixed(2)}</span></div>
-      )}
-      {type === "deposit" && (
+      ) : (
         <div className="text-sm"><span className="text-muted-foreground">Deposit: </span><span className="font-semibold text-primary">RM {depositAmount.toFixed(2)}</span></div>
       )}
 
