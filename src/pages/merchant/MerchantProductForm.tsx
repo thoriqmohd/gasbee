@@ -37,6 +37,9 @@ export default function MerchantProductForm() {
     new_cylinder_price: 0, deposit_amount: 0, stock_qty: 0, low_stock_threshold: 5, image_url: "", category_id: "", is_coming_soon: false,
   });
 
+  const selectedCat = cats.find((c) => c.id === form.category_id);
+  const isAccessories = selectedCat?.name?.toLowerCase().includes("accessories");
+
   useEffect(() => { supabase.from("categories").select("*").eq("is_active", true).then(({ data }) => setCats(data ?? [])); }, []);
   useEffect(() => {
     if (!isEdit) return;
@@ -47,7 +50,21 @@ export default function MerchantProductForm() {
     if (!merchant) return;
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (isAccessories && (!form.selling_price || Number(form.selling_price) <= 0)) {
+      toast.error("Harga is required for accessories");
+      return;
+    }
+    if (!isAccessories && (!form.refill_price || Number(form.refill_price) <= 0)) {
+      toast.error("Harga Refill / Gas is required");
+      return;
+    }
     const payload: any = { ...parsed.data, image_url: parsed.data.image_url || null, category_id: form.category_id || null, merchant_id: merchant.id, name: parsed.data.name! };
+    if (isAccessories) {
+      payload.cylinder_size_kg = 0;
+      payload.refill_price = 0;
+      payload.new_cylinder_price = 0;
+      payload.deposit_amount = 0;
+    }
     const res = isEdit
       ? await supabase.from("products").update(payload).eq("id", id!)
       : await supabase.from("products").insert([payload]);
