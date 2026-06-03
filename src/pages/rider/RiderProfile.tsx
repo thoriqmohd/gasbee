@@ -51,7 +51,7 @@ export default function RiderProfile() {
       {r.license_image_url && (
         <Card className="p-4">
           <p className="mb-2 text-sm font-semibold">Driving license</p>
-          <img src={r.license_image_url} className="w-full rounded-md border" />
+          <SignedImage url={r.license_image_url} bucket="rider-docs" className="w-full rounded-md border" />
         </Card>
       )}
     </div>
