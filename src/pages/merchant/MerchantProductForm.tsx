@@ -79,25 +79,44 @@ export default function MerchantProductForm() {
         <div><Label>Description</Label><Textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={1000} /></div>
         <div className="grid grid-cols-2 gap-3">
           <div><Label>Category</Label>
-            <Select value={form.category_id ?? ""} onValueChange={(v) => setForm({ ...form, category_id: v })}>
+            <Select value={form.category_id ?? ""} onValueChange={(v) => {
+              const cat = cats.find((c) => c.id === v);
+              const isAcc = cat?.name?.toLowerCase().includes("accessories");
+              setForm({
+                ...form,
+                category_id: v,
+                ...(isAcc ? { cylinder_size_kg: 0, refill_price: 0, new_cylinder_price: 0, deposit_amount: 0 } : {})
+              });
+            }}>
               <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
               <SelectContent>{cats.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div><Label>Cylinder size (kg)</Label><Input type="number" step="0.1" value={form.cylinder_size_kg ?? ""} onChange={(e) => setForm({ ...form, cylinder_size_kg: e.target.value })} /></div>
+          {isAccessories ? (
+            <div>
+              <Label>Harga (RM) *</Label>
+              <Input type="number" step="0.01" value={form.selling_price} onChange={(e) => setForm({ ...form, selling_price: e.target.value })} />
+            </div>
+          ) : (
+            <div><Label>Cylinder size (kg)</Label><Input type="number" step="0.1" value={form.cylinder_size_kg ?? ""} onChange={(e) => setForm({ ...form, cylinder_size_kg: e.target.value })} /></div>
+          )}
         </div>
+        {!isAccessories && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Harga Refill / Gas (RM) *</Label>
+              <Input type="number" step="0.01" value={form.refill_price} onChange={(e) => setForm({ ...form, refill_price: e.target.value })} />
+              <p className="mt-1 text-xs text-muted-foreground">Harga tukar gas sahaja</p>
+            </div>
+            <div>
+              <Label>Harga New Tong / Cylinder (RM)</Label>
+              <Input type="number" step="0.01" value={form.new_cylinder_price} onChange={(e) => setForm({ ...form, new_cylinder_price: e.target.value })} />
+              <p className="mt-1 text-xs text-muted-foreground">Harga tong kosong. Beli new = tong + refill</p>
+            </div>
+            <div><Label>Deposit (RM)</Label><Input type="number" step="0.01" value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })} /></div>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label>Harga Refill / Gas (RM)</Label>
-            <Input type="number" step="0.01" value={form.refill_price} onChange={(e) => setForm({ ...form, refill_price: e.target.value })} />
-            <p className="mt-1 text-xs text-muted-foreground">Harga tukar gas sahaja</p>
-          </div>
-          <div>
-            <Label>Harga New Tong / Cylinder (RM)</Label>
-            <Input type="number" step="0.01" value={form.new_cylinder_price} onChange={(e) => setForm({ ...form, new_cylinder_price: e.target.value })} />
-            <p className="mt-1 text-xs text-muted-foreground">Harga tong kosong. Beli new = tong + refill</p>
-          </div>
-          <div><Label>Deposit (RM)</Label><Input type="number" step="0.01" value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })} /></div>
           <div><Label>Stock qty</Label><Input type="number" value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} /></div>
           <div><Label>Low-stock threshold</Label><Input type="number" value={form.low_stock_threshold} onChange={(e) => setForm({ ...form, low_stock_threshold: e.target.value })} /></div>
         </div>
