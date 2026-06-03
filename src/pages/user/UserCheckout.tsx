@@ -234,9 +234,14 @@ export default function UserCheckout() {
                 <span>{it.name} × {it.quantity}</span>
                 <span>RM {(it.unit_price * it.quantity).toFixed(2)}</span>
               </div>
-              {it.type === "new" && (it.new_cylinder_price != null || it.refill_price != null) && (
+              {it.type === "new" && it.category_slug !== "accessories" && it.category_slug !== "lpg-refill" && (it.new_cylinder_price != null || it.refill_price != null) && (
                 <div className="mt-1 space-y-0.5 pl-3 text-xs text-muted-foreground">
                   <div className="flex justify-between"><span>· New cylinder (tong)</span><span>RM {(Number(it.new_cylinder_price ?? 0) * it.quantity).toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span>· Refill (gas)</span><span>RM {(Number(it.refill_price ?? 0) * it.quantity).toFixed(2)}</span></div>
+                </div>
+              )}
+              {it.type === "new" && it.category_slug === "lpg-refill" && it.refill_price != null && (
+                <div className="mt-1 space-y-0.5 pl-3 text-xs text-muted-foreground">
                   <div className="flex justify-between"><span>· Refill (gas)</span><span>RM {(Number(it.refill_price ?? 0) * it.quantity).toFixed(2)}</span></div>
                 </div>
               )}
