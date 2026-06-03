@@ -28,7 +28,7 @@ export default function RiderProfile() {
       <Card className="p-4">
         <div className="mb-3 flex items-center gap-3">
           {r.profile_image_url
-            ? <img src={r.profile_image_url} className="h-16 w-16 rounded-full object-cover" />
+            ? <SignedImage url={r.profile_image_url} bucket="rider-docs" className="h-16 w-16 rounded-full object-cover" />
             : <div className="h-16 w-16 rounded-full bg-muted" />}
           <div>
             <p className="font-bold">{r.full_name}</p>
