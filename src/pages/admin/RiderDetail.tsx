@@ -70,7 +70,7 @@ export default function RiderDetail() {
             <p>License no: <span className="font-medium">{r.license_no ?? "—"}</span></p>
             <p>Expiry: <span className={expired ? "font-semibold text-destructive" : "font-medium"}>{r.license_expiry_date ? new Date(r.license_expiry_date).toLocaleDateString() : "—"}{expired ? " (expired)" : ""}</span></p>
           </div>
-          {r.license_image_url ? <img src={r.license_image_url} className="rounded-md border" /> : <p className="text-sm text-muted-foreground">No license uploaded.</p>}
+          {r.license_image_url ? <SignedImage url={r.license_image_url} bucket="rider-docs" className="rounded-md border" /> : <p className="text-sm text-muted-foreground">No license uploaded.</p>}
         </div>
         <div className="mt-3">
           <ImageUpload
