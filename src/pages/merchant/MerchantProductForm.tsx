@@ -66,6 +66,9 @@ export default function MerchantProductForm() {
       payload.new_cylinder_price = 0;
       payload.deposit_amount = 0;
     }
+    if (isLPGRefill) {
+      payload.new_cylinder_price = 0;
+    }
     const res = isEdit
       ? await supabase.from("products").update(payload).eq("id", id!)
       : await supabase.from("products").insert([payload]);
