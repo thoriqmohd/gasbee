@@ -39,6 +39,7 @@ export default function MerchantProductForm() {
 
   const selectedCat = cats.find((c) => c.id === form.category_id);
   const isAccessories = selectedCat?.name?.toLowerCase().includes("accessories");
+  const isLPGRefill = selectedCat?.name?.toLowerCase().includes("lpg refill");
 
   useEffect(() => { supabase.from("categories").select("*").eq("is_active", true).then(({ data }) => setCats(data ?? [])); }, []);
   useEffect(() => {
