@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { SignedLink } from "@/components/SignedImage";
 
 const fmt = (n: any) => new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR" }).format(Number(n || 0));
 
