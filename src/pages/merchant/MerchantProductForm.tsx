@@ -39,6 +39,7 @@ export default function MerchantProductForm() {
 
   const selectedCat = cats.find((c) => c.id === form.category_id);
   const isAccessories = selectedCat?.name?.toLowerCase().includes("accessories");
+  const isLPGRefill = selectedCat?.name?.toLowerCase().includes("lpg refill");
 
   useEffect(() => { supabase.from("categories").select("*").eq("is_active", true).then(({ data }) => setCats(data ?? [])); }, []);
   useEffect(() => {
@@ -65,6 +66,9 @@ export default function MerchantProductForm() {
       payload.new_cylinder_price = 0;
       payload.deposit_amount = 0;
     }
+    if (isLPGRefill) {
+      payload.new_cylinder_price = 0;
+    }
     const res = isEdit
       ? await supabase.from("products").update(payload).eq("id", id!)
       : await supabase.from("products").insert([payload]);
@@ -82,10 +86,12 @@ export default function MerchantProductForm() {
             <Select value={form.category_id ?? ""} onValueChange={(v) => {
               const cat = cats.find((c) => c.id === v);
               const isAcc = cat?.name?.toLowerCase().includes("accessories");
+              const isRefill = cat?.name?.toLowerCase().includes("lpg refill");
               setForm({
                 ...form,
                 category_id: v,
-                ...(isAcc ? { cylinder_size_kg: 0, refill_price: 0, new_cylinder_price: 0, deposit_amount: 0 } : {})
+                ...(isAcc ? { cylinder_size_kg: 0, refill_price: 0, new_cylinder_price: 0, deposit_amount: 0 } : {}),
+                ...(isRefill ? { new_cylinder_price: 0 } : {})
               });
             }}>
               <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
@@ -109,9 +115,9 @@ export default function MerchantProductForm() {
               <p className="mt-1 text-xs text-muted-foreground">Harga tukar gas sahaja</p>
             </div>
             <div>
-              <Label>Harga New Tong / Cylinder (RM)</Label>
-              <Input type="number" step="0.01" value={form.new_cylinder_price} onChange={(e) => setForm({ ...form, new_cylinder_price: e.target.value })} />
-              <p className="mt-1 text-xs text-muted-foreground">Harga tong kosong. Beli new = tong + refill</p>
+              <Label className={isLPGRefill ? "text-muted-foreground" : ""}>Harga New Tong / Cylinder (RM)</Label>
+              <Input type="number" step="0.01" value={form.new_cylinder_price} onChange={(e) => setForm({ ...form, new_cylinder_price: e.target.value })} disabled={isLPGRefill} className={isLPGRefill ? "bg-muted" : ""} />
+              <p className="mt-1 text-xs text-muted-foreground">{isLPGRefill ? "Tidak berkaitan untuk LPG refill" : "Harga tong kosong. Beli new = tong + refill"}</p>
             </div>
             <div><Label>Deposit (RM)</Label><Input type="number" step="0.01" value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })} /></div>
           </div>
