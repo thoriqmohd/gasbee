@@ -83,10 +83,12 @@ export default function MerchantProductForm() {
             <Select value={form.category_id ?? ""} onValueChange={(v) => {
               const cat = cats.find((c) => c.id === v);
               const isAcc = cat?.name?.toLowerCase().includes("accessories");
+              const isRefill = cat?.name?.toLowerCase().includes("lpg refill");
               setForm({
                 ...form,
                 category_id: v,
-                ...(isAcc ? { cylinder_size_kg: 0, refill_price: 0, new_cylinder_price: 0, deposit_amount: 0 } : {})
+                ...(isAcc ? { cylinder_size_kg: 0, refill_price: 0, new_cylinder_price: 0, deposit_amount: 0 } : {}),
+                ...(isRefill ? { new_cylinder_price: 0 } : {})
               });
             }}>
               <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
