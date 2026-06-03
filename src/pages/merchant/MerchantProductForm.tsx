@@ -19,7 +19,6 @@ const schema = z.object({
   refill_price: z.coerce.number().nonnegative(),
   selling_price: z.coerce.number().nonnegative(),
   new_cylinder_price: z.coerce.number().nonnegative(),
-  deposit_amount: z.coerce.number().nonnegative(),
   stock_qty: z.coerce.number().int().nonnegative(),
   low_stock_threshold: z.coerce.number().int().nonnegative(),
   image_url: z.string().trim().url().optional().or(z.literal("")).nullable(),
@@ -34,7 +33,7 @@ export default function MerchantProductForm() {
   const [cats, setCats] = useState<any[]>([]);
   const [form, setForm] = useState<any>({
     name: "", description: "", cylinder_size_kg: 14, refill_price: 0, selling_price: 0,
-    new_cylinder_price: 0, deposit_amount: 0, stock_qty: 0, low_stock_threshold: 5, image_url: "", category_id: "", is_coming_soon: false,
+    new_cylinder_price: 0, stock_qty: 0, low_stock_threshold: 5, image_url: "", category_id: "", is_coming_soon: false,
   });
 
   const selectedCat = cats.find((c) => c.id === form.category_id);
@@ -64,7 +63,6 @@ export default function MerchantProductForm() {
       payload.cylinder_size_kg = 0;
       payload.refill_price = 0;
       payload.new_cylinder_price = 0;
-      payload.deposit_amount = 0;
     }
     if (isLPGRefill) {
       payload.new_cylinder_price = 0;
@@ -90,7 +88,7 @@ export default function MerchantProductForm() {
               setForm({
                 ...form,
                 category_id: v,
-                ...(isAcc ? { cylinder_size_kg: 0, refill_price: 0, new_cylinder_price: 0, deposit_amount: 0 } : {}),
+                ...(isAcc ? { cylinder_size_kg: 0, refill_price: 0, new_cylinder_price: 0 } : {}),
                 ...(isRefill ? { new_cylinder_price: 0 } : {})
               });
             }}>
@@ -119,7 +117,6 @@ export default function MerchantProductForm() {
               <Input type="number" step="0.01" value={form.new_cylinder_price} onChange={(e) => setForm({ ...form, new_cylinder_price: e.target.value })} disabled={isLPGRefill} className={isLPGRefill ? "bg-muted" : ""} />
               <p className="mt-1 text-xs text-muted-foreground">{isLPGRefill ? "Tidak berkaitan untuk LPG refill" : "Harga tong kosong. Beli new = tong + refill"}</p>
             </div>
-            <div><Label>Deposit (RM)</Label><Input type="number" step="0.01" value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })} /></div>
           </div>
         )}
         <div className="grid grid-cols-2 gap-3">
