@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SignedLink } from "@/components/SignedImage";
 
 function ReviewDialog({ row, onDone }: { row: any; onDone: () => void }) {
   const { user } = useAuth();
