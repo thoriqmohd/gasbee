@@ -95,18 +95,15 @@ export default function UserCheckout() {
 
   const applyPromo = async () => {
     if (!promoCode.trim()) return;
-    const { data } = await supabase.from("promotions").select("*").eq("code", promoCode.trim().toUpperCase()).maybeSingle();
-    if (!data || !data.is_active) { toast.error("Invalid promo code"); setDiscount(0); return; }
-    const now = new Date();
-    if (data.starts_at && new Date(data.starts_at) > now) { toast.error("Promo not yet active"); setDiscount(0); return; }
-    if (data.ends_at && new Date(data.ends_at) < now) { toast.error("Promo has expired"); setDiscount(0); return; }
-    if (data.usage_limit != null && data.used_count >= data.usage_limit) { toast.error("Promo usage limit reached"); setDiscount(0); return; }
-    if ((data as any).applies_to === "merchant" && (data as any).merchant_id && (data as any).merchant_id !== items[0]?.merchant_id) {
+    const { data: rows } = await supabase.rpc("validate_promotion", { _code: promoCode.trim() });
+    const data: any = Array.isArray(rows) ? rows[0] : rows;
+    if (!data) { toast.error("Invalid promo code"); setDiscount(0); return; }
+    if (data.applies_to === "merchant" && data.merchant_id && data.merchant_id !== items[0]?.merchant_id) {
       toast.error("This promo is not valid for this merchant"); setDiscount(0); return;
     }
     if (data.min_order_amount && subtotal < Number(data.min_order_amount)) { toast.error(`Min order RM${data.min_order_amount}`); return; }
     let d = data.type === "percent" ? subtotal * (Number(data.value) / 100) : Number(data.value);
-    const maxD = (data as any).max_discount;
+    const maxD = data.max_discount;
     if (maxD != null && d > Number(maxD)) d = Number(maxD);
     d = Math.min(d, subtotal);
     setDiscount(d);

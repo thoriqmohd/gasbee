@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/ImageUpload";
+import { SignedImage } from "@/components/SignedImage";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toast } from "sonner";
@@ -115,7 +116,7 @@ export default function MerchantRiders() {
               <tr key={r.id} className="border-b">
                 <td className="p-3">
                   <div className="flex items-center gap-2">
-                    {r.profile_image_url ? <img src={r.profile_image_url} className="h-8 w-8 rounded-full object-cover" /> : <div className="h-8 w-8 rounded-full bg-muted" />}
+                    {r.profile_image_url ? <SignedImage url={r.profile_image_url} bucket="rider-docs" className="h-8 w-8 rounded-full object-cover" /> : <div className="h-8 w-8 rounded-full bg-muted" />}
                     <div><div>{r.full_name}</div><div className="text-xs text-muted-foreground">{r.phone}</div></div>
                   </div>
                 </td>

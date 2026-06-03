@@ -18,7 +18,7 @@ export default function UserMerchantDetail() {
 
   useEffect(() => {
     if (!id) return;
-    supabase.from("merchants").select("*").eq("id", id).maybeSingle().then(({ data }) => setM(data));
+    supabase.from("merchants_public").select("*").eq("id", id).maybeSingle().then(({ data }) => setM(data));
     let qb = supabase.from("products").select("*").eq("merchant_id", id).eq("is_active", true);
     if (categoryId) qb = qb.eq("category_id", categoryId);
     qb.then(({ data }) => setProducts(data ?? []));
