@@ -112,9 +112,9 @@ export default function MerchantProductForm() {
               <p className="mt-1 text-xs text-muted-foreground">Harga tukar gas sahaja</p>
             </div>
             <div>
-              <Label>Harga New Tong / Cylinder (RM)</Label>
-              <Input type="number" step="0.01" value={form.new_cylinder_price} onChange={(e) => setForm({ ...form, new_cylinder_price: e.target.value })} />
-              <p className="mt-1 text-xs text-muted-foreground">Harga tong kosong. Beli new = tong + refill</p>
+              <Label className={isLPGRefill ? "text-muted-foreground" : ""}>Harga New Tong / Cylinder (RM)</Label>
+              <Input type="number" step="0.01" value={form.new_cylinder_price} onChange={(e) => setForm({ ...form, new_cylinder_price: e.target.value })} disabled={isLPGRefill} className={isLPGRefill ? "bg-muted" : ""} />
+              <p className="mt-1 text-xs text-muted-foreground">{isLPGRefill ? "Tidak berkaitan untuk LPG refill" : "Harga tong kosong. Beli new = tong + refill"}</p>
             </div>
             <div><Label>Deposit (RM)</Label><Input type="number" step="0.01" value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })} /></div>
           </div>
