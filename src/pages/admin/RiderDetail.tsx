@@ -34,7 +34,7 @@ export default function RiderDetail() {
     <div className="space-y-4">
       <Button variant="ghost" size="sm" onClick={() => nav(-1)}>← Back</Button>
       <div className="flex items-center gap-4">
-        {r.profile_image_url ? <img src={r.profile_image_url} className="h-16 w-16 rounded-full object-cover" /> : <div className="h-16 w-16 rounded-full bg-muted" />}
+        {r.profile_image_url ? <SignedImage url={r.profile_image_url} bucket="avatars" className="h-16 w-16 rounded-full object-cover" /> : <div className="h-16 w-16 rounded-full bg-muted" />}
         <div>
           <h1 className="text-2xl font-bold">{r.full_name}</h1>
           <p className="text-sm text-muted-foreground">{r.phone} · <span className="capitalize">{r.vehicle_type ?? "—"}</span> {r.vehicle_plate}</p>
