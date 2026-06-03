@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ImageUpload } from "@/components/ImageUpload";
+import { SignedImage } from "@/components/SignedImage";
 import { toast } from "sonner";
 
 export default function RiderDetail() {
