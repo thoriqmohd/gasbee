@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
+import { SignedImage } from "@/components/SignedImage";
 
 export default function RiderProfile() {
   const { user } = useAuth();
