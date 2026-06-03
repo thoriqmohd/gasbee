@@ -93,6 +93,9 @@ export default function UserMerchantDetail() {
               {cs && <span className="absolute right-1 top-1 rounded bg-muted-foreground/80 px-1.5 py-0.5 text-[10px] font-medium text-background">Coming Soon</span>}
               <div className="p-2">
                 <div className="line-clamp-1 text-sm font-medium">{p.name}</div>
+                {categoriesMap[p.category_id] && (
+                  <Badge variant="outline" className="mt-1 text-[10px]">{categoriesMap[p.category_id]}</Badge>
+                )}
                 <div className="mt-1 text-sm font-bold text-primary">RM {Number(p.refill_price || p.selling_price).toFixed(2)}</div>
               </div>
             </Card>
