@@ -19,7 +19,6 @@ const schema = z.object({
   refill_price: z.coerce.number().nonnegative(),
   selling_price: z.coerce.number().nonnegative(),
   new_cylinder_price: z.coerce.number().nonnegative(),
-  deposit_amount: z.coerce.number().nonnegative(),
   stock_qty: z.coerce.number().int().nonnegative(),
   low_stock_threshold: z.coerce.number().int().nonnegative(),
   image_url: z.string().trim().url().optional().or(z.literal("")).nullable(),
