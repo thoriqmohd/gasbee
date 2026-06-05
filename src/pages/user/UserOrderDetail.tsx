@@ -63,12 +63,7 @@ export default function UserOrderDetail() {
   };
 
   const a = o.address_snapshot ?? {};
-  const markers: any[] = [];
-  if (a.latitude) markers.push({ lat: Number(a.latitude), lng: Number(a.longitude), label: "Delivery address" });
-  if (o.merchants?.latitude) markers.push({ lat: Number(o.merchants.latitude), lng: Number(o.merchants.longitude), label: o.merchants.name });
-  if (riderLoc) markers.push({ lat: riderLoc.lat, lng: riderLoc.lng, label: "Rider 🛵" });
 
-  const trackable = ["rider_accepted","arrived_at_merchant","picked_up","on_delivery","arrived_at_customer","out_for_delivery"].includes(o.status);
 
   return (
     <div className="space-y-4">
