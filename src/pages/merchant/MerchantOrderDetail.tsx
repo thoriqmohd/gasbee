@@ -104,17 +104,23 @@ export default function MerchantOrderDetail() {
         {o.notes && <p className="mt-2 text-xs italic">Notes: {o.notes}</p>}
       </Card>
 
+      {!paid && (
+        <Card className="p-4 border-amber-500/40 bg-amber-500/10">
+          <p className="text-sm font-medium">⏳ Waiting for payment confirmation. Merchant actions will be available once payment is confirmed.</p>
+        </Card>
+      )}
+
       <Card className="p-4">
         <h2 className="mb-2 font-semibold">Assign Rider</h2>
         <div className="flex gap-2">
-          <Select value={riderId || "none"} onValueChange={(v) => setRiderId(v === "none" ? "" : v)}>
+          <Select value={riderId || "none"} onValueChange={(v) => setRiderId(v === "none" ? "" : v)} disabled={!paid}>
             <SelectTrigger className="max-w-xs"><SelectValue placeholder="Select rider" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">— Unassigned —</SelectItem>
               {riders.map((r) => <SelectItem key={r.id} value={r.id}>{r.full_name} · {r.phone}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button onClick={() => assignRider(riderId)}>{o.rider_id ? "Update" : "Assign"}</Button>
+          <Button onClick={() => assignRider(riderId)} disabled={!paid}>{o.rider_id ? "Update" : "Assign"}</Button>
         </div>
         {riders.length === 0 && <p className="mt-2 text-xs text-muted-foreground">No active riders. Add riders in the Riders page.</p>}
         {o.rider_id && (() => {
@@ -147,8 +153,8 @@ export default function MerchantOrderDetail() {
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        {o.status === "pending" && <Button variant="destructive" onClick={() => setRejectOpen(true)}>Reject</Button>}
-        {NEXT[o.status] && <Button onClick={() => updateStatus(NEXT[o.status])}>Mark as {NEXT[o.status].replace(/_/g, " ")}</Button>}
+        {o.status === "pending" && <Button variant="destructive" onClick={() => setRejectOpen(true)} disabled={!paid}>Reject</Button>}
+        {NEXT[o.status] && <Button onClick={() => updateStatus(NEXT[o.status])} disabled={!paid}>Mark as {NEXT[o.status].replace(/_/g, " ")}</Button>}
       </div>
 
       {o.failure_reason && (o.status === "cancelled" || o.rejected_at) && (
