@@ -218,9 +218,14 @@ export default function UserOrderDetail() {
 
       {o.riders && (
         <Card className="space-y-2 p-3 text-sm">
-          <div className="font-semibold">Rider</div>
-          <div>{o.riders.full_name} {o.riders.vehicle_type && <span className="text-xs text-muted-foreground">· {o.riders.vehicle_type} {o.riders.vehicle_plate ?? ""}</span>}</div>
-          <div className="text-xs text-muted-foreground">{o.riders.phone}</div>
+          <div className="font-semibold">Your rider</div>
+          <div>{o.riders.full_name}</div>
+          {(o.riders.vehicle_type || o.riders.vehicle_plate) && (
+            <div className="text-xs text-muted-foreground">
+              🛵 {o.riders.vehicle_type ?? ""} {o.riders.vehicle_plate ? <span className="font-mono font-semibold">{o.riders.vehicle_plate}</span> : null}
+            </div>
+          )}
+          {o.riders.phone && <div className="text-xs text-muted-foreground">{o.riders.phone}</div>}
           {o.riders.phone && (
             <Button asChild size="sm" className="w-full"><a href={`tel:${o.riders.phone}`}><Phone className="mr-1 h-3 w-3" />Call rider</a></Button>
           )}
