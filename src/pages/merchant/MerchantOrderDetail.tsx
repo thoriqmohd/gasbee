@@ -88,6 +88,7 @@ export default function MerchantOrderDetail() {
   };
 
 
+  const paid = o.payment_status === "paid";
   return (
     <div className="space-y-4">
       <Button variant="ghost" size="sm" onClick={() => nav(-1)}>← Back</Button>
