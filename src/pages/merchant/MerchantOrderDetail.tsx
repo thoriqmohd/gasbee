@@ -170,8 +170,8 @@ export default function MerchantOrderDetail() {
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        {o.status === "pending" && <Button variant="destructive" onClick={() => setRejectOpen(true)} disabled={!paid}>Reject</Button>}
-        {NEXT[o.status] && <Button onClick={() => updateStatus(NEXT[o.status])} disabled={!paid}>Mark as {NEXT[o.status].replace(/_/g, " ")}</Button>}
+        {o.status === "pending" && <Button variant="destructive" onClick={() => setRejectOpen(true)} disabled={!canDecide}>Reject</Button>}
+        {NEXT[o.status] && <Button onClick={() => updateStatus(NEXT[o.status])} disabled={o.status === "pending" ? !canDecide : !(isCod || paid)}>Mark as {NEXT[o.status].replace(/_/g, " ")}</Button>}
       </div>
 
       {o.failure_reason && (o.status === "cancelled" || o.rejected_at) && (
