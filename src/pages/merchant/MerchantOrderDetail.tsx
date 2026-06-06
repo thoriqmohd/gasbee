@@ -89,6 +89,13 @@ export default function MerchantOrderDetail() {
 
 
   const paid = o.payment_status === "paid";
+  const isCod = o.payment_method === "cod";
+  const acceptedStatuses = ["accepted","preparing","assigned","rider_accepted","arrived_at_merchant","picked_up","on_delivery","arrived_at_customer","delivered"];
+  const orderAccepted = acceptedStatuses.includes(o.status);
+  const canDecide = o.status === "pending" && (isCod || paid);
+  const canAssignRider = orderAccepted && (isCod || paid);
+  const paymentStatusLabel = isCod ? (o.status === "delivered" ? "Collected" : "To be collected") : o.payment_status;
+  const orderStatusLabel = (isCod && o.status === "pending") ? "Pending Merchant Confirmation" : o.status;
   return (
     <div className="space-y-4">
       <Button variant="ghost" size="sm" onClick={() => nav(-1)}>← Back</Button>
