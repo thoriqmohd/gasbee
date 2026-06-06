@@ -206,8 +206,8 @@ export default function UserOrderDetail() {
       })()}
 
       <Card className="space-y-1 p-3 text-sm">
-        <div className="font-semibold">Merchant</div>
-        <div>{o.merchants?.name}</div>
+        <div className="text-xs text-muted-foreground">Merchant</div>
+        <div className="text-base font-semibold">{o.merchants?.name ?? "—"}</div>
         {o.merchants?.phone && <div className="text-xs text-muted-foreground">{o.merchants.phone}</div>}
       </Card>
 
