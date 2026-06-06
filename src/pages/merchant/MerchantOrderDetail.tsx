@@ -115,9 +115,14 @@ export default function MerchantOrderDetail() {
         {o.notes && <p className="mt-2 text-xs italic">Notes: {o.notes}</p>}
       </Card>
 
-      {!paid && (
+      {!isCod && !paid && (
         <Card className="p-4 border-amber-500/40 bg-amber-500/10">
           <p className="text-sm font-medium">⏳ Waiting for payment confirmation. Merchant actions will be available once payment is confirmed.</p>
+        </Card>
+      )}
+      {isCod && o.status === "pending" && (
+        <Card className="p-4 border-amber-500/40 bg-amber-500/10">
+          <p className="text-sm font-medium">📞 Please confirm this COD order with the customer before assigning a rider.</p>
         </Card>
       )}
 
