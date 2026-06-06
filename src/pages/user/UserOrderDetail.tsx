@@ -148,7 +148,7 @@ export default function UserOrderDetail() {
           );
         }
 
-        if (!paid || !o.rider_id || !riderAccepted || !isPickup && !isDelivery) return null;
+        if (!paymentOk || !o.rider_id || !riderAccepted || !isPickup && !isDelivery) return null;
 
         const target = isPickup
           ? (o.merchants?.latitude ? { lat: Number(o.merchants.latitude), lng: Number(o.merchants.longitude), label: o.merchants.name } : null)
