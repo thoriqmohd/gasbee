@@ -129,16 +129,17 @@ export default function MerchantOrderDetail() {
       <Card className="p-4">
         <h2 className="mb-2 font-semibold">Assign Rider</h2>
         <div className="flex gap-2">
-          <Select value={riderId || "none"} onValueChange={(v) => setRiderId(v === "none" ? "" : v)} disabled={!paid}>
+          <Select value={riderId || "none"} onValueChange={(v) => setRiderId(v === "none" ? "" : v)} disabled={!canAssignRider}>
             <SelectTrigger className="max-w-xs"><SelectValue placeholder="Select rider" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">— Unassigned —</SelectItem>
               {riders.map((r) => <SelectItem key={r.id} value={r.id}>{r.full_name} · {r.phone}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button onClick={() => assignRider(riderId)} disabled={!paid}>{o.rider_id ? "Update" : "Assign"}</Button>
+          <Button onClick={() => assignRider(riderId)} disabled={!canAssignRider}>{o.rider_id ? "Update" : "Assign"}</Button>
         </div>
         {riders.length === 0 && <p className="mt-2 text-xs text-muted-foreground">No active riders. Add riders in the Riders page.</p>}
+        {!canAssignRider && !orderAccepted && <p className="mt-2 text-xs text-muted-foreground">{isCod ? "Rider assignment unlocks after you mark the COD order as accepted." : "Rider assignment unlocks after payment is confirmed and order is accepted."}</p>}
         {o.rider_id && (() => {
           const ar = riders.find((x) => x.id === o.rider_id);
           const accepted = ["rider_accepted","arrived_at_merchant","picked_up","on_delivery","arrived_at_customer","delivered"].includes(o.status);
