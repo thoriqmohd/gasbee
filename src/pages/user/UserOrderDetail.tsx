@@ -129,8 +129,9 @@ export default function UserOrderDetail() {
       )}
 
       {(() => {
-        // Live rider tracking — gated by: paid + merchant accepted + rider assigned + rider accepted
-        const paid = o.payment_status === "paid";
+        // Live rider tracking — available once rider has accepted the job, regardless of payment method (COD or online).
+        const isCod = o.payment_method === "cod";
+        const paymentOk = isCod || o.payment_status === "paid";
         const PRE_PICKUP = ["rider_accepted", "arrived_at_merchant"];
         const DELIVERY = ["picked_up", "on_delivery", "arrived_at_customer"];
         const isPickup = PRE_PICKUP.includes(o.status);
@@ -138,7 +139,7 @@ export default function UserOrderDetail() {
         const riderAccepted = isPickup || isDelivery || o.status === "delivered";
 
         // Show waiting card after rider assigned but not yet accepted
-        if (paid && o.rider_id && o.status === "assigned") {
+        if (paymentOk && o.rider_id && o.status === "assigned") {
           return (
             <Card className="border-amber-500 bg-amber-500/5 p-3 text-sm">
               <div className="font-semibold">⏳ Waiting for rider to accept the delivery job.</div>
