@@ -101,7 +101,10 @@ export default function MerchantOrderDetail() {
       <Button variant="ghost" size="sm" onClick={() => nav(-1)}>← Back</Button>
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-bold">{o.code}</h1><p className="text-sm text-muted-foreground">{new Date(o.created_at).toLocaleString()}</p></div>
-        <div className="flex gap-2"><StatusBadge value={o.status} /><StatusBadge value={o.payment_status} /></div>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex gap-2"><StatusBadge value={orderStatusLabel} /><StatusBadge value={paymentStatusLabel} /></div>
+          <div className="text-xs text-muted-foreground">Payment method: <span className="font-semibold uppercase">{o.payment_method}</span></div>
+        </div>
       </div>
 
       <Card className="p-4">
