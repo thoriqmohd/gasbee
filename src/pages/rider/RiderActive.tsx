@@ -69,17 +69,42 @@ export default function RiderActive() {
     return () => { supabase.removeChannel(ch); };
   }, [rider?.id]);
 
+  // Start native/web GPS tracking once rider has at least one active job
   useEffect(() => {
-    if (!rider || orders.length === 0 || !navigator.geolocation) return;
-    const id = navigator.geolocation.watchPosition(
-      async (pos) => {
-        await supabase.from("riders").update({ current_lat: pos.coords.latitude, current_lng: pos.coords.longitude, status: "on_delivery" as any }).eq("id", rider.id);
-      },
-      () => {},
-      { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 }
-    );
-    watchRef.current = id;
-    return () => { if (watchRef.current != null) navigator.geolocation.clearWatch(watchRef.current); };
+    let cancelled = false;
+    const stop = async () => {
+      if (watchRef.current) { await watchRef.current.stop(); watchRef.current = null; }
+    };
+    if (!rider || orders.length === 0) { setGpsStatus("idle"); stop(); return; }
+
+    (async () => {
+      setGpsStatus("searching");
+      const perm = await ensureLocationPermission();
+      if (cancelled) return;
+      if (!perm.granted) {
+        setGpsStatus(perm.status);
+        toast.error("Location permission is required to continue this delivery.");
+        return;
+      }
+      const handle = await startLocationWatch(
+        async (pos) => {
+          // Throttle DB updates to once every ~5s
+          const now = Date.now();
+          if (now - lastSentRef.current < 5000) return;
+          lastSentRef.current = now;
+          const { error } = await supabase
+            .from("riders")
+            .update({ current_lat: pos.lat, current_lng: pos.lng })
+            .eq("id", rider.id);
+          if (error) console.error("[riderTracking] failed to push location", error);
+        },
+        (s) => { if (!cancelled) setGpsStatus(s); }
+      );
+      if (cancelled) { await handle?.stop(); return; }
+      watchRef.current = handle;
+    })();
+
+    return () => { cancelled = true; stop(); };
   }, [rider?.id, orders.length]);
 
   const advance = async (o: any) => {
