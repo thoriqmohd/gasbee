@@ -5,8 +5,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Phone, Navigation, MapPin, Package, Home } from "lucide-react";
+import { Phone, Navigation, MapPin, Package, Home, Loader2, MapPinOff, ShieldAlert } from "lucide-react";
 import { ImageUpload } from "@/components/ImageUpload";
+import { ensureLocationPermission, startLocationWatch, type GpsStatus, type WatchHandle } from "@/lib/riderTracking";
 
 const FLOW: Record<string, string> = {
   assigned: "arrived_at_merchant",
