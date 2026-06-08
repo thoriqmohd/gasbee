@@ -69,7 +69,7 @@ export function ImageUpload({ bucket, pathPrefix = "", value, onChange, label = 
     <div className="space-y-2">
       {value ? (
         <div className="relative inline-block">
-          <SignedImage url={value} bucket={bucket} alt="" className={`rounded-md border object-cover ${aspect === "square" ? "h-32 w-32" : "h-32 w-full"}`} />
+          <SignedImage url={value} bucket={bucket} alt="" className={`rounded-md border object-cover ${aspect === "square" ? "h-56 w-full" : "h-56 w-full"}`} />
           <button type="button" onClick={() => onChange(null)} className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"><X className="h-3 w-3" /></button>
         </div>
       ) : (
