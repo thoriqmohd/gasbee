@@ -133,6 +133,31 @@ export default function RiderActive() {
         <h1 className="text-xl font-bold">Active deliveries</h1>
         <Button asChild variant="outline" size="sm"><Link to="/merchant/rider/refund-pickups">Refund pickups</Link></Button>
       </div>
+      {orders.length > 0 && (() => {
+        const map: Record<GpsStatus, { cls: string; icon: any; text: string }> = {
+          idle: { cls: "bg-muted text-muted-foreground", icon: MapPinOff, text: "GPS idle" },
+          searching: { cls: "bg-amber-500/10 text-amber-700", icon: Loader2, text: "Searching for GPS signal…" },
+          active: { cls: "bg-emerald-500/10 text-emerald-700", icon: MapPin, text: "GPS active — sharing live location" },
+          permission_required: { cls: "bg-amber-500/10 text-amber-700", icon: ShieldAlert, text: "Location permission required" },
+          permission_denied: { cls: "bg-destructive/10 text-destructive", icon: ShieldAlert, text: "Location permission denied — enable in settings" },
+          service_disabled: { cls: "bg-destructive/10 text-destructive", icon: MapPinOff, text: "Please turn on your phone location/GPS to continue delivery." },
+          error: { cls: "bg-destructive/10 text-destructive", icon: MapPinOff, text: "GPS error — please check device location" },
+        };
+        const s = map[gpsStatus];
+        const Icon = s.icon;
+        return (
+          <div className={`flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium ${s.cls}`}>
+            <Icon className={`h-4 w-4 ${gpsStatus === "searching" ? "animate-spin" : ""}`} />
+            <span>{s.text}</span>
+            {(gpsStatus === "permission_denied" || gpsStatus === "service_disabled") && (
+              <Button size="sm" variant="outline" className="ml-auto h-7" onClick={async () => {
+                const p = await ensureLocationPermission();
+                setGpsStatus(p.status);
+              }}>Retry</Button>
+            )}
+          </div>
+        );
+      })()}
       {orders.length === 0 && <p className="text-sm text-muted-foreground">No active delivery.</p>}
       {orders.map((o) => {
         const a = o.address_snapshot ?? {};
