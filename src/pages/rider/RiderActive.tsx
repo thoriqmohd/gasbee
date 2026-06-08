@@ -26,7 +26,9 @@ export default function RiderActive() {
   const [orders, setOrders] = useState<any[]>([]);
   const [merchants, setMerchants] = useState<Record<string, any>>({});
   const [proofUrls, setProofUrls] = useState<Record<string, string | null>>({});
-  const watchRef = useRef<number | null>(null);
+  const watchRef = useRef<WatchHandle | null>(null);
+  const [gpsStatus, setGpsStatus] = useState<GpsStatus>("idle");
+  const lastSentRef = useRef<number>(0);
 
   const load = async () => {
     if (!user) return;
