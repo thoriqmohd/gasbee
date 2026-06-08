@@ -73,7 +73,7 @@ export function ImageUpload({ bucket, pathPrefix = "", value, onChange, label = 
           <button type="button" onClick={() => onChange(null)} className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"><X className="h-3 w-3" /></button>
         </div>
       ) : (
-        <div className={`flex items-center justify-center rounded-md border border-dashed text-muted-foreground ${aspect === "square" ? "h-32 w-32" : "h-32 w-full"}`}><Upload className="h-6 w-6" /></div>
+        <div className={`flex items-center justify-center rounded-md border border-dashed text-muted-foreground ${aspect === "square" ? "h-56 w-full" : "h-56 w-full"}`}><Upload className="h-8 w-8" /></div>
       )}
       <input ref={fileRef} type="file" accept={accept} className="hidden" onChange={onPick} />
       <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
