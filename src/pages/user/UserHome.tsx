@@ -8,12 +8,12 @@ import categoryNew from "@/assets/category-new.png";
 import categoryAccessories from "@/assets/category-accessories.png";
 import categoryIndustrial from "@/assets/category-industrial.png";
 
-const categoryImage = (c: any): string | null => {
+const categoryImage = (c: any): { src: string | null; scaleClass?: string } | null => {
   const key = `${c.slug ?? ""} ${c.name ?? ""}`.toLowerCase();
-  if (key.includes("refill")) return categoryRefill;
-  if (key.includes("new") || key.includes("cylinder")) return categoryNew;
-  if (key.includes("accessor")) return categoryAccessories;
-  if (key.includes("industrial")) return categoryIndustrial;
+  if (key.includes("refill")) return { src: categoryRefill, scaleClass: "scale-110" };
+  if (key.includes("new") || key.includes("cylinder")) return { src: categoryNew, scaleClass: "scale-75" };
+  if (key.includes("accessor")) return { src: categoryAccessories };
+  if (key.includes("industrial")) return { src: categoryIndustrial };
   return null;
 };
 import { Link, useNavigate } from "react-router-dom";
