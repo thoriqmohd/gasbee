@@ -18,10 +18,6 @@ export default function UserProfile() {
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => setProfile(data ?? { full_name: "", phone: "", avatar_url: "" }));
   }, [user]);
 
-  const save = async () => {
-    const { error } = await supabase.from("profiles").update({ full_name: profile.full_name, phone: profile.phone }).eq("id", user!.id);
-    if (error) toast.error(error.message); else toast.success("Saved");
-  };
 
   const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
