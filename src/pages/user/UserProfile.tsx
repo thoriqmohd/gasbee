@@ -87,46 +87,12 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {/* Personal info */}
-      <div className="glass-category-card space-y-4 rounded-2xl p-4">
-        <div className="flex items-center gap-2">
-          <UserIcon className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold">Personal Info</h2>
-        </div>
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Email</Label>
-            <Input value={user?.email ?? ""} disabled className="rounded-xl" />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Full name</Label>
-            <Input
-              value={profile.full_name ?? ""}
-              onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-              className="rounded-xl"
-              placeholder="Your name"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Phone</Label>
-            <Input
-              value={profile.phone ?? ""}
-              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              className="rounded-xl"
-              placeholder="+60..."
-            />
-          </div>
-          <Button onClick={save} className="w-full rounded-xl shadow-md shadow-primary/20">
-            Save changes
-          </Button>
-        </div>
-      </div>
-
       {/* Menu */}
       <div className="space-y-2">
         <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</h2>
         <div className="space-y-2">
           {[
+            { to: "/user/account-settings", icon: Settings, label: "Account Settings", desc: "Personal info & account actions" },
             { to: "/user/orders", icon: ShoppingBag, label: "My Orders", desc: "Track your gas deliveries" },
             { to: "/user/addresses", icon: MapPin, label: "Addresses", desc: "Manage delivery locations" },
             { to: "/user/notifications", icon: Bell, label: "Notifications", desc: "Updates and alerts" },
