@@ -29,6 +29,7 @@ import Promotions from "@/pages/admin/Promotions";
 import Reports from "@/pages/admin/Reports";
 import Notifications from "@/pages/admin/Notifications";
 import SupportTickets from "@/pages/admin/SupportTickets";
+import AccountDeletionRequests from "@/pages/admin/AccountDeletionRequests";
 import AuditLogs from "@/pages/admin/AuditLogs";
 import Settings from "@/pages/admin/Settings";
 import PaymentGateway from "@/pages/admin/PaymentGateway";
@@ -142,6 +143,7 @@ const App = () => (
               <Route path="/reports" element={<Reports />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/support-tickets" element={<SupportTickets />} />
+              <Route path="/account-deletion-requests" element={<AccountDeletionRequests />} />
               <Route path="/audit-logs" element={<AuditLogs />} />
               <Route path="/admins" element={<Admins />} />
               <Route path="/settings" element={<Settings />} />
