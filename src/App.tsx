@@ -52,6 +52,7 @@ import UserOrderDetail from "@/pages/user/UserOrderDetail";
 import UserPayment from "@/pages/user/UserPayment";
 import UserAddresses from "@/pages/user/UserAddresses";
 import UserProfile from "@/pages/user/UserProfile";
+import UserAccountSettings from "@/pages/user/UserAccountSettings";
 import UserNotifications from "@/pages/user/UserNotifications";
 import UserSupport from "@/pages/user/UserSupport";
 import UserRefund from "@/pages/user/UserRefund";
@@ -167,6 +168,7 @@ const App = () => (
               <Route path="/user/tracking/:orderId" element={<UserOrderDetail />} />
               <Route path="/user/refund" element={<UserRefund />} />
               <Route path="/user/profile" element={<UserProfile />} />
+              <Route path="/user/account-settings" element={<UserAccountSettings />} />
               <Route path="/user/addresses" element={<UserAddresses />} />
               <Route path="/user/support" element={<UserSupport />} />
               <Route path="/user/notifications" element={<UserNotifications />} />
