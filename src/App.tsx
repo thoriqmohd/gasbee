@@ -52,6 +52,7 @@ import UserOrderDetail from "@/pages/user/UserOrderDetail";
 import UserPayment from "@/pages/user/UserPayment";
 import UserAddresses from "@/pages/user/UserAddresses";
 import UserProfile from "@/pages/user/UserProfile";
+import UserAccountSettings from "@/pages/user/UserAccountSettings";
 import UserNotifications from "@/pages/user/UserNotifications";
 import UserSupport from "@/pages/user/UserSupport";
 import UserRefund from "@/pages/user/UserRefund";
