@@ -37,7 +37,7 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
     if (!forgotEmail) return;
     setForgotBusy(true);
     const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}${resetRedirectPath}`,
+      redirectTo: `https://app.gasbee.com.my${resetRedirectPath}`,
     });
     setForgotBusy(false);
     if (error) return toast.error(error.message);
