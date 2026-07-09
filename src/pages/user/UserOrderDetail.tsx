@@ -339,7 +339,7 @@ export default function UserOrderDetail() {
       )}
 
       <div className="flex flex-wrap gap-2">
-        {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={cancel}>Cancel</Button>}
+        {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={() => setCancelOpen(true)}>Cancel</Button>}
         {o.payment_status === "paid" && (
           <Button
             variant="outline"
