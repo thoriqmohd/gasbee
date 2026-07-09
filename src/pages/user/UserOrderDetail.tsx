@@ -75,10 +75,32 @@ export default function UserOrderDetail() {
   };
   const stepIdx = STATUS_TO_STEP[o.status] ?? -1;
 
-  const cancel = async () => {
-    const { error } = await supabase.from("orders").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", o.id);
-    if (error) toast.error(error.message); else { toast.success("Cancelled"); setO({ ...o, status: "cancelled" }); }
+  const CANCEL_REASONS = [
+    "Tersalah tempah",
+    "Nak tukar produk / kuantiti",
+    "Nak tukar alamat penghantaran",
+    "Merchant terlalu lambat",
+    "Jumpa harga lebih murah di tempat lain",
+    "Lain-lain",
+  ];
+
+  const submitCancel = async () => {
+    if (!cancelReason) { toast.error("Sila pilih sebab pembatalan"); return; }
+    setCancelling(true);
+    const reasonText = cancelNote.trim() ? `${cancelReason} — ${cancelNote.trim()}` : cancelReason;
+    const { error } = await supabase.from("orders").update({
+      status: "cancelled",
+      cancelled_at: new Date().toISOString(),
+      failure_reason: reasonText,
+    }).eq("id", o.id);
+    setCancelling(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Pesanan dibatalkan");
+    setO({ ...o, status: "cancelled", failure_reason: reasonText });
+    setCancelOpen(false);
+    setCancelReason(""); setCancelNote("");
   };
+
 
   const a = o.address_snapshot ?? {};
 
