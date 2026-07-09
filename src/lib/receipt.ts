@@ -244,7 +244,7 @@ export async function downloadReceipt(orderId: string) {
   const { supabase } = await import("@/integrations/supabase/client");
   const { data: order, error } = await supabase
     .from("orders")
-    .select("*, merchants(name, phone)")
+    .select("*, merchants(name, phone, address, city, postcode, state)")
     .eq("id", orderId)
     .maybeSingle();
   if (error || !order) throw new Error(error?.message || "Order not found");
