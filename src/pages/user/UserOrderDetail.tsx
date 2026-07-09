@@ -64,6 +64,54 @@ export default function UserOrderDetail() {
 
   const a = o.address_snapshot ?? {};
 
+  const renderTracker = () => (
+    <>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm font-semibold">Order Tracking</div>
+        <div className="text-[11px] font-medium text-primary">
+          {Math.round(((stepIdx + 1) / STEPS.length) * 100)}% complete
+        </div>
+      </div>
+      <div className="relative">
+        <div className="absolute left-5 right-5 top-5 h-1 -translate-y-1/2 rounded-full bg-muted" />
+        <div
+          className="absolute left-5 top-5 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700 ease-out"
+          style={{ width: `calc((100% - 2.5rem) * ${stepIdx / (STEPS.length - 1)})` }}
+        />
+        <div className="relative flex items-start justify-between">
+          {STEPS.map((s, i) => {
+            const Icon = s.icon;
+            const isActive = i === stepIdx;
+            const isDone = i <= stepIdx;
+            return (
+              <div key={s.key} className="flex flex-1 flex-col items-center text-center">
+                <div
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all duration-500 ${
+                    isDone
+                      ? "bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30"
+                      : "bg-muted text-muted-foreground"
+                  } ${isActive ? "scale-110 ring-4 ring-primary/20" : ""}`}
+                >
+                  {isActive && (
+                    <span className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
+                  )}
+                  <Icon className="relative h-4 w-4" />
+                </div>
+                <div
+                  className={`mt-2 text-[10px] font-medium leading-tight transition-colors ${
+                    isDone ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {s.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+
 
   return (
     <div className="space-y-4">
@@ -80,53 +128,11 @@ export default function UserOrderDetail() {
 
       {stepIdx >= 0 && o.status !== "cancelled" && (
         <div className="glass-category-card animate-fade-in rounded-2xl p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="text-sm font-semibold">Order Tracking</div>
-            <div className="text-[11px] font-medium text-primary">
-              {Math.round(((stepIdx + 1) / STEPS.length) * 100)}% complete
-            </div>
-          </div>
-          <div className="relative">
-            {/* Progress line background */}
-            <div className="absolute left-5 right-5 top-5 h-1 -translate-y-1/2 rounded-full bg-muted" />
-            {/* Progress line filled */}
-            <div
-              className="absolute left-5 top-5 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700 ease-out"
-              style={{ width: `calc((100% - 2.5rem) * ${stepIdx / (STEPS.length - 1)})` }}
-            />
-            <div className="relative flex items-start justify-between">
-              {STEPS.map((s, i) => {
-                const Icon = s.icon;
-                const isActive = i === stepIdx;
-                const isDone = i <= stepIdx;
-                return (
-                  <div key={s.key} className="flex flex-1 flex-col items-center text-center">
-                    <div
-                      className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all duration-500 ${
-                        isDone
-                          ? "bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30"
-                          : "bg-muted text-muted-foreground"
-                      } ${isActive ? "scale-110 ring-4 ring-primary/20" : ""}`}
-                    >
-                      {isActive && (
-                        <span className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
-                      )}
-                      <Icon className="relative h-4 w-4" />
-                    </div>
-                    <div
-                      className={`mt-2 text-[10px] font-medium leading-tight transition-colors ${
-                        isDone ? "text-foreground" : "text-muted-foreground"
-                      }`}
-                    >
-                      {s.label}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {renderTracker()}
         </div>
       )}
+
+
 
       {(() => {
         // Live rider tracking — available once rider has accepted the job, regardless of payment method (COD or online).
@@ -190,6 +196,12 @@ export default function UserOrderDetail() {
                 {etaMin != null && <span> · ETA ~{etaMin} min</span>}
               </div>
             </div>
+            {stepIdx >= 0 && (
+              <div className="border-b bg-background px-3 py-4">
+                {renderTracker()}
+              </div>
+            )}
+
             {riderLoc ? (
               <MapPicker
                 lat={riderLoc.lat}
