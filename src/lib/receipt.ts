@@ -7,11 +7,13 @@ export interface ReceiptOrder {
   total_amount: number | string;
   items_subtotal: number | string;
   delivery_fee: number | string;
+  service_fee?: number | string | null;
+  processing_fee?: number | string | null;
   discount?: number | string | null;
   payment_method?: string | null;
   payment_status?: string | null;
   address_snapshot?: any;
-  merchants?: { name?: string | null; phone?: string | null } | null;
+  merchants?: { name?: string | null; phone?: string | null; address?: string | null; city?: string | null; postcode?: string | null; state?: string | null } | null;
 }
 
 export interface ReceiptItem {
@@ -116,6 +118,11 @@ export async function generateReceiptPdf(
   doc.setFontSize(9);
   doc.setTextColor(...BRAND.body);
   if (order.merchants?.phone) doc.text(String(order.merchants.phone), M, y);
+  const mAddr = [order.merchants?.address, order.merchants?.postcode, order.merchants?.city, order.merchants?.state].filter(Boolean).join(", ");
+  if (mAddr) {
+    const ml = doc.splitTextToSize(mAddr, pageW / 2 - M - 10);
+    doc.text(ml, M, y + 14);
+  }
   if (a.recipient_phone) doc.text(String(a.recipient_phone), pageW / 2, y);
 
   const addr = [a.address_line1, a.address_line2, a.postcode, a.city, a.state]
@@ -176,7 +183,11 @@ export async function generateReceiptPdf(
     y += opts?.bold ? 18 : 15;
   };
   totalsRow("Subtotal", money(order.items_subtotal));
-  totalsRow("Delivery", money(order.delivery_fee));
+  totalsRow("Delivery Fee", money(order.delivery_fee));
+  if (Number(order.service_fee || 0) > 0)
+    totalsRow("Service Fee", money(order.service_fee));
+  if (Number(order.processing_fee || 0) > 0)
+    totalsRow("Processing Fee", money(order.processing_fee));
   if (Number(order.discount || 0) > 0)
     totalsRow("Discount", `- ${money(order.discount)}`);
 
@@ -233,7 +244,7 @@ export async function downloadReceipt(orderId: string) {
   const { supabase } = await import("@/integrations/supabase/client");
   const { data: order, error } = await supabase
     .from("orders")
-    .select("*, merchants(name, phone)")
+    .select("*, merchants(name, phone, address, city, postcode, state)")
     .eq("id", orderId)
     .maybeSingle();
   if (error || !order) throw new Error(error?.message || "Order not found");
