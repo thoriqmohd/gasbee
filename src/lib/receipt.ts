@@ -7,11 +7,13 @@ export interface ReceiptOrder {
   total_amount: number | string;
   items_subtotal: number | string;
   delivery_fee: number | string;
+  service_fee?: number | string | null;
+  processing_fee?: number | string | null;
   discount?: number | string | null;
   payment_method?: string | null;
   payment_status?: string | null;
   address_snapshot?: any;
-  merchants?: { name?: string | null; phone?: string | null } | null;
+  merchants?: { name?: string | null; phone?: string | null; address?: string | null; city?: string | null; postcode?: string | null; state?: string | null } | null;
 }
 
 export interface ReceiptItem {
