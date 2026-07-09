@@ -353,7 +353,35 @@ export default function UserOrderDetail() {
           <Button asChild variant="outline" className="flex-1"><Link to={`/user/refund?order=${o.id}`}>Request refund</Link></Button>
         )}
       </div>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Batalkan pesanan</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm">Sebab pembatalan *</Label>
+              <RadioGroup value={cancelReason} onValueChange={setCancelReason} className="mt-2 space-y-2">
+                {CANCEL_REASONS.map((r) => (
+                  <label key={r} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <RadioGroupItem value={r} id={`cr-${r}`} />
+                    <span>{r}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+            <div>
+              <Label className="text-sm">Nota tambahan (pilihan)</Label>
+              <Textarea value={cancelNote} onChange={(e) => setCancelNote(e.target.value.slice(0, 500))} placeholder="Ceritakan lebih lanjut…" maxLength={500} rows={3} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelling}>Kembali</Button>
+            <Button variant="destructive" onClick={submitCancel} disabled={cancelling || !cancelReason}>{cancelling ? "Membatalkan…" : "Sahkan batal"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
 
