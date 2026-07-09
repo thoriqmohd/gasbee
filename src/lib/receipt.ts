@@ -183,7 +183,11 @@ export async function generateReceiptPdf(
     y += opts?.bold ? 18 : 15;
   };
   totalsRow("Subtotal", money(order.items_subtotal));
-  totalsRow("Delivery", money(order.delivery_fee));
+  totalsRow("Delivery Fee", money(order.delivery_fee));
+  if (Number(order.service_fee || 0) > 0)
+    totalsRow("Service Fee", money(order.service_fee));
+  if (Number(order.processing_fee || 0) > 0)
+    totalsRow("Processing Fee", money(order.processing_fee));
   if (Number(order.discount || 0) > 0)
     totalsRow("Discount", `- ${money(order.discount)}`);
 
