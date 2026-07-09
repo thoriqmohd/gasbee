@@ -132,36 +132,21 @@ export default function UserMerchantDetail() {
         return (
           <div className="space-y-6">
             {sections.map((s) => {
-              const list = bySlug[s.slug] ?? [];
-              if (!s.withSizes) {
-                return (
-                  <section key={s.slug} className="space-y-2">
-                    <h3 className="text-sm font-semibold">{s.label}</h3>
-                    <div className="grid grid-cols-2 gap-3">{list.map(renderCard)}</div>
-                  </section>
-                );
-              }
-              const sizes = Array.from(new Set(list.map((p) => Number(p.cylinder_size_kg) || 0))).sort((a, b) => {
-                if (a === 0) return 1;
-                if (b === 0) return -1;
-                return a - b;
+              const list = (bySlug[s.slug] ?? []).slice().sort((a, b) => {
+                const sa = Number(a.cylinder_size_kg) || 0;
+                const sb = Number(b.cylinder_size_kg) || 0;
+                if (sa === 0 && sb !== 0) return 1;
+                if (sb === 0 && sa !== 0) return -1;
+                return sa - sb;
               });
               return (
-                <section key={s.slug} className="space-y-3">
+                <section key={s.slug} className="space-y-2">
                   <h3 className="text-sm font-semibold">{s.label}</h3>
-                  {sizes.map((sz) => {
-                    const items = list.filter((p) => (Number(p.cylinder_size_kg) || 0) === sz);
-                    if (items.length === 0) return null;
-                    return (
-                      <div key={sz} className="space-y-2">
-                        <div className="text-xs font-medium text-muted-foreground">{sz > 0 ? `${sz} kg` : "Other sizes"}</div>
-                        <div className="grid grid-cols-2 gap-3">{items.map(renderCard)}</div>
-                      </div>
-                    );
-                  })}
+                  <div className="grid grid-cols-2 gap-3">{list.map(renderCard)}</div>
                 </section>
               );
             })}
+
             {others.length > 0 && (
               <section className="space-y-2">
                 <h3 className="text-sm font-semibold">Other</h3>
