@@ -29,10 +29,15 @@ export default function UserOrderDetail() {
   const [o, setO] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [riderLoc, setRiderLoc] = useState<{ lat: number; lng: number } | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelNote, setCancelNote] = useState("");
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
+
       const { data: order } = await supabase.from("orders").select("*, merchants(name, phone, latitude, longitude), riders(id, full_name, phone, current_lat, current_lng, vehicle_type, vehicle_plate)").eq("id", id).maybeSingle();
       setO(order);
       if ((order as any)?.riders?.current_lat) {
