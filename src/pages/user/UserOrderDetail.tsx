@@ -196,6 +196,12 @@ export default function UserOrderDetail() {
                 {etaMin != null && <span> · ETA ~{etaMin} min</span>}
               </div>
             </div>
+            {stepIdx >= 0 && (
+              <div className="border-b bg-background px-3 py-4">
+                {renderTracker()}
+              </div>
+            )}
+
             {riderLoc ? (
               <MapPicker
                 lat={riderLoc.lat}
