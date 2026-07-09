@@ -1,15 +1,29 @@
-## Goal
-Bila paparan live rider map muncul dalam page order detail, tunjukkan juga stepper status penghantaran (Pending → Confirmed → Preparing → On the way → Delivered) di atas map — sama seperti card "Order Tracking" yang ada di bahagian atas page.
+## Reorganize merchant store product page by category + size
 
-## Change
-File: `src/pages/user/UserOrderDetail.tsx`
+Update `src/pages/user/UserMerchantDetail.tsx` so the product list is grouped into clear sections instead of one flat grid.
 
-1. Extract markup stepper "Order Tracking" (lines 81–129) menjadi satu helper JSX kecil (dalam component yang sama) supaya boleh digunakan dua kali tanpa duplikasi.
-2. Render helper tersebut:
-   - Di tempat asal (di atas page) — kekal.
-   - Di dalam Card live rider tracking (lines 184–205), tepat di bawah header phaseLabel/ETA dan sebelum `<MapPicker />`. Ini bermakna waktu map keluar, user nampak status stepper terkini + map dalam satu card.
-3. Tiada perubahan pada logic status, data fetching, real-time subscription, atau map component.
+### Grouping structure
+Group products by category, in this fixed order, and within each category sub-group by cylinder size (kg) ascending:
 
-## Notes
-- Hanya perubahan presentasi (UI). Tiada perubahan DB, RLS, atau business logic.
-- Stepper akan sync automatik dengan `o.status` sedia ada, jadi status di atas map sentiasa reflect status terkini.
+1. **LPG Refill** — subsections per size (e.g. 12kg, 14kg)
+2. **New Cylinder Gas** — subsections per size (e.g. 12kg, 14kg)
+3. **Industrial Gas** — subsections per size (e.g. 12kg, 14kg)
+4. **Accessories / Inspection** — no size subsections; single list (Gas Kit + Inspection + Installation, Gas Inspection, etc.)
+
+Any product whose category doesn't match the four above falls into an "Other" section at the end.
+
+### Layout
+- Section header: category name (e.g. "LPG Refill").
+- Under each section, size subheaders ("12 kg", "14 kg") followed by a 2-col product grid (same card style as today).
+- Accessories section has no size subheader — just the grid.
+- Sections with zero products are hidden.
+- Keep existing card, coming-soon badge, out-of-range disable, and price logic unchanged.
+
+### Category-filter behavior
+When `?category=` is set in the URL, only that single section renders (still with size subgroups if applicable). The existing filter chip stays.
+
+### Technical notes
+- Match categories by slug (`lpg-refill`, `cylinder` / new cylinder, `industrial-gas`, `accessories`) — pull slug into `categoriesMap` (store `{name, slug}`).
+- Confirm exact slugs by reading `categories` in DB before finalizing during build.
+- Sorting: size asc numeric; products with no size go last within their category.
+- No DB or business-logic changes; presentation only.
