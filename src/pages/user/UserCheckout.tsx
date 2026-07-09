@@ -34,9 +34,7 @@ export default function UserCheckout() {
   const [useCredit, setUseCredit] = useState(true);
 
   useEffect(() => {
-    supabase.from("app_settings").select("*").in("key", [
-      "service_fee", "delivery_base_fee", "delivery_base_km", "delivery_per_km", "processing_fee",
-    ]).then(({ data }) => {
+    supabase.rpc("get_public_fee_settings").then(({ data }) => {
       const m: Record<string, number> = {};
       (data ?? []).forEach((r: any) => {
         const raw = typeof r.value === "string" ? r.value : (r.value?.value ?? r.value);
@@ -51,6 +49,7 @@ export default function UserCheckout() {
         processingFee: m.processing_fee ?? DEFAULT_FEE_CONFIG.processingFee,
       });
     });
+
   }, []);
 
   const addr = addresses.find((a) => a.id === addrId);
