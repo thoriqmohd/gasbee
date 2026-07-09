@@ -118,6 +118,11 @@ export async function generateReceiptPdf(
   doc.setFontSize(9);
   doc.setTextColor(...BRAND.body);
   if (order.merchants?.phone) doc.text(String(order.merchants.phone), M, y);
+  const mAddr = [order.merchants?.address, order.merchants?.postcode, order.merchants?.city, order.merchants?.state].filter(Boolean).join(", ");
+  if (mAddr) {
+    const ml = doc.splitTextToSize(mAddr, pageW / 2 - M - 10);
+    doc.text(ml, M, y + 14);
+  }
   if (a.recipient_phone) doc.text(String(a.recipient_phone), pageW / 2, y);
 
   const addr = [a.address_line1, a.address_line2, a.postcode, a.city, a.state]
