@@ -101,7 +101,26 @@ export default function UserMerchantDetail() {
               {cs && <span className="absolute right-1 top-1 rounded bg-muted-foreground/80 px-1.5 py-0.5 text-[10px] font-medium text-background">Coming Soon</span>}
               <div className="p-2">
                 <div className="line-clamp-1 text-sm font-medium">{p.name}</div>
-                <div className="mt-1 text-sm font-bold text-primary">RM {Number(p.refill_price || p.selling_price).toFixed(2)}</div>
+                {(() => {
+                  const slug = categoriesMap[p.category_id]?.slug;
+                  const refill = Number(p.refill_price || 0);
+                  const newCyl = Number(p.new_cylinder_price || 0);
+                  const sell = Number(p.selling_price || 0);
+                  const price = slug === "cylinder"
+                    ? (newCyl + refill) || sell
+                    : slug === "accessories"
+                      ? sell
+                      : refill || sell;
+                  return (
+                    <>
+                      <div className="mt-1 text-sm font-bold text-primary">RM {price.toFixed(2)}</div>
+                      {slug === "cylinder" && newCyl > 0 && (
+                        <div className="text-[10px] text-muted-foreground">Tong RM {newCyl.toFixed(2)} + Gas RM {refill.toFixed(2)}</div>
+                      )}
+                    </>
+                  );
+                })()}
+
               </div>
             </Card>
           );
