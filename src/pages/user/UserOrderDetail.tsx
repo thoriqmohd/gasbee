@@ -10,6 +10,11 @@ import { downloadReceipt } from "@/lib/receipt";
 import { MapPicker } from "@/components/MapPicker";
 import { OrderChat } from "@/components/OrderChat";
 import { OrderRating } from "@/components/user/OrderRating";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
 
 const STEPS = [
   { key: "pending", label: "Pending", icon: Clock },
