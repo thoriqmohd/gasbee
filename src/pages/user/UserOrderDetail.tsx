@@ -56,7 +56,15 @@ export default function UserOrderDetail() {
 
   if (!o) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
-  const stepIdx = STEPS.findIndex((s) => s.key === o.status);
+  const STATUS_TO_STEP: Record<string, number> = {
+    pending: 0,
+    confirmed: 1,
+    preparing: 2, assigned: 2, rider_accepted: 2, arrived_at_merchant: 2,
+    out_for_delivery: 3, picked_up: 3, on_delivery: 3, arrived_at_customer: 3,
+    delivered: 4,
+  };
+  const stepIdx = STATUS_TO_STEP[o.status] ?? -1;
+
   const cancel = async () => {
     const { error } = await supabase.from("orders").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", o.id);
     if (error) toast.error(error.message); else { toast.success("Cancelled"); setO({ ...o, status: "cancelled" }); }
