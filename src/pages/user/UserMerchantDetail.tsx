@@ -14,7 +14,7 @@ export default function UserMerchantDetail() {
   const [products, setProducts] = useState<any[]>([]);
   const [addr, setAddr] = useState<any>(null);
   const [category, setCategory] = useState<any>(null);
-  const [categoriesMap, setCategoriesMap] = useState<Record<string, string>>({});
+  const [categoriesMap, setCategoriesMap] = useState<Record<string, { name: string; slug: string }>>({});
 
   useEffect(() => {
     if (!id) return;
@@ -23,9 +23,9 @@ export default function UserMerchantDetail() {
     if (categoryId) qb = qb.eq("category_id", categoryId);
     qb.then(({ data }) => setProducts(data ?? []));
     supabase.from("addresses").select("*").eq("is_default", true).maybeSingle().then(({ data }) => setAddr(data));
-    supabase.from("categories").select("id,name").then(({ data }) => {
-      const map: Record<string, string> = {};
-      (data ?? []).forEach((c: any) => { map[c.id] = c.name; });
+    supabase.from("categories").select("id,name,slug").then(({ data }) => {
+      const map: Record<string, { name: string; slug: string }> = {};
+      (data ?? []).forEach((c: any) => { map[c.id] = { name: c.name, slug: c.slug }; });
       setCategoriesMap(map);
     });
     if (categoryId) {
@@ -34,6 +34,7 @@ export default function UserMerchantDetail() {
       setCategory(null);
     }
   }, [id, categoryId]);
+
 
 
   if (!m) return <p className="text-sm text-muted-foreground">Loading…</p>;
