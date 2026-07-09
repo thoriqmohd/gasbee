@@ -10,6 +10,11 @@ import { downloadReceipt } from "@/lib/receipt";
 import { MapPicker } from "@/components/MapPicker";
 import { OrderChat } from "@/components/OrderChat";
 import { OrderRating } from "@/components/user/OrderRating";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
 
 const STEPS = [
   { key: "pending", label: "Pending", icon: Clock },
@@ -24,10 +29,15 @@ export default function UserOrderDetail() {
   const [o, setO] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [riderLoc, setRiderLoc] = useState<{ lat: number; lng: number } | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelNote, setCancelNote] = useState("");
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
+
       const { data: order } = await supabase.from("orders").select("*, merchants(name, phone, latitude, longitude), riders(id, full_name, phone, current_lat, current_lng, vehicle_type, vehicle_plate)").eq("id", id).maybeSingle();
       setO(order);
       if ((order as any)?.riders?.current_lat) {
@@ -65,10 +75,32 @@ export default function UserOrderDetail() {
   };
   const stepIdx = STATUS_TO_STEP[o.status] ?? -1;
 
-  const cancel = async () => {
-    const { error } = await supabase.from("orders").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", o.id);
-    if (error) toast.error(error.message); else { toast.success("Cancelled"); setO({ ...o, status: "cancelled" }); }
+  const CANCEL_REASONS = [
+    "Tersalah tempah",
+    "Nak tukar produk / kuantiti",
+    "Nak tukar alamat penghantaran",
+    "Merchant terlalu lambat",
+    "Jumpa harga lebih murah di tempat lain",
+    "Lain-lain",
+  ];
+
+  const submitCancel = async () => {
+    if (!cancelReason) { toast.error("Sila pilih sebab pembatalan"); return; }
+    setCancelling(true);
+    const reasonText = cancelNote.trim() ? `${cancelReason} — ${cancelNote.trim()}` : cancelReason;
+    const { error } = await supabase.from("orders").update({
+      status: "cancelled",
+      cancelled_at: new Date().toISOString(),
+      failure_reason: reasonText,
+    }).eq("id", o.id);
+    setCancelling(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Pesanan dibatalkan");
+    setO({ ...o, status: "cancelled", failure_reason: reasonText });
+    setCancelOpen(false);
+    setCancelReason(""); setCancelNote("");
   };
+
 
   const a = o.address_snapshot ?? {};
 
@@ -307,7 +339,7 @@ export default function UserOrderDetail() {
       )}
 
       <div className="flex flex-wrap gap-2">
-        {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={cancel}>Cancel</Button>}
+        {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={() => setCancelOpen(true)}>Cancel</Button>}
         {o.payment_status === "paid" && (
           <Button
             variant="outline"
@@ -321,7 +353,35 @@ export default function UserOrderDetail() {
           <Button asChild variant="outline" className="flex-1"><Link to={`/user/refund?order=${o.id}`}>Request refund</Link></Button>
         )}
       </div>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Batalkan pesanan</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm">Sebab pembatalan *</Label>
+              <RadioGroup value={cancelReason} onValueChange={setCancelReason} className="mt-2 space-y-2">
+                {CANCEL_REASONS.map((r) => (
+                  <label key={r} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <RadioGroupItem value={r} id={`cr-${r}`} />
+                    <span>{r}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+            <div>
+              <Label className="text-sm">Nota tambahan (pilihan)</Label>
+              <Textarea value={cancelNote} onChange={(e) => setCancelNote(e.target.value.slice(0, 500))} placeholder="Ceritakan lebih lanjut…" maxLength={500} rows={3} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelling}>Kembali</Button>
+            <Button variant="destructive" onClick={submitCancel} disabled={cancelling || !cancelReason}>{cancelling ? "Membatalkan…" : "Sahkan batal"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
 
