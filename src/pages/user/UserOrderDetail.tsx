@@ -290,7 +290,7 @@ export default function UserOrderDetail() {
       <Card className="divide-y">
         {items.map((it) => (
           <div key={it.id} className="flex justify-between p-3 text-sm">
-            <span>{it.product_name} × {it.quantity}</span>
+            <span>{formatOrderItemName(it)} × {it.quantity}</span>
             <span>RM {Number(it.subtotal).toFixed(2)}</span>
           </div>
         ))}
