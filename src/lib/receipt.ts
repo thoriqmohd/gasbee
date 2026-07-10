@@ -18,12 +18,29 @@ export interface ReceiptOrder {
 
 export interface ReceiptItem {
   product_name: string;
+  type?: string | null;
   quantity: number | string;
   unit_price: number | string;
   subtotal: number | string;
 }
 
 const money = (v: any) => `RM ${Number(v || 0).toFixed(2)}`;
+
+const TYPE_LABEL: Record<string, string> = {
+  refill: "LPG Refill",
+  new_cylinder: "New Cylinder Gas",
+  deposit: "Cylinder Deposit",
+};
+
+export function formatOrderItemName(it: { product_name?: string | null; type?: string | null }): string {
+  const name = (it.product_name ?? "").trim();
+  const label = it.type ? TYPE_LABEL[it.type] : null;
+  if (!label) return name || "Item";
+  if (!name) return label;
+  // Skip if name already begins with the category label
+  if (name.toLowerCase().startsWith(label.toLowerCase())) return name;
+  return `${label}, ${name}`;
+}
 
 // Brand palette
 const BRAND = {
@@ -152,7 +169,7 @@ export async function generateReceiptPdf(
   doc.setFontSize(10);
   doc.setTextColor(...BRAND.body);
   items.forEach((it, i) => {
-    const nameLines = doc.splitTextToSize(it.product_name, pageW - M * 2 - 220);
+    const nameLines = doc.splitTextToSize(formatOrderItemName(it), pageW - M * 2 - 220);
     const rowH = Math.max(18, nameLines.length * 13);
     if (i % 2 === 1) {
       doc.setFillColor(250, 250, 250);

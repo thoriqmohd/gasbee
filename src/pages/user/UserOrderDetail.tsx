@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toast } from "sonner";
 import { Phone, Navigation, Clock, CheckCircle2, Package, Truck, Home, Download } from "lucide-react";
-import { downloadReceipt } from "@/lib/receipt";
+import { downloadReceipt, formatOrderItemName } from "@/lib/receipt";
 import { MapPicker } from "@/components/MapPicker";
 import { OrderChat } from "@/components/OrderChat";
 import { OrderRating } from "@/components/user/OrderRating";
@@ -290,7 +290,7 @@ export default function UserOrderDetail() {
       <Card className="divide-y">
         {items.map((it) => (
           <div key={it.id} className="flex justify-between p-3 text-sm">
-            <span>{it.product_name} × {it.quantity}</span>
+            <span>{formatOrderItemName(it)} × {it.quantity}</span>
             <span>RM {Number(it.subtotal).toFixed(2)}</span>
           </div>
         ))}
