@@ -146,10 +146,21 @@ export default function UserCheckout() {
 
     if (error || !order) { toast.error(error?.message ?? "Order failed"); setBusy(false); return; }
 
+    const CATEGORY_LABEL: Record<string, string> = {
+      "lpg-refill": "LPG Refill",
+      "cylinder": "New Cylinder Gas",
+      "industrial-gas": "Industrial Gas",
+      "accessories": "Accessories",
+    };
+    const buildName = (it: any) => {
+      const catLabel = it.category_slug ? CATEGORY_LABEL[it.category_slug] ?? null : null;
+      const parts = [catLabel, it.name].filter(Boolean);
+      return parts.join(", ");
+    };
     const orderItems = items.map((it) => ({
       order_id: order.id,
       product_id: it.product_id,
-      product_name: it.name,
+      product_name: buildName(it),
       product_image_url: it.image_url,
       type: (it.type === "new" ? "new_cylinder" : it.type) as "refill" | "new_cylinder" | "deposit",
       cylinder_size_kg: it.cylinder_size_kg,
