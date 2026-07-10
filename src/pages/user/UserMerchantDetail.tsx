@@ -84,8 +84,8 @@ export default function UserMerchantDetail() {
       </div>
       {(() => {
         const SECTIONS: { slug: string; label: string; withSizes: boolean }[] = [
-          { slug: "lpg-refill", label: "LPG Refill", withSizes: true },
-          { slug: "cylinder", label: "New Cylinder Gas", withSizes: true },
+          { slug: "lpg-refill", label: "LPG Refill (Gas Refill + Exchange Empty Cylinder)", withSizes: true },
+          { slug: "cylinder", label: "New Cylinder Gas (Gas Refill + New Cylinder Deposit Fee)", withSizes: true },
           { slug: "industrial-gas", label: "Industrial Gas", withSizes: true },
           { slug: "accessories", label: "Accessories / Inspection", withSizes: false },
         ];
