@@ -358,9 +358,24 @@ export default function UserCheckout() {
               Please confirm your delivery details, payment method and total amount before we process your order.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-1 rounded-md border bg-muted/30 p-3 text-sm">
+          <div className="space-y-3 rounded-md border bg-muted/30 p-3 text-sm">
+            <div>
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Items ({items.reduce((n, it) => n + it.quantity, 0)})</div>
+              <ul className="space-y-1">
+                {items.map((it) => {
+                  const catLabel = ({ "lpg-refill": "LPG Refill", "cylinder": "New Cylinder Gas", "industrial-gas": "Industrial Gas", "accessories": "Accessories" } as Record<string, string>)[it.category_slug ?? ""] ?? null;
+                  const fullName = [catLabel, it.name].filter(Boolean).join(", ");
+                  return (
+                    <li key={`${it.product_id}-${it.type}`} className="flex justify-between gap-2">
+                      <span className="font-medium">{fullName} × {it.quantity}</span>
+                      <span className="text-muted-foreground">RM {(it.unit_price * it.quantity).toFixed(2)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
             {addr && (
-              <div><span className="text-muted-foreground">Deliver to: </span><span className="font-medium">{addr.label ?? "Address"} — {addr.address_line1}, {addr.postcode} {addr.city}</span></div>
+              <div className="border-t pt-2"><span className="text-muted-foreground">Deliver to: </span><span className="font-medium">{addr.label ?? "Address"} — {addr.address_line1}, {addr.postcode} {addr.city}</span></div>
             )}
             <div><span className="text-muted-foreground">Payment: </span><span className="font-medium">{paymentMethod === "fpx" ? "FPX (Online Transfer)" : (paymentMethod === "card" ? "Credit Card" : (paymentMethod === "cod" ? "COD (Cash on Delivery)" : paymentMethod.toUpperCase()))}</span></div>
             <div><span className="text-muted-foreground">Total: </span><span className="font-bold text-primary">RM {total.toFixed(2)}</span></div>
