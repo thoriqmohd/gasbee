@@ -18,6 +18,11 @@ export interface ReceiptOrder {
 
 export interface ReceiptItem {
   product_name: string;
+  type?: string | null;
+  quantity: number | string;
+  unit_price: number | string;
+  subtotal: number | string;
+}
   quantity: number | string;
   unit_price: number | string;
   subtotal: number | string;
