@@ -25,6 +25,22 @@ export interface ReceiptItem {
 
 const money = (v: any) => `RM ${Number(v || 0).toFixed(2)}`;
 
+const TYPE_LABEL: Record<string, string> = {
+  refill: "LPG Refill",
+  new_cylinder: "New Cylinder Gas",
+  deposit: "Cylinder Deposit",
+};
+
+export function formatOrderItemName(it: { product_name?: string | null; type?: string | null }): string {
+  const name = (it.product_name ?? "").trim();
+  const label = it.type ? TYPE_LABEL[it.type] : null;
+  if (!label) return name || "Item";
+  if (!name) return label;
+  // Skip if name already begins with the category label
+  if (name.toLowerCase().startsWith(label.toLowerCase())) return name;
+  return `${label}, ${name}`;
+}
+
 // Brand palette
 const BRAND = {
   amber: [245, 158, 11] as [number, number, number], // primary amber
