@@ -169,7 +169,7 @@ export async function generateReceiptPdf(
   doc.setFontSize(10);
   doc.setTextColor(...BRAND.body);
   items.forEach((it, i) => {
-    const nameLines = doc.splitTextToSize(it.product_name, pageW - M * 2 - 220);
+    const nameLines = doc.splitTextToSize(formatOrderItemName(it), pageW - M * 2 - 220);
     const rowH = Math.max(18, nameLines.length * 13);
     if (i % 2 === 1) {
       doc.setFillColor(250, 250, 250);
