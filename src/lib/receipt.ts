@@ -23,10 +23,6 @@ export interface ReceiptItem {
   unit_price: number | string;
   subtotal: number | string;
 }
-  quantity: number | string;
-  unit_price: number | string;
-  subtotal: number | string;
-}
 
 const money = (v: any) => `RM ${Number(v || 0).toFixed(2)}`;
 
