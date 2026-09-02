@@ -3,8 +3,10 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, ADMIN_ROLES, MERCHANT_MANAGER_ROLES, RIDER_ROLES, CUSTOMER_ROLES } from "@/hooks/useAuth";
+import { AuthProvider, useAuth, homeForRoles, ADMIN_ROLES, MERCHANT_MANAGER_ROLES, RIDER_ROLES, CUSTOMER_ROLES } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Splash } from "@/components/Splash";
+
 
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminLogin from "@/pages/admin/AdminLogin";
