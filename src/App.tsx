@@ -158,7 +158,8 @@ const App = () => (
             <Route path="/user/login" element={<UserLogin />} />
             <Route path="/user/register" element={<UserRegister />} />
             <Route path="/reset-password" element={<UserResetPassword />} />
-            <Route element={<ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout /></ProtectedRoute>}>
+            {/* Public browsing — no login required */}
+            <Route element={<UserLayout />}>
               <Route path="/user" element={<Navigate to="/user/home" replace />} />
               <Route path="/user/home" element={<UserHome />} />
               <Route path="/user/products" element={<UserProducts />} />
@@ -166,13 +167,16 @@ const App = () => (
               <Route path="/user/merchant/:id" element={<UserMerchantDetail />} />
               <Route path="/user/product/:id" element={<UserProductDetail />} />
               <Route path="/user/cart" element={<UserCart />} />
+              <Route path="/user/profile" element={<UserProfile />} />
+            </Route>
+            {/* Account-based features — login required */}
+            <Route element={<ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout /></ProtectedRoute>}>
               <Route path="/user/checkout" element={<UserCheckout />} />
               <Route path="/user/orders" element={<UserOrders />} />
               <Route path="/user/orders/:id" element={<UserOrderDetail />} />
               <Route path="/user/payment/:id" element={<UserPayment />} />
               <Route path="/user/tracking/:orderId" element={<UserOrderDetail />} />
               <Route path="/user/refund" element={<UserRefund />} />
-              <Route path="/user/profile" element={<UserProfile />} />
               <Route path="/user/account-settings" element={<UserAccountSettings />} />
               <Route path="/user/addresses" element={<UserAddresses />} />
               <Route path="/user/support" element={<UserSupport />} />
@@ -180,6 +184,7 @@ const App = () => (
               <Route path="/user/apply-merchant" element={<UserApplyMerchant />} />
               <Route path="/user/company-verification" element={<UserCompanyVerification />} />
             </Route>
+
 
             {/* ===== MERCHANT MANAGER ===== */}
             <Route path="/merchant/login" element={<MerchantLogin />} />
