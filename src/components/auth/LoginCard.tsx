@@ -117,11 +117,11 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
           </div>
           <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
         </form>
-        <div className="mt-4 flex items-center justify-between gap-2">
+        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
           {showForgotPassword && (
             <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
               <DialogTrigger asChild>
-                <button type="button" className="text-sm text-foreground/90 underline underline-offset-4 hover:text-foreground/80">
+                <button type="button" className="text-foreground/90 underline underline-offset-4 hover:text-foreground/80">
                   Forgot password?
                 </button>
               </DialogTrigger>
@@ -138,11 +138,12 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
               </DialogContent>
             </Dialog>
           )}
+          {showForgotPassword && showGuest && <span className="text-muted-foreground">|</span>}
           {showGuest && (
             <button
               type="button"
               onClick={() => nav("/user/home")}
-              className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+              className="font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
             >
               Continue as guest
             </button>
