@@ -140,7 +140,7 @@ export function ImageUpload({ bucket, pathPrefix = "", value, onChange, label = 
       <input ref={fileRef} type="file" accept={accept} className="hidden" onChange={onPick} />
       <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
       <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => camRef.current?.click()} disabled={busy}>
+        <Button type="button" variant="outline" size="sm" onClick={onCameraClick} disabled={busy}>
           <Camera className="mr-1 h-3 w-3" />{busy ? "Uploading…" : "Camera"}
         </Button>
         <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>
