@@ -59,9 +59,9 @@ export default function UserCheckout() {
       const enabled = String(rawM.dev_mode_enabled ?? "false").toLowerCase() === "true";
       setDevMode({
         enabled,
-        title: unwrap(rawM.dev_mode_title) || "Mobile App dalam tempoh percubaan",
-        message: unwrap(rawM.dev_mode_message) || "Aplikasi sedang dalam pembangunan semula. Tiada penghantaran akan dilakukan sepanjang tempoh ini.",
-        button: unwrap(rawM.dev_mode_button) || "Faham",
+        title: unwrap(rawM.dev_mode_title) || "Mobile App is in trial period",
+        message: unwrap(rawM.dev_mode_message) || "The app is currently under redevelopment. No deliveries will be made during this period.",
+        button: unwrap(rawM.dev_mode_button) || "Got it",
       });
     });
 
