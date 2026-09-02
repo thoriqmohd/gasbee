@@ -3,12 +3,16 @@ import { useCompanyVerification } from "@/hooks/useCompanyVerification";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Minus, Plus, Flame, AlertTriangle, Building2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function UserCart() {
   const { items, setQty, remove, subtotal } = useCart();
   const { isApproved, status } = useCompanyVerification();
+  const { user } = useAuth();
+  const nav = useNavigate();
+
 
   const cylinders = cylinderTotal(items);
   const industrialBlocked = hasIndustrial(items) && !isApproved;
