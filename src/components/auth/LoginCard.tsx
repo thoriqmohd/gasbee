@@ -20,9 +20,10 @@ interface Props {
   signupLink?: string;
   showForgotPassword?: boolean;
   resetRedirectPath?: string;
+  showGuest?: boolean;
 }
 
-export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showForgotPassword, resetRedirectPath = "/reset-password" }: Props) => {
+export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showForgotPassword, resetRedirectPath = "/reset-password", showGuest }: Props) => {
   const nav = useNavigate();
   const loc = useLocation();
 
@@ -135,6 +136,15 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
               </form>
             </DialogContent>
           </Dialog>
+        )}
+        {showGuest && (
+          <button
+            type="button"
+            onClick={() => nav("/user/home")}
+            className="mt-4 block w-full text-center text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            Continue as guest
+          </button>
         )}
         {showSignup && signupLink && (
           <p className="mt-4 text-center text-sm text-foreground/90">
