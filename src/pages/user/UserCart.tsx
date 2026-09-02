@@ -76,9 +76,25 @@ export default function UserCart() {
           <span className="text-sm">Subtotal</span>
           <span className="text-lg font-bold text-primary">RM {subtotal.toFixed(2)}</span>
         </div>
-        <Button asChild className="w-full" disabled={industrialBlocked}>
-          <Link to="/user/checkout">Checkout</Link>
-        </Button>
+        {user ? (
+          <Button asChild className="w-full" disabled={industrialBlocked}>
+            <Link to="/user/checkout">Checkout</Link>
+          </Button>
+        ) : (
+          <>
+            <Button
+              className="w-full"
+              disabled={industrialBlocked}
+              onClick={() => nav("/user/login", { state: { from: { pathname: "/user/checkout" } } })}
+            >
+              Sign in to checkout
+            </Button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Your cart is saved. <Link to="/user/register" className="underline">Create an account</Link>
+            </p>
+          </>
+        )}
+
       </div>
     </div>
   );
