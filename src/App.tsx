@@ -98,9 +98,16 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const RootRedirect = () => {
+  const { roles, loading } = useAuth();
+  if (loading) return <Splash />;
+  return <Navigate to={homeForRoles(roles)} replace />;
+};
+
 const Admin = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout>{children}</AdminLayout></ProtectedRoute>
 );
+
 const Customer = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout />{children}</ProtectedRoute>
 );
