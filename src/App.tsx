@@ -3,8 +3,10 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, ADMIN_ROLES, MERCHANT_MANAGER_ROLES, RIDER_ROLES, CUSTOMER_ROLES } from "@/hooks/useAuth";
+import { AuthProvider, useAuth, homeForRoles, ADMIN_ROLES, MERCHANT_MANAGER_ROLES, RIDER_ROLES, CUSTOMER_ROLES } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Splash } from "@/components/Splash";
+
 
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -98,9 +100,16 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const RootRedirect = () => {
+  const { roles, loading } = useAuth();
+  if (loading) return <Splash />;
+  return <Navigate to={homeForRoles(roles)} replace />;
+};
+
 const Admin = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout>{children}</AdminLayout></ProtectedRoute>
 );
+
 const Customer = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout />{children}</ProtectedRoute>
 );
@@ -118,12 +127,15 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Entry point: guests land on the shop, signed-in staff on their home */}
+            <Route path="/" element={<RootRedirect />} />
+
             {/* ===== ADMIN ===== */}
             <Route path="/login" element={<AdminLogin />} />
             <Route path="/live-monitoring" element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><LiveMonitoring /></ProtectedRoute>} />
             <Route element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout /></ProtectedRoute>}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
+
               <Route path="/orders" element={<Orders />} />
               <Route path="/orders/:id" element={<OrderDetail />} />
               <Route path="/customers" element={<Customers />} />
@@ -158,7 +170,8 @@ const App = () => (
             <Route path="/user/login" element={<UserLogin />} />
             <Route path="/user/register" element={<UserRegister />} />
             <Route path="/reset-password" element={<UserResetPassword />} />
-            <Route element={<ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout /></ProtectedRoute>}>
+            {/* Public browsing — no login required */}
+            <Route element={<UserLayout />}>
               <Route path="/user" element={<Navigate to="/user/home" replace />} />
               <Route path="/user/home" element={<UserHome />} />
               <Route path="/user/products" element={<UserProducts />} />
@@ -166,13 +179,16 @@ const App = () => (
               <Route path="/user/merchant/:id" element={<UserMerchantDetail />} />
               <Route path="/user/product/:id" element={<UserProductDetail />} />
               <Route path="/user/cart" element={<UserCart />} />
+              <Route path="/user/profile" element={<UserProfile />} />
+            </Route>
+            {/* Account-based features — login required */}
+            <Route element={<ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout /></ProtectedRoute>}>
               <Route path="/user/checkout" element={<UserCheckout />} />
               <Route path="/user/orders" element={<UserOrders />} />
               <Route path="/user/orders/:id" element={<UserOrderDetail />} />
               <Route path="/user/payment/:id" element={<UserPayment />} />
               <Route path="/user/tracking/:orderId" element={<UserOrderDetail />} />
               <Route path="/user/refund" element={<UserRefund />} />
-              <Route path="/user/profile" element={<UserProfile />} />
               <Route path="/user/account-settings" element={<UserAccountSettings />} />
               <Route path="/user/addresses" element={<UserAddresses />} />
               <Route path="/user/support" element={<UserSupport />} />
@@ -180,6 +196,7 @@ const App = () => (
               <Route path="/user/apply-merchant" element={<UserApplyMerchant />} />
               <Route path="/user/company-verification" element={<UserCompanyVerification />} />
             </Route>
+
 
             {/* ===== MERCHANT MANAGER ===== */}
             <Route path="/merchant/login" element={<MerchantLogin />} />

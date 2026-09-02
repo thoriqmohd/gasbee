@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,8 @@ interface Props {
 
 export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showForgotPassword, resetRedirectPath = "/reset-password" }: Props) => {
   const nav = useNavigate();
+  const loc = useLocation();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -64,8 +66,11 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
     const target = homeForRoles(roles);
     if (target === "/user/home") {
       try { sessionStorage.setItem("gasbee-bee-intro", "1"); } catch {}
+      const from = (loc.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+      if (from && from.startsWith("/user")) { nav(from, { replace: true }); return; }
     }
     nav(target, { replace: true });
+
   };
 
 

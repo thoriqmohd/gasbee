@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { SignedImage } from "@/components/SignedImage";
+import { Capacitor } from "@capacitor/core";
+
 
 interface Props {
   bucket: string;
@@ -49,21 +51,81 @@ export function ImageUpload({ bucket, pathPrefix = "", value, onChange, label = 
   const handleFile = async (file: File) => {
     if (file.size > 20 * 1024 * 1024) { toast.error("Max 20MB"); return; }
     setBusy(true);
-    const compressed = await compressImage(file);
-    const ext = (compressed.type === "image/jpeg" ? "jpg" : (compressed.name.split(".").pop() || "jpg"));
-    const key = `${pathPrefix}${pathPrefix ? "/" : ""}${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-    const { error } = await supabase.storage.from(bucket).upload(key, compressed, { upsert: false, contentType: compressed.type });
-    if (error) { toast.error(error.message); setBusy(false); return; }
-    const { data } = supabase.storage.from(bucket).getPublicUrl(key);
-    onChange(data.publicUrl);
-    setBusy(false);
+    try {
+      const compressed = await compressImage(file);
+      const ext = (compressed.type === "image/jpeg" ? "jpg" : (compressed.name.split(".").pop() || "jpg"));
+      const key = `${pathPrefix}${pathPrefix ? "/" : ""}${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(key, compressed, { upsert: false, contentType: compressed.type });
+      if (error) { toast.error(error.message); return; }
+      const { data } = supabase.storage.from(bucket).getPublicUrl(key);
+      onChange(data.publicUrl);
+    } catch (err: any) {
+      toast.error(err?.message ?? "Upload failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) await handleFile(file);
     if (e.target) e.target.value = "";
+    if (file) await handleFile(file);
   };
+
+  // Native (iOS/Android) camera capture via Capacitor. The HTML capture input
+  // is unreliable inside WKWebView and can terminate the app, so it is only
+  // used as the web fallback.
+  const takePhotoNative = async () => {
+    setBusy(true);
+    try {
+      const { Camera: CapCamera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+
+      let perm = await CapCamera.checkPermissions();
+      if (perm.camera !== "granted") {
+        perm = await CapCamera.requestPermissions({ permissions: ["camera"] });
+      }
+      if (perm.camera !== "granted") {
+        toast.error("Camera access is off. Enable it in Settings > Gasbee > Camera.");
+        return;
+      }
+
+      const photo = await CapCamera.getPhoto({
+        quality: 80,
+        width: 1600,
+        correctOrientation: true,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+        saveToGallery: false,
+      });
+
+      const path = photo.webPath ?? photo.path;
+      if (!path) { toast.error("Could not read the captured photo."); return; }
+
+      const res = await fetch(path);
+      const blob = await res.blob();
+      const type = blob.type || `image/${photo.format || "jpeg"}`;
+      const file = new File([blob], `photo-${Date.now()}.${photo.format || "jpg"}`, { type });
+      await handleFile(file);
+    } catch (err: any) {
+      const msg = String(err?.message ?? err ?? "");
+      // User tapped Cancel — not an error.
+      if (/cancel/i.test(msg) || /No image picked/i.test(msg)) return;
+      if (/denied|permission/i.test(msg)) {
+        toast.error("Camera permission denied. Enable it in your device settings.");
+        return;
+      }
+      toast.error("Camera is unavailable right now. Please pick a photo instead.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onCameraClick = () => {
+    if (Capacitor.isNativePlatform()) { void takePhotoNative(); return; }
+    camRef.current?.click();
+  };
+
 
   return (
     <div className="space-y-2">
@@ -78,7 +140,7 @@ export function ImageUpload({ bucket, pathPrefix = "", value, onChange, label = 
       <input ref={fileRef} type="file" accept={accept} className="hidden" onChange={onPick} />
       <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
       <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => camRef.current?.click()} disabled={busy}>
+        <Button type="button" variant="outline" size="sm" onClick={onCameraClick} disabled={busy}>
           <Camera className="mr-1 h-3 w-3" />{busy ? "Uploading…" : "Camera"}
         </Button>
         <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>

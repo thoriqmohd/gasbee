@@ -51,7 +51,32 @@ export default function UserProfile() {
     .join("")
     .toUpperCase();
 
+  if (!user) {
+    return (
+      <div className="space-y-5">
+        <div className="glass-category-card relative overflow-hidden rounded-3xl p-6 text-center">
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-2xl" />
+          <div className="relative space-y-2">
+            <h1 className="text-lg font-bold">Sign in to manage your account</h1>
+            <p className="text-sm text-muted-foreground">
+              Browsing is free. Sign in to place orders, track deliveries and manage your profile.
+            </p>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Button className="w-full" onClick={() => nav("/user/login", { state: { from: { pathname: "/user/profile" } } })}>
+            Sign in
+          </Button>
+          <Button variant="outline" className="w-full" onClick={() => nav("/user/register")}>
+            Create an account
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
+
     <div className="space-y-5">
       {/* Hero header */}
       <div className="glass-category-card relative overflow-hidden rounded-3xl p-5">

@@ -3,12 +3,16 @@ import { useCompanyVerification } from "@/hooks/useCompanyVerification";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Minus, Plus, Flame, AlertTriangle, Building2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function UserCart() {
   const { items, setQty, remove, subtotal } = useCart();
   const { isApproved, status } = useCompanyVerification();
+  const { user } = useAuth();
+  const nav = useNavigate();
+
 
   const cylinders = cylinderTotal(items);
   const industrialBlocked = hasIndustrial(items) && !isApproved;
@@ -76,9 +80,25 @@ export default function UserCart() {
           <span className="text-sm">Subtotal</span>
           <span className="text-lg font-bold text-primary">RM {subtotal.toFixed(2)}</span>
         </div>
-        <Button asChild className="w-full" disabled={industrialBlocked}>
-          <Link to="/user/checkout">Checkout</Link>
-        </Button>
+        {user ? (
+          <Button asChild className="w-full" disabled={industrialBlocked}>
+            <Link to="/user/checkout">Checkout</Link>
+          </Button>
+        ) : (
+          <>
+            <Button
+              className="w-full"
+              disabled={industrialBlocked}
+              onClick={() => nav("/user/login", { state: { from: { pathname: "/user/checkout" } } })}
+            >
+              Sign in to checkout
+            </Button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Your cart is saved. <Link to="/user/register" className="underline">Create an account</Link>
+            </p>
+          </>
+        )}
+
       </div>
     </div>
   );
