@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { SignedImage } from "@/components/SignedImage";
+import { Capacitor } from "@capacitor/core";
+
 
 interface Props {
   bucket: string;
