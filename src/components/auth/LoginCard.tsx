@@ -24,6 +24,8 @@ interface Props {
 
 export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLink, showForgotPassword, resetRedirectPath = "/reset-password" }: Props) => {
   const nav = useNavigate();
+  const loc = useLocation();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
