@@ -21,9 +21,9 @@ const KEYS = [
 
 const DEV_KEYS = [
   { key: "dev_mode_enabled", default: "false" },
-  { key: "dev_mode_title", default: "Mobile App dalam tempoh percubaan" },
-  { key: "dev_mode_message", default: "Aplikasi sedang dalam pembangunan semula. Tiada penghantaran akan dilakukan sepanjang tempoh ini." },
-  { key: "dev_mode_button", default: "Faham" },
+  { key: "dev_mode_title", default: "Mobile App is in trial period" },
+  { key: "dev_mode_message", default: "The app is currently under redevelopment. No deliveries will be made during this period." },
+  { key: "dev_mode_button", default: "Got it" },
 ];
 
 export default function Settings() {
@@ -59,25 +59,25 @@ export default function Settings() {
       <Card className="p-6 space-y-4 max-w-2xl">
         <div>
           <h2 className="text-lg font-semibold">App Status / Development Mode</h2>
-          <p className="text-sm text-muted-foreground">Bila aktif, notis akan dipaparkan kepada pengguna setiap kali mereka membuka aplikasi.</p>
+          <p className="text-sm text-muted-foreground">When enabled, a notice is shown to users every time they open the app.</p>
         </div>
         <div className="flex items-center justify-between rounded-md border p-3">
           <div>
             <Label>Development mode</Label>
-            <p className="text-xs text-muted-foreground">{devOn ? "Aktif — notis dipaparkan" : "Tidak aktif"}</p>
+            <p className="text-xs text-muted-foreground">{devOn ? "Active — notice is shown" : "Inactive"}</p>
           </div>
           <Switch checked={devOn} onCheckedChange={(c)=>setVals({ ...vals, dev_mode_enabled: c ? "true" : "false" })} />
         </div>
         <div>
-          <Label>Tajuk notis</Label>
+          <Label>Notice title</Label>
           <Input value={vals.dev_mode_title ?? ""} onChange={(e)=>setVals({ ...vals, dev_mode_title: e.target.value })} />
         </div>
         <div>
-          <Label>Mesej notis</Label>
+          <Label>Notice message</Label>
           <Textarea rows={4} value={vals.dev_mode_message ?? ""} onChange={(e)=>setVals({ ...vals, dev_mode_message: e.target.value })} />
         </div>
         <div>
-          <Label>Teks butang</Label>
+          <Label>Button text</Label>
           <Input value={vals.dev_mode_button ?? ""} onChange={(e)=>setVals({ ...vals, dev_mode_button: e.target.value })} />
         </div>
       </Card>

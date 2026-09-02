@@ -19,11 +19,11 @@ const unwrap = (v: unknown): string => {
 
 export default function DevModeNotice() {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("Mobile App dalam tempoh percubaan");
+  const [title, setTitle] = useState("Mobile App is in trial period");
   const [message, setMessage] = useState(
-    "Aplikasi sedang dalam pembangunan semula. Tiada penghantaran akan dilakukan sepanjang tempoh ini."
+    "The app is currently under redevelopment. No deliveries will be made during this period."
   );
-  const [buttonText, setButtonText] = useState("Faham");
+  const [buttonText, setButtonText] = useState("Got it");
 
   useEffect(() => {
     let active = true;
