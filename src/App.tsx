@@ -118,12 +118,15 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Entry point: guests land on the shop, signed-in staff on their home */}
+            <Route path="/" element={<RootRedirect />} />
+
             {/* ===== ADMIN ===== */}
             <Route path="/login" element={<AdminLogin />} />
             <Route path="/live-monitoring" element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><LiveMonitoring /></ProtectedRoute>} />
             <Route element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout /></ProtectedRoute>}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
+
               <Route path="/orders" element={<Orders />} />
               <Route path="/orders/:id" element={<OrderDetail />} />
               <Route path="/customers" element={<Customers />} />
