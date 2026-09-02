@@ -64,8 +64,11 @@ export const LoginCard = ({ title, subtitle, expectedRoles, showSignup, signupLi
     const target = homeForRoles(roles);
     if (target === "/user/home") {
       try { sessionStorage.setItem("gasbee-bee-intro", "1"); } catch {}
+      const from = (loc.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+      if (from && from.startsWith("/user")) { nav(from, { replace: true }); return; }
     }
     nav(target, { replace: true });
+
   };
 
 
