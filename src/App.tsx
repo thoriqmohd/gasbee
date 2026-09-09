@@ -110,6 +110,14 @@ const Admin = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout>{children}</AdminLayout></ProtectedRoute>
 );
 
+const AdminEntry = () => {
+  const { roles, loading } = useAuth();
+  if (loading) return <Splash />;
+  const isAdmin = roles.some((r) => ADMIN_ROLES.includes(r));
+  return <Navigate to={isAdmin ? "/dashboard" : "/login"} replace />;
+};
+
+
 const Customer = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allow={CUSTOMER_ROLES} loginPath="/user/login"><UserLayout />{children}</ProtectedRoute>
 );
@@ -132,6 +140,9 @@ const App = () => (
 
             {/* ===== ADMIN ===== */}
             <Route path="/login" element={<AdminLogin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminEntry />} />
+
             <Route path="/live-monitoring" element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><LiveMonitoring /></ProtectedRoute>} />
             <Route element={<ProtectedRoute allow={ADMIN_ROLES} loginPath="/login"><AdminLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
