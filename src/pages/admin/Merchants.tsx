@@ -159,9 +159,19 @@ export default function Merchants() {
         <div className="flex justify-end gap-2">
           <EditMerchantDialog row={r} onDone={() => setReloadKey((k) => k + 1)} />
           <Button size="sm" variant="outline" onClick={async () => {
+            const hide = r.status === "active";
+            if (!confirm(hide ? `Hide "${r.name}" from customers?` : `Show "${r.name}" to customers again?`)) return;
+            const { error } = await supabase.from("merchants").update({ status: hide ? "suspended" : "active" }).eq("id", r.id);
+            if (error) return toast.error(error.message);
+            toast.success(hide ? "Merchant hidden from customers" : "Merchant is visible again"); setReloadKey((k) => k + 1);
+          }}>{r.status === "active" ? <><EyeOff className="mr-1 h-3 w-3" />Hide</> : <><Eye className="mr-1 h-3 w-3" />Unhide</>}</Button>
+          <Button size="sm" variant="outline" onClick={async () => {
             if (!confirm(`Delete merchant "${r.name}"? This cannot be undone.`)) return;
             const { error } = await supabase.from("merchants").delete().eq("id", r.id);
-            if (error) return toast.error(error.message);
+            if (error) {
+              if (error.code === "23503") return toast.error("This merchant has order records and can't be deleted. Use Hide instead to remove it from the customer app.");
+              return toast.error(error.message);
+            }
             toast.success("Merchant deleted"); setReloadKey((k) => k + 1);
           }}><Trash2 className="h-3 w-3" /></Button>
         </div>
