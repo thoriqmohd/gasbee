@@ -52,7 +52,11 @@ export default function MerchantRiders() {
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
     });
     setBusy(false);
-    if (error || (data as any)?.error) { toast.error((data as any)?.error ?? error?.message ?? "Failed"); return; }
+    if (error || (data as any)?.error) {
+      let msg = (data as any)?.error ?? error?.message ?? "Failed";
+      try { const b = await (error as any)?.context?.json?.(); if (b?.error) msg = b.error; } catch { /* ignore */ }
+      toast.error(msg); return;
+    }
     toast.success("Rider added");
     setOpen(false);
     setForm({ full_name: "", phone: "", email: "", password: "", vehicle_type: "motorcycle", vehicle_plate: "", license_no: "" });
