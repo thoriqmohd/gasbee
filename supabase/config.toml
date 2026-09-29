@@ -11,7 +11,7 @@ project_id = "dkxjykxvljppdiaekvwk"
     verify_jwt = true
 
   [functions.merchant-create-rider]
-    verify_jwt = true
+    verify_jwt = false
   [functions.merchant-create-staff]
     verify_jwt = true
   [functions.process-email-queue]
