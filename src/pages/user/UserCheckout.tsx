@@ -24,7 +24,7 @@ export default function UserCheckout() {
   const [notes, setNotes] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "fpx" | "card" | "ewallet">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "fpx" | "card" | "ewallet">("fpx");
   const [deliveryType, setDeliveryType] = useState<"immediate" | "scheduled">("immediate");
   const [scheduledAt, setScheduledAt] = useState<string>("");
   const [busy, setBusy] = useState(false);
@@ -297,10 +297,7 @@ export default function UserCheckout() {
         <div className="mb-2 text-sm font-semibold">Payment method</div>
         <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="grid grid-cols-2 gap-2">
           {[
-            { id: "cod", label: <>COD <br />(Cash on Delivery)</> },
             { id: "fpx", label: <>FPX <br />(Online Transfer)</> },
-            { id: "card", label: "Credit Card" },
-            { id: "ewallet", label: "E-Wallet" }
           ].map((m) => (
             <Card key={m.id} className="flex items-center gap-2 p-3">
               <RadioGroupItem value={m.id} id={m.id} />
