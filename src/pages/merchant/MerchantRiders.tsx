@@ -46,7 +46,11 @@ export default function MerchantRiders() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
     setBusy(true);
-    const { data: { session } } = await supabase.auth.getSession();
+    let { data: { session } } = await supabase.auth.getSession();
+    if (!session || (session.expires_at ?? 0) * 1000 < Date.now() + 60_000) {
+      session = (await supabase.auth.refreshSession()).data.session;
+    }
+    if (!session) { setBusy(false); toast.error("Your session has expired. Please sign in again."); return; }
     const { data, error } = await supabase.functions.invoke("merchant-create-rider", {
       body: parsed.data,
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
