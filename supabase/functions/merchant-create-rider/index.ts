@@ -76,10 +76,8 @@ Deno.serve(async (req) => {
 
     // New accounts: replace default 'customer' role. Existing accounts keep their customer role.
     if (!isExisting) await admin.from("user_roles").delete().eq("user_id", newUserId);
-    const { error: roleErr } = await admin.from("user_roles").upsert(
-      { user_id: newUserId, role: "merchant_rider", merchant_id },
-      { onConflict: "user_id,role", ignoreDuplicates: true },
-    );
+    const { data: hasRole } = await admin.from("user_roles").select("id").eq("user_id", newUserId).eq("role", "merchant_rider").eq("merchant_id", merchant_id).maybeSingle();
+    const { error: roleErr } = hasRole ? { error: null } : await admin.from("user_roles").insert({ user_id: newUserId, role: "merchant_rider", merchant_id });
     if (roleErr) return json({ error: roleErr.message }, 400);
 
     // Create rider row
