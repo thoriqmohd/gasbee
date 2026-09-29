@@ -57,7 +57,7 @@ export default function MerchantRiders() {
     });
     setBusy(false);
     if (error || (data as any)?.error) {
-      let msg = (data as any)?.error ?? error?.message ?? "Failed";
+      let msg = (data as any)?.error ?? "Could not register rider. Please try again.";
       try { const b = await (error as any)?.context?.json?.(); if (b?.error) msg = b.error; } catch { /* ignore */ }
       toast.error(msg); return;
     }

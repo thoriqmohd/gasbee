@@ -66,7 +66,11 @@ Deno.serve(async (req) => {
       isExisting = true;
 
       const { data: existingRoles } = await admin.from("user_roles").select("role, merchant_id").eq("user_id", newUserId);
-      const blocked = (existingRoles ?? []).find((r) => r.role !== "customer" && r.role !== "buyer" && !(r.role === "merchant_rider" && r.merchant_id === merchant_id));
+      const roles = existingRoles ?? [];
+      if (roles.some((r) => r.role === "customer" || r.role === "buyer")) {
+        return json({ error: "This email is already registered as a customer account. Please use a different email for the rider." }, 200);
+      }
+      const blocked = roles.find((r) => !(r.role === "merchant_rider" && r.merchant_id === merchant_id));
       if (blocked) return json({ error: "This email already belongs to a staff, admin or another merchant's account. Please use a different email." }, 200);
       const { data: existingRider } = await admin.from("riders").select("id, merchant_id").eq("user_id", newUserId).maybeSingle();
       if (existingRider) return json({ error: existingRider.merchant_id === merchant_id ? "This rider is already registered in your shop." : "This email is already registered as a rider for another merchant." }, 200);
