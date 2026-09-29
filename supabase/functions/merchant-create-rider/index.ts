@@ -39,24 +39,46 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Create auth user
+    const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const normEmail = String(email).trim().toLowerCase();
+
+    // Create auth user, or reuse an existing account with this email
+    let newUserId: string;
+    let isExisting = false;
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
-      email, password, email_confirm: true, user_metadata: { full_name, phone },
+      email: normEmail, password, email_confirm: true, user_metadata: { full_name, phone },
     });
-    if (createErr || !created.user) {
-      return new Response(JSON.stringify({ error: createErr?.message ?? "Failed to create user" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (created?.user) {
+      newUserId = created.user.id;
+    } else if ((createErr as any)?.code === "email_exists" || /already been registered/i.test(createErr?.message ?? "")) {
+      let found: any = null;
+      for (let page = 1; page <= 20 && !found; page++) {
+        const { data: list, error: listErr } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+        if (listErr) return json({ error: listErr.message }, 400);
+        found = list.users.find((u) => (u.email ?? "").toLowerCase() === normEmail);
+        if (list.users.length < 1000) break;
+      }
+      if (!found) return json({ error: "This email is already registered. Please use a different email." }, 409);
+      newUserId = found.id;
+      isExisting = true;
+
+      const { data: existingRoles } = await admin.from("user_roles").select("role, merchant_id").eq("user_id", newUserId);
+      const blocked = (existingRoles ?? []).find((r) => r.role !== "customer" && r.role !== "buyer" && !(r.role === "merchant_rider" && r.merchant_id === merchant_id));
+      if (blocked) return json({ error: "This email already belongs to a staff, admin or another merchant's account. Please use a different email." }, 409);
+      const { data: existingRider } = await admin.from("riders").select("id, merchant_id").eq("user_id", newUserId).maybeSingle();
+      if (existingRider) return json({ error: existingRider.merchant_id === merchant_id ? "This rider is already registered in your shop." : "This email is already registered as a rider for another merchant." }, 409);
+    } else {
+      return json({ error: createErr?.message ?? "Failed to create user" }, 400);
     }
-    const newUserId = created.user.id;
 
     // Profile may have been auto-created by trigger; ensure row exists
-    await admin.from("profiles").upsert({ id: newUserId, full_name, phone });
+    if (!isExisting) await admin.from("profiles").upsert({ id: newUserId, full_name, phone });
 
-    // Remove default 'customer' role added by trigger, assign merchant_rider with merchant_id
-    await admin.from("user_roles").delete().eq("user_id", newUserId);
-    const { error: roleErr } = await admin.from("user_roles").insert({ user_id: newUserId, role: "merchant_rider", merchant_id });
-    if (roleErr) {
-      return new Response(JSON.stringify({ error: roleErr.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    // New accounts: replace default 'customer' role. Existing accounts keep their customer role.
+    if (!isExisting) await admin.from("user_roles").delete().eq("user_id", newUserId);
+    const { data: hasRole } = await admin.from("user_roles").select("id").eq("user_id", newUserId).eq("role", "merchant_rider").eq("merchant_id", merchant_id).maybeSingle();
+    const { error: roleErr } = hasRole ? { error: null } : await admin.from("user_roles").insert({ user_id: newUserId, role: "merchant_rider", merchant_id });
+    if (roleErr) return json({ error: roleErr.message }, 400);
 
     // Create rider row
     const { data: rider, error: riderErr } = await admin.from("riders").insert({
