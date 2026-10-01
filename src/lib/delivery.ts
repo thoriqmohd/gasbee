@@ -2,8 +2,8 @@
 // fee = base when distance <= baseKm, else base + (distance - baseKm) * perKm.
 
 export type FeeConfig = {
-  serviceFee: number; // Landed
-  serviceFeeHighrise: number;
+  serviceFee: number;
+  highriseDeliverySurcharge: number;
   deliveryBaseFee: number;
   deliveryBaseKm: number;
   deliveryPerKm: number;
@@ -12,7 +12,7 @@ export type FeeConfig = {
 
 export const DEFAULT_FEE_CONFIG: FeeConfig = {
   serviceFee: 5,
-  serviceFeeHighrise: 8,
+  highriseDeliverySurcharge: 3,
   deliveryBaseFee: 5,
   deliveryBaseKm: 5,
   deliveryPerKm: 1,
