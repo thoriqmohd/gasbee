@@ -26,7 +26,6 @@ export default function UserLayout() {
     } catch {}
   }, []);
 
-
   const handleBack = () => {
     if (window.history.length > 1) nav(-1);
     else nav("/user/home");
@@ -34,7 +33,7 @@ export default function UserLayout() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background pb-28">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-4 pb-3 pt-[max(0.75rem,calc(env(safe-area-inset-top)+0.5rem))] backdrop-blur">
         <div className="flex items-center gap-1">
           {!isTopLevel && (
             <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Back">
@@ -48,10 +47,16 @@ export default function UserLayout() {
         </div>
         <Button variant="ghost" size="icon" className="relative" onClick={() => nav("/user/cart")}>
           <ShoppingCart className="h-5 w-5" />
-          {count > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">{count}</span>}
+          {count > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+              {count}
+            </span>
+          )}
         </Button>
       </header>
-      <main className="flex-1 p-4"><Outlet /></main>
+      <main className="flex-1 p-4">
+        <Outlet />
+      </main>
       <div className="pb-24 text-center text-[10px] text-muted-foreground py-1">Version 2.0.0</div>
       <UserTabBar />
       {showBee && <BeeIntro onDone={() => setShowBee(false)} />}
@@ -59,4 +64,3 @@ export default function UserLayout() {
     </div>
   );
 }
-
