@@ -68,15 +68,18 @@ export type Database = {
           address_line2: string | null
           city: string | null
           created_at: string
+          floor: string | null
           id: string
           is_default: boolean
           label: string | null
           latitude: number | null
           longitude: number | null
           postcode: string | null
+          property_type: string | null
           recipient_name: string | null
           recipient_phone: string | null
           state: string | null
+          unit_no: string | null
           updated_at: string
           user_id: string
         }
@@ -85,15 +88,18 @@ export type Database = {
           address_line2?: string | null
           city?: string | null
           created_at?: string
+          floor?: string | null
           id?: string
           is_default?: boolean
           label?: string | null
           latitude?: number | null
           longitude?: number | null
           postcode?: string | null
+          property_type?: string | null
           recipient_name?: string | null
           recipient_phone?: string | null
           state?: string | null
+          unit_no?: string | null
           updated_at?: string
           user_id: string
         }
@@ -102,15 +108,18 @@ export type Database = {
           address_line2?: string | null
           city?: string | null
           created_at?: string
+          floor?: string | null
           id?: string
           is_default?: boolean
           label?: string | null
           latitude?: number | null
           longitude?: number | null
           postcode?: string | null
+          property_type?: string | null
           recipient_name?: string | null
           recipient_phone?: string | null
           state?: string | null
+          unit_no?: string | null
           updated_at?: string
           user_id?: string
         }

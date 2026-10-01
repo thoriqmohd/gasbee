@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Plus, Trash2, Star, Crosshair, Pencil } from "lucide-react";
+import { MapPin, Plus, Trash2, Star, Crosshair, Pencil, Home, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { MapPicker } from "@/components/MapPicker";
@@ -56,8 +56,16 @@ export default function UserAddresses() {
   const save = async () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (form.property_type !== "landed" && form.property_type !== "highrise") { toast.error("Please select a property type"); return; }
+    const isHigh = form.property_type === "highrise";
+    const floor = String(form.floor ?? "").trim().slice(0, 20);
+    const unit = String(form.unit_no ?? "").trim().slice(0, 30);
+    if (isHigh && (!floor || !unit)) { toast.error("Floor and unit number are required for High-Rise"); return; }
     if (form.latitude == null || form.longitude == null) { toast.error("Pin your location on the map"); return; }
-    const payload: any = { ...parsed.data, latitude: form.latitude, longitude: form.longitude };
+    const payload: any = {
+      ...parsed.data, latitude: form.latitude, longitude: form.longitude,
+      property_type: form.property_type, floor: isHigh ? floor : null, unit_no: isHigh ? unit : null,
+    };
     if (form.id) {
       const { error } = await supabase.from("addresses").update(payload).eq("id", form.id);
       if (error) return toast.error(error.message);
@@ -92,6 +100,27 @@ export default function UserAddresses() {
               <div><Label>Recipient phone</Label><Input value={form.recipient_phone ?? ""} onChange={(e) => setForm({ ...form, recipient_phone: e.target.value })} /></div>
               <div><Label>Address line 1 *</Label><Input value={form.address_line1} onChange={(e) => setForm({ ...form, address_line1: e.target.value })} /></div>
               <div><Label>Address line 2</Label><Input value={form.address_line2 ?? ""} onChange={(e) => setForm({ ...form, address_line2: e.target.value })} /></div>
+              <div>
+                <Label>Property Type *</Label>
+                <div className="mt-1 grid grid-cols-2 gap-2">
+                  {([
+                    { v: "landed", icon: Home, title: "Landed", desc: "Rumah teres, semi-D, bungalow, townhouse, etc." },
+                    { v: "highrise", icon: Building2, title: "High-Rise", desc: "Apartment, condominium, flat, service residence, etc." },
+                  ] as const).map((o) => (
+                    <button key={o.v} type="button" onClick={() => setForm({ ...form, property_type: o.v })}
+                      className={`rounded-lg border p-3 text-left transition-colors ${form.property_type === o.v ? "border-primary bg-primary/10" : "hover:bg-muted"}`}>
+                      <div className="flex items-center gap-1 text-sm font-semibold"><o.icon className="h-4 w-4 text-primary" />{o.title}</div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">{o.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {form.property_type === "highrise" && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div><Label>Floor / Tingkat *</Label><Input value={form.floor ?? ""} onChange={(e) => setForm({ ...form, floor: e.target.value })} /></div>
+                  <div><Label>Unit / No. Rumah *</Label><Input value={form.unit_no ?? ""} onChange={(e) => setForm({ ...form, unit_no: e.target.value })} /></div>
+                </div>
+              )}
               <div className="grid grid-cols-3 gap-2">
                 <div><Label>Postcode</Label><Input value={form.postcode ?? ""} onChange={(e) => setForm({ ...form, postcode: e.target.value })} /></div>
                 <div><Label>City</Label><Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
@@ -121,10 +150,14 @@ export default function UserAddresses() {
 
       {items.map((a) => (
         <Card key={a.id} className="flex items-start gap-3 p-3">
-          <MapPin className="mt-1 h-4 w-4 text-primary" />
+          {a.property_type === "highrise" ? <Building2 className="mt-1 h-4 w-4 text-primary" /> : a.property_type === "landed" ? <Home className="mt-1 h-4 w-4 text-primary" /> : <MapPin className="mt-1 h-4 w-4 text-primary" />}
           <div className="flex-1">
             <div className="flex items-center gap-2 text-sm font-semibold">{a.label ?? "Address"} {a.is_default && <span className="rounded bg-primary/10 px-2 text-xs text-primary">Default</span>}</div>
-            <div className="text-xs text-muted-foreground">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ""}, {a.postcode} {a.city} {a.state}</div>
+            <div className="text-xs text-muted-foreground">
+              {a.property_type === "highrise" && (a.unit_no || a.floor) ? `Unit ${a.unit_no ?? "-"}, Floor ${a.floor ?? "-"}, ` : ""}
+              {a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ""}, {a.postcode} {a.city} {a.state}
+            </div>
+            <div className="text-xs font-medium">{a.property_type === "highrise" ? "High-Rise" : a.property_type === "landed" ? "Landed" : <span className="text-amber-600">Property type not set</span>}</div>
             {a.recipient_name && <div className="text-xs text-muted-foreground">{a.recipient_name} · {a.recipient_phone}</div>}
             {a.latitude && <div className="text-[10px] text-muted-foreground">📍 {Number(a.latitude).toFixed(4)}, {Number(a.longitude).toFixed(4)}</div>}
           </div>

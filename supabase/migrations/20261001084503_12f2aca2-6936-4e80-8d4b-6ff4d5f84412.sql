@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.audit_service_fee_pricing() FROM PUBLIC, anon, authenticated;

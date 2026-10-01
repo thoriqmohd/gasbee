@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { MapPin } from "lucide-react";
+import { MapPin, Home, Building2 } from "lucide-react";
 import { calcDeliveryFee, haversineKm, DEFAULT_FEE_CONFIG, type FeeConfig } from "@/lib/delivery";
 
 export default function UserCheckout() {
@@ -49,6 +49,7 @@ export default function UserCheckout() {
       });
       setFeeConfig({
         serviceFee: m.service_fee ?? DEFAULT_FEE_CONFIG.serviceFee,
+        serviceFeeHighrise: m.service_fee_highrise ?? DEFAULT_FEE_CONFIG.serviceFeeHighrise,
         deliveryBaseFee: m.delivery_base_fee ?? DEFAULT_FEE_CONFIG.deliveryBaseFee,
         deliveryBaseKm: m.delivery_base_km ?? DEFAULT_FEE_CONFIG.deliveryBaseKm,
         deliveryPerKm: m.delivery_per_km ?? DEFAULT_FEE_CONFIG.deliveryPerKm,
@@ -74,7 +75,14 @@ export default function UserCheckout() {
   const distanceKm = haversineKm(addr?.latitude, addr?.longitude, merchant?.latitude, merchant?.longitude);
   const feeCalc = calcDeliveryFee({ distanceKm, config: feeConfig });
   const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
-  const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
+  const serviceFee = subtotal > 0 ? (addr?.property_type === "highrise" ? feeConfig.serviceFeeHighrise : feeConfig.serviceFee) : 0;
+
+  const savePropertyType = async (t: "landed" | "highrise") => {
+    if (!addr) return;
+    const { error } = await supabase.from("addresses").update({ property_type: t }).eq("id", addr.id);
+    if (error) { toast.error(error.message); return; }
+    setAddresses((list) => list.map((a) => (a.id === addr.id ? { ...a, property_type: t } : a)));
+  };
   const processingFee = subtotal > 0 ? feeConfig.processingFee : 0;
   // LPG Refill cylinders (mirrors server-side order_recalc_totals)
   const refillQty = items
@@ -135,6 +143,7 @@ export default function UserCheckout() {
 
   const placeOrder = async () => {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
+    if (!addr?.property_type) { toast.error("Please choose the property type for this address."); return; }
     if (outOfRange) { toast.error(`${merchant?.name ?? "This merchant"} only delivers within ${radiusKm} km. You are ${distanceKm!.toFixed(1)} km away.`); return; }
     if (deliveryType === "scheduled" && (!scheduledAt || new Date(scheduledAt) <= new Date())) { toast.error("Pick a future date/time for scheduled delivery"); return; }
     if (refillQty > 0 && !gasType) { toast.error("Please select your gas cylinder type (Petronas or Non-Petronas)."); return; }
@@ -240,22 +249,49 @@ export default function UserCheckout() {
           <Button variant="link" size="sm" onClick={() => nav("/user/addresses")}>Manage</Button>
         </div>
         {addresses.length === 0 && <Card className="p-3 text-sm text-muted-foreground">Add an address first.</Card>}
-        {addr && (
-          <Card className="p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-1 text-sm font-medium"><MapPin className="h-3 w-3" />{addr.label ?? "Address"}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{addr.address_line1}{addr.address_line2 ? `, ${addr.address_line2}` : ""}, {addr.postcode} {addr.city}</div>
-              </div>
-              {(addr.recipient_name || addr.recipient_phone) && (
-                <div className="shrink-0 text-right text-xs">
-                  {addr.recipient_name && <div className="font-medium">{addr.recipient_name}</div>}
-                  {addr.recipient_phone && <div className="text-muted-foreground">{addr.recipient_phone}</div>}
+        <RadioGroup value={addrId} onValueChange={setAddrId} className="space-y-2">
+          {addresses.map((a) => (
+            <Card key={a.id} className={`p-3 ${a.id === addrId ? "border-primary" : ""}`}>
+              <label htmlFor={`addr-${a.id}`} className="flex cursor-pointer items-start gap-3">
+                <RadioGroupItem value={a.id} id={`addr-${a.id}`} className="mt-1" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1 text-sm font-medium">
+                    {a.property_type === "highrise" ? <Building2 className="h-3 w-3" /> : a.property_type === "landed" ? <Home className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
+                    {a.label ?? "Address"}
+                    {a.property_type && <span className="ml-1 rounded bg-muted px-1.5 text-[10px] text-muted-foreground">{a.property_type === "highrise" ? "High-Rise" : "Landed"}</span>}
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {a.property_type === "highrise" && (a.unit_no || a.floor) ? `Unit ${a.unit_no ?? "-"}, Floor ${a.floor ?? "-"}, ` : ""}
+                    {a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ""}, {a.postcode} {a.city}
+                  </div>
                 </div>
-              )}
+                {(a.recipient_name || a.recipient_phone) && (
+                  <div className="shrink-0 text-right text-xs">
+                    {a.recipient_name && <div className="font-medium">{a.recipient_name}</div>}
+                    {a.recipient_phone && <div className="text-muted-foreground">{a.recipient_phone}</div>}
+                  </div>
+                )}
+              </label>
+            </Card>
+          ))}
+        </RadioGroup>
+
+        <AlertDialog open={!!addr && !addr.property_type}>
+          <AlertDialogContent className="max-w-sm">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Jenis kediaman?</AlertDialogTitle>
+              <AlertDialogDescription>Please choose the property type for "{addr?.label ?? "this address"}". We'll remember it for next time.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" className="h-auto flex-col gap-1 py-3" onClick={() => savePropertyType("landed")}>
+                <Home className="h-5 w-5" /><span>Landed</span>
+              </Button>
+              <Button variant="outline" className="h-auto flex-col gap-1 py-3" onClick={() => savePropertyType("highrise")}>
+                <Building2 className="h-5 w-5" /><span>High-Rise</span>
+              </Button>
             </div>
-          </Card>
-        )}
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div>
@@ -394,7 +430,7 @@ export default function UserCheckout() {
         </Card>
       )}
 
-      <Button className="w-full" onClick={() => setConfirmOpen(true)} disabled={busy || items.length === 0 || !addrId || outOfRange}>
+      <Button className="w-full" onClick={() => setConfirmOpen(true)} disabled={busy || items.length === 0 || !addrId || outOfRange || !addr?.property_type}>
         {busy ? "Placing…" : `Place order · RM ${total.toFixed(2)}`}
       </Button>
 
