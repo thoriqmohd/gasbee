@@ -834,6 +834,8 @@ export type Database = {
           delivery_type: Database["public"]["Enums"]["delivery_type"]
           discount: number
           failure_reason: string | null
+          gas_exchange_fee: number
+          gas_exchange_type: string | null
           id: string
           items_subtotal: number
           merchant_id: string
@@ -866,6 +868,8 @@ export type Database = {
           delivery_type?: Database["public"]["Enums"]["delivery_type"]
           discount?: number
           failure_reason?: string | null
+          gas_exchange_fee?: number
+          gas_exchange_type?: string | null
           id?: string
           items_subtotal?: number
           merchant_id: string
@@ -898,6 +902,8 @@ export type Database = {
           delivery_type?: Database["public"]["Enums"]["delivery_type"]
           discount?: number
           failure_reason?: string | null
+          gas_exchange_fee?: number
+          gas_exchange_type?: string | null
           id?: string
           items_subtotal?: number
           merchant_id?: string
