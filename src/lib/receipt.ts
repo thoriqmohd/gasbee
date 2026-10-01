@@ -9,6 +9,8 @@ export interface ReceiptOrder {
   delivery_fee: number | string;
   service_fee?: number | string | null;
   processing_fee?: number | string | null;
+  gas_exchange_type?: string | null;
+  gas_exchange_fee?: number | string | null;
   discount?: number | string | null;
   payment_method?: string | null;
   payment_status?: string | null;
@@ -205,6 +207,8 @@ export async function generateReceiptPdf(
     totalsRow("Service Fee", money(order.service_fee));
   if (Number(order.processing_fee || 0) > 0)
     totalsRow("Processing Fee", money(order.processing_fee));
+  if (order.gas_exchange_type)
+    totalsRow(`Gas Exchange (${order.gas_exchange_type === "non_petronas" ? "Non-Petronas" : "Petronas"})`, money(order.gas_exchange_fee || 0));
   if (Number(order.discount || 0) > 0)
     totalsRow("Discount", `- ${money(order.discount)}`);
 

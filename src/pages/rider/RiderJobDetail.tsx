@@ -58,6 +58,7 @@ export default function RiderJobDetail() {
           <p className="text-sm font-semibold text-primary">Scheduled: {new Date(o.scheduled_at).toLocaleString()}</p>
         )}
         {o.notes && <p className="rounded bg-muted p-2 text-xs">📝 {o.notes}</p>}
+        {o.gas_exchange_type && <div className="flex justify-between"><span>Gas Cylinder Type</span><span className="font-semibold">{o.gas_exchange_type === "non_petronas" ? "Non-Petronas" : "Petronas"}</span></div>}
         <div className="flex justify-between border-t pt-2"><span>Delivery fee</span><span className="font-bold">{fmt(o.delivery_fee)}</span></div>
         <div className="flex justify-between"><span>Total</span><span>{fmt(o.total_amount)}</span></div>
       </Card>

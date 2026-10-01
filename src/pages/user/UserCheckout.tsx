@@ -34,6 +34,8 @@ export default function UserCheckout() {
   const [useCredit, setUseCredit] = useState(true);
   const [devMode, setDevMode] = useState({ enabled: false, title: "", message: "", button: "" });
   const [devWarnOpen, setDevWarnOpen] = useState(false);
+  const [gasType, setGasType] = useState<"" | "petronas" | "non_petronas">("");
+  const [gasFeeUnit, setGasFeeUnit] = useState(3);
 
   useEffect(() => {
     supabase.rpc("get_public_fee_settings").then(({ data }) => {
@@ -52,6 +54,7 @@ export default function UserCheckout() {
         deliveryPerKm: m.delivery_per_km ?? DEFAULT_FEE_CONFIG.deliveryPerKm,
         processingFee: m.processing_fee ?? DEFAULT_FEE_CONFIG.processingFee,
       });
+      setGasFeeUnit(m.gas_exchange_fee ?? 3);
       const unwrap = (v: unknown): string => {
         if (typeof v === "string") return v;
         try { return JSON.parse(JSON.stringify(v)) as string; } catch { return String(v ?? ""); }
@@ -73,10 +76,15 @@ export default function UserCheckout() {
   const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
   const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
   const processingFee = subtotal > 0 ? feeConfig.processingFee : 0;
+  // LPG Refill cylinders (mirrors server-side order_recalc_totals)
+  const refillQty = items
+    .filter((it) => it.category_slug === "lpg-refill" || (it.type === "refill" && it.category_slug !== "accessories" && it.category_slug !== "industrial-gas"))
+    .reduce((n, it) => n + it.quantity, 0);
+  const gasExchangeFee = refillQty > 0 && gasType === "non_petronas" ? Math.round(gasFeeUnit * refillQty * 100) / 100 : 0;
   // Filter credits: must be from a DIFFERENT merchant than the current cart
   const cartMerchantId = items[0]?.merchant_id;
   const eligibleCredit = credits.find((c) => c.source_merchant_id !== cartMerchantId);
-  const grossTotal = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee - discount);
+  const grossTotal = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee + gasExchangeFee - discount);
   const creditApplied = useCredit && eligibleCredit ? Math.min(Number(eligibleCredit.amount), grossTotal) : 0;
   const creditLeftover = useCredit && eligibleCredit ? Math.max(0, Number(eligibleCredit.amount) - creditApplied) : 0;
   const total = Math.max(0, grossTotal - creditApplied);
@@ -129,6 +137,7 @@ export default function UserCheckout() {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
     if (outOfRange) { toast.error(`${merchant?.name ?? "This merchant"} only delivers within ${radiusKm} km. You are ${distanceKm!.toFixed(1)} km away.`); return; }
     if (deliveryType === "scheduled" && (!scheduledAt || new Date(scheduledAt) <= new Date())) { toast.error("Pick a future date/time for scheduled delivery"); return; }
+    if (refillQty > 0 && !gasType) { toast.error("Please select your gas cylinder type (Petronas or Non-Petronas)."); return; }
     // Cart limit guards (defensive)
     const cyl = items.filter((it: any) => it.category_slug === "cylinder" || it.category_slug === "lpg-refill").reduce((a, x) => a + x.quantity, 0);
     if (cyl > 2) { toast.error("Maximum 2 cylinders (LPG Refill / Cylinder Gas) per transaction."); return; }
@@ -148,6 +157,7 @@ export default function UserCheckout() {
       delivery_fee: deliveryFee,
       service_fee: serviceFee,
       processing_fee: processingFee,
+      gas_exchange_type: refillQty > 0 ? gasType : null,
       discount: discount + creditApplied,
       total_amount: total,
       payment_method: paymentMethod,
@@ -273,6 +283,25 @@ export default function UserCheckout() {
         </Card>
       </div>
 
+      {refillQty > 0 && (
+        <div>
+          <div className="mb-1 text-sm font-semibold">Gas Cylinder Type</div>
+          <p className="mb-2 text-xs text-muted-foreground">Please select the type of gas cylinder currently used at your home.</p>
+          <RadioGroup value={gasType} onValueChange={(v) => setGasType(v as "petronas" | "non_petronas")} className="grid grid-cols-2 gap-2">
+            <Card className="flex items-center gap-2 p-3">
+              <RadioGroupItem value="petronas" id="gt-petronas" />
+              <Label htmlFor="gt-petronas" className="cursor-pointer text-sm">Petronas<br /><span className="text-xs text-muted-foreground">+RM 0.00</span></Label>
+            </Card>
+            <Card className="flex items-center gap-2 p-3">
+              <RadioGroupItem value="non_petronas" id="gt-non" />
+              <Label htmlFor="gt-non" className="cursor-pointer text-sm">Non-Petronas<br /><span className="text-xs text-muted-foreground">+RM {gasFeeUnit.toFixed(2)} per cylinder</span></Label>
+            </Card>
+          </RadioGroup>
+        </div>
+      )}
+
+
+
 
       <div>
         <div className="mb-2 text-sm font-semibold">Promo code</div>
@@ -333,6 +362,12 @@ export default function UserCheckout() {
           <span>Processing fee</span>
           <span>RM {processingFee.toFixed(2)}</span>
         </div>
+        {refillQty > 0 && gasType && (
+          <div className="flex justify-between">
+            <span>Gas exchange charge {gasType === "non_petronas" && <span className="text-xs text-muted-foreground">({refillQty} × RM{gasFeeUnit.toFixed(2)})</span>}</span>
+            <span>RM {gasExchangeFee.toFixed(2)}</span>
+          </div>
+        )}
         {discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {discount.toFixed(2)}</span></div>}
         {eligibleCredit && (
           <div className="mt-1 rounded-md border border-primary/30 bg-primary/5 p-2">

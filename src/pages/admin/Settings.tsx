@@ -17,6 +17,7 @@ const KEYS = [
   { key: "delivery_base_km", label: "Delivery base distance (km)", default: "5" },
   { key: "delivery_per_km", label: "Delivery per additional km (MYR)", default: "1" },
   { key: "processing_fee", label: "Processing fee (MYR)", default: "1.50" },
+  { key: "gas_exchange_fee", label: "Non-Petronas gas exchange charge per refill cylinder (MYR)", default: "3" },
 ];
 
 const DEV_KEYS = [

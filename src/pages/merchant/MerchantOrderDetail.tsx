@@ -165,6 +165,10 @@ export default function MerchantOrderDetail() {
         <div className="space-y-1 border-t p-4 text-sm">
           <div className="flex justify-between"><span>Subtotal</span><span>{fmt(o.items_subtotal)}</span></div>
           <div className="flex justify-between"><span>Delivery</span><span>{fmt(o.delivery_fee)}</span></div>
+          {o.gas_exchange_type && (<>
+            <div className="flex justify-between"><span>Gas Cylinder Type</span><span>{o.gas_exchange_type === "non_petronas" ? "Non-Petronas" : "Petronas"}</span></div>
+            <div className="flex justify-between"><span>Gas Exchange Charge</span><span>{fmt(o.gas_exchange_fee)}</span></div>
+          </>)}
           {Number(o.discount) > 0 && <div className="flex justify-between"><span>Discount</span><span>- {fmt(o.discount)}</span></div>}
           <div className="flex justify-between border-t pt-2 font-bold"><span>Total</span><span>{fmt(o.total_amount)}</span></div>
         </div>
