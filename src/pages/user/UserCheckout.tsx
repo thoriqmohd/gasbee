@@ -143,6 +143,7 @@ export default function UserCheckout() {
 
   const placeOrder = async () => {
     if (!user || !addrId || items.length === 0) { toast.error("Select address and add items"); return; }
+    if (!addr?.property_type) { toast.error("Please choose the property type for this address."); return; }
     if (outOfRange) { toast.error(`${merchant?.name ?? "This merchant"} only delivers within ${radiusKm} km. You are ${distanceKm!.toFixed(1)} km away.`); return; }
     if (deliveryType === "scheduled" && (!scheduledAt || new Date(scheduledAt) <= new Date())) { toast.error("Pick a future date/time for scheduled delivery"); return; }
     if (refillQty > 0 && !gasType) { toast.error("Please select your gas cylinder type (Petronas or Non-Petronas)."); return; }
@@ -429,7 +430,7 @@ export default function UserCheckout() {
         </Card>
       )}
 
-      <Button className="w-full" onClick={() => setConfirmOpen(true)} disabled={busy || items.length === 0 || !addrId || outOfRange}>
+      <Button className="w-full" onClick={() => setConfirmOpen(true)} disabled={busy || items.length === 0 || !addrId || outOfRange || !addr?.property_type}>
         {busy ? "Placing…" : `Place order · RM ${total.toFixed(2)}`}
       </Button>
 
