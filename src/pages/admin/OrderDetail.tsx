@@ -65,6 +65,12 @@ export default function OrderDetail() {
               <span>{formatOrderItemName(it)} × {it.quantity}</span><span>{fmt(it.subtotal)}</span>
             </div>
           ))}
+          {order.gas_exchange_type && (
+            <div className="mt-3 space-y-1 text-sm">
+              <div className="flex justify-between"><span>Gas Cylinder Type</span><span>{order.gas_exchange_type === "non_petronas" ? "Non-Petronas" : "Petronas"}</span></div>
+              <div className="flex justify-between"><span>Gas Exchange Charge</span><span>{fmt(order.gas_exchange_fee)}</span></div>
+            </div>
+          )}
           <div className="mt-3 flex justify-between font-semibold"><span>Total</span><span>{fmt(order.total_amount)}</span></div>
           <div className="mt-1 flex justify-between text-xs text-muted-foreground italic">
             <span>Payment method</span>
