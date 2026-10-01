@@ -49,7 +49,7 @@ export default function UserCheckout() {
       });
       setFeeConfig({
         serviceFee: m.service_fee ?? DEFAULT_FEE_CONFIG.serviceFee,
-        serviceFeeHighrise: m.service_fee_highrise ?? DEFAULT_FEE_CONFIG.serviceFeeHighrise,
+        highriseDeliverySurcharge: m.highrise_delivery_surcharge ?? DEFAULT_FEE_CONFIG.highriseDeliverySurcharge,
         deliveryBaseFee: m.delivery_base_fee ?? DEFAULT_FEE_CONFIG.deliveryBaseFee,
         deliveryBaseKm: m.delivery_base_km ?? DEFAULT_FEE_CONFIG.deliveryBaseKm,
         deliveryPerKm: m.delivery_per_km ?? DEFAULT_FEE_CONFIG.deliveryPerKm,
@@ -74,8 +74,12 @@ export default function UserCheckout() {
   const addr = addresses.find((a) => a.id === addrId);
   const distanceKm = haversineKm(addr?.latitude, addr?.longitude, merchant?.latitude, merchant?.longitude);
   const feeCalc = calcDeliveryFee({ distanceKm, config: feeConfig });
-  const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
-  const serviceFee = subtotal > 0 ? (addr?.property_type === "highrise" ? feeConfig.serviceFeeHighrise : feeConfig.serviceFee) : 0;
+  const baseDeliveryFee = subtotal > 0 ? feeCalc.fee : 0;
+  // High-Rise surcharge is folded into Delivery fee (server adds it again authoritatively from the base)
+  const deliveryFee = subtotal > 0
+    ? Math.round((feeCalc.fee + (addr?.property_type === "highrise" ? feeConfig.highriseDeliverySurcharge : 0)) * 100) / 100
+    : 0;
+  const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
 
   const savePropertyType = async (t: "landed" | "highrise") => {
     if (!addr) return;
@@ -163,7 +167,7 @@ export default function UserCheckout() {
       merchant_id,
       address_snapshot: addr2 as any,
       items_subtotal: subtotal,
-      delivery_fee: deliveryFee,
+      delivery_fee: baseDeliveryFee,
       service_fee: serviceFee,
       processing_fee: processingFee,
       gas_exchange_type: refillQty > 0 ? gasType : null,

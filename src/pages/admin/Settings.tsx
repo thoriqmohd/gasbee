@@ -20,8 +20,8 @@ const KEYS = [
 ];
 
 const SERVICE_FEE_KEYS = [
-  { key: "service_fee", label: "Landed", default: "5" },
-  { key: "service_fee_highrise", label: "High-Rise", default: "8" },
+  { key: "service_fee", label: "Service fee (RM)", section: "service", default: "5" },
+  { key: "highrise_delivery_surcharge", label: "High-Rise Delivery Surcharge (RM)", section: "delivery", default: "3" },
 ];
 
 const DEV_KEYS = [
@@ -52,33 +52,45 @@ export default function Settings() {
   const save = async () => {
     for (const k of SERVICE_FEE_KEYS) {
       const s = String(vals[k.key] ?? "").trim();
-      if (!/^\d+(\.\d{1,2})?$/.test(s)) return toast.error(`${k.label} Service fee must be a valid amount (e.g. 5.00)`);
+      if (!/^\d+(\.\d{1,2})?$/.test(s)) return toast.error(`${k.label} must be a valid amount (e.g. 5.00)`);
     }
-    const rows = Object.entries(vals).map(([key, value]) => ({
-      key,
-      value: (SERVICE_FEE_KEYS.some((k) => k.key === key) ? { value: Number(Number(value).toFixed(2)) } : value) as any,
-    }));
+    const rows = Object.entries(vals)
+      .filter(([key]) => key !== "service_fee_highrise")
+      .map(([key, value]) => ({
+        key,
+        value: (SERVICE_FEE_KEYS.some((k) => k.key === key) ? { value: Number(Number(value).toFixed(2)) } : value) as any,
+      }));
     const { error } = await supabase.from("app_settings").upsert(rows);
     if (error) return toast.error(error.message);
     toast.success("Saved");
   };
   const devOn = String(vals.dev_mode_enabled ?? "false").toLowerCase() === "true";
+  const feeField = (key: string) => {
+    const k = SERVICE_FEE_KEYS.find((x) => x.key === key)!;
+    return (
+      <div>
+        <Label>{k.label}</Label>
+        <Input inputMode="decimal" value={vals[k.key] ?? ""} onChange={(e)=>setVals({ ...vals, [k.key]: e.target.value })} />
+      </div>
+    );
+  };
   return (
     <div className="space-y-6">
       <div><h1 className="text-2xl font-bold">Settings</h1><p className="text-sm text-muted-foreground">System-wide configuration.</p></div>
       <Card className="p-6 space-y-4 max-w-2xl">
         <div>
           <h2 className="text-lg font-semibold">Service fee pricing</h2>
-          <p className="text-sm text-muted-foreground">Service fee charged per order, based on the customer's property type. Applies to new orders only.</p>
+          <p className="text-sm text-muted-foreground">Service fee charged per order, same for Landed and High-Rise. Applies to new orders only.</p>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {SERVICE_FEE_KEYS.map((k) => (
-            <div key={k.key}>
-              <Label>{k.label} — Service fee (RM)</Label>
-              <Input inputMode="decimal" value={vals[k.key] ?? ""} onChange={(e)=>setVals({ ...vals, [k.key]: e.target.value })} />
-            </div>
-          ))}
+        {feeField("service_fee")}
+      </Card>
+
+      <Card className="p-6 space-y-4 max-w-2xl">
+        <div>
+          <h2 className="text-lg font-semibold">Delivery fee settings</h2>
+          <p className="text-sm text-muted-foreground">Added to the normal distance-based Delivery fee for High-Rise addresses. Customers only see the final Delivery fee. Applies to new orders only.</p>
         </div>
+        {feeField("highrise_delivery_surcharge")}
       </Card>
 
       <Card className="p-6 space-y-4 max-w-2xl">
