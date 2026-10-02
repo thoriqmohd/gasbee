@@ -115,7 +115,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           onClick={async () => { await signOut(); nav("/login"); }}>
           <LogOut className="mr-2 h-4 w-4" />Sign out
         </Button>
-        <div className="mt-2 text-center text-[10px] opacity-50">Version 2.0.0</div>
+        <div className="mt-2 text-center text-[10px] opacity-50">Version 2.6.5(32)</div>
       </div>
     </div>
   );
