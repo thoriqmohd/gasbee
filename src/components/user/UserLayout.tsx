@@ -57,7 +57,7 @@ export default function UserLayout() {
       <main className="flex-1 p-4">
         <Outlet />
       </main>
-      <div className="pb-24 text-center text-[10px] text-muted-foreground py-1">Version 2.0.0</div>
+      <div className="pb-24 text-center text-[10px] text-muted-foreground py-1">Version 2.6.5(32)</div>
       <UserTabBar />
       {showBee && <BeeIntro onDone={() => setShowBee(false)} />}
       <DevModeNotice />

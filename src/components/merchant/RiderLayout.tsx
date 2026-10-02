@@ -37,7 +37,7 @@ export default function RiderLayout() {
       <main className="flex-1 p-4">
         <Outlet />
       </main>
-      <div className="text-center text-[10px] text-muted-foreground py-1">Version 2.0.0</div>
+      <div className="text-center text-[10px] text-muted-foreground py-1">Version 2.6.5(32)</div>
       <nav className="fixed bottom-0 left-1/2 grid w-full max-w-md -translate-x-1/2 grid-cols-4 border-t bg-background pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {tabs.map((t) => (
           <NavLink
