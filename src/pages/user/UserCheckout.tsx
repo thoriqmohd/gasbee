@@ -206,7 +206,14 @@ export default function UserCheckout() {
       unit_price: it.unit_price,
       subtotal: it.unit_price * it.quantity,
     }));
-    await supabase.from("order_items").insert(orderItems);
+    // Server guard may reject an item (product inactive/changed, bad qty…) —
+    // the order total stays 0 then, so payment must NOT be attempted.
+    const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
+    if (itemsError) {
+      toast.error("Order items rejected: " + itemsError.message);
+      nav(`/user/orders/${order.id}`);
+      return;
+    }
 
     // Mark credit as used (server-side, atomic) + create leftover refund if any
     if (creditApplied > 0 && eligibleCredit) {

@@ -119,6 +119,12 @@ Deno.serve(async (req) => {
 
     if (paid) {
       await admin.from("orders").update({ payment_status: "paid" }).eq("id", payment.order_id);
+    } else if (["failed", "error", "cancelled", "expired"].includes(status)) {
+      // Surface the failure on the order so the UI shows the red
+      // "Payment failed / Retry payment" banner (never overwrite a paid order).
+      await admin.from("orders").update({ payment_status: "failed" })
+        .eq("id", payment.order_id)
+        .neq("payment_status", "paid");
     }
 
     return new Response("ok", { headers: corsHeaders });

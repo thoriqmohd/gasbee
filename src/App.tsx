@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { App as CapApp } from "@capacitor/app";
+import { Browser } from "@capacitor/browser";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -96,9 +99,47 @@ import RiderNotifications from "@/pages/rider/RiderNotifications";
 import RiderRefundPickups from "@/pages/rider/RiderRefundPickups";
 
 import PlaceholderPage from "@/components/PlaceholderPage";
+import PaymentBridge from "@/pages/PaymentBridge";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+// Handles gasbee:// deep links coming back from external flows (e.g. CHIP
+// payment redirect in the native app): gasbee:///user/orders/<id>?payment=...
+const DeepLinkHandler = () => {
+  const nav = useNavigate();
+
+  const handleUrl = async (url: string | undefined) => {
+    if (!url) return;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "gasbee:") return;
+      // Payment return — close the in-app payment browser that may still be
+      // sitting in the task stack (carried over from the old build's flow).
+      if (parsed.search.includes("payment=")) {
+        try {
+          await Browser.close();
+        } catch {
+          // browser not open — nothing to close
+        }
+      }
+      if (parsed.pathname && parsed.pathname !== "/") {
+        nav(`${parsed.pathname}${parsed.search}`, { replace: true });
+      }
+    } catch {
+      // ignore malformed deep links
+    }
+  };
+
+  useEffect(() => {
+    let handle: { remove: () => void } | undefined;
+    CapApp.addListener("appUrlOpen", ({ url }) => handleUrl(url)).then((h) => (handle = h));
+    // Cold start: app was fully closed while the gateway redirected back.
+    CapApp.getLaunchUrl().then(({ url }) => handleUrl(url));
+    return () => handle?.remove();
+  }, [nav]);
+  return null;
+};
 
 const RootRedirect = () => {
   const { roles, loading } = useAuth();
@@ -134,6 +175,7 @@ const App = () => (
       <Toaster /><Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <DeepLinkHandler />
           <Routes>
             {/* Entry point: guests land on the shop, signed-in staff on their home */}
             <Route path="/" element={<RootRedirect />} />
@@ -181,6 +223,7 @@ const App = () => (
             <Route path="/user/login" element={<UserLogin />} />
             <Route path="/user/register" element={<UserRegister />} />
             <Route path="/reset-password" element={<UserResetPassword />} />
+            <Route path="/payment-bridge" element={<PaymentBridge />} />
             {/* Public browsing — no login required */}
             <Route element={<UserLayout />}>
               <Route path="/user" element={<Navigate to="/user/home" replace />} />
