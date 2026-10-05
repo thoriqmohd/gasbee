@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ const STEPS = [
 
 export default function UserOrderDetail() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [o, setO] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [riderLoc, setRiderLoc] = useState<{ lat: number; lng: number } | null>(null);
@@ -33,6 +34,7 @@ export default function UserOrderDetail() {
   const [cancelReason, setCancelReason] = useState("");
   const [cancelNote, setCancelNote] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -52,6 +54,45 @@ export default function UserOrderDetail() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [id]);
+
+  // Payment return feedback (?payment=...) — toasts once per status change.
+  const paymentResult = searchParams.get("payment");
+  useEffect(() => {
+    if (paymentResult === "failed") {
+      toast.error("Pembayaran tidak selesai. Sila cuba lagi.");
+      setSearchParams({}, { replace: true });
+    } else if (paymentResult === "success" && o) {
+      if (o.payment_status === "paid") {
+        setConfirming(false);
+        toast.success("Pembayaran berjaya!");
+        setSearchParams({}, { replace: true });
+      } else if (!confirming) {
+        // Gateway accepted the payment — webhook confirmation is on its way.
+        setConfirming(true);
+        toast.info("Pembayaran diterima — sedang disahkan…");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentResult, o?.payment_status]);
+
+  // Buffer window: poll while waiting for the webhook so the user sees
+  // "paid" as soon as it lands, even if realtime is slow.
+  useEffect(() => {
+    if (!confirming || !id) return;
+    const started = Date.now();
+    const t = setInterval(async () => {
+      const { data: ord } = await supabase.from("orders").select("payment_status").eq("id", id).maybeSingle();
+      if ((ord as any)?.payment_status === "paid") {
+        setO((prev: any) => (prev && prev.payment_status !== "paid" ? { ...prev, payment_status: "paid" } : prev));
+        setConfirming(false);
+      } else if (Date.now() - started > 60000) {
+        setConfirming(false);
+        setSearchParams({}, { replace: true });
+      }
+    }, 3000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirming, id]);
 
   // Subscribe to rider location updates
   useEffect(() => {
@@ -306,20 +347,24 @@ export default function UserOrderDetail() {
       </Card>
 
       {o.payment_status !== "paid" && o.payment_method && o.payment_method !== "cod" && o.status !== "cancelled" && (
-        <Card className={`space-y-2 p-3 ${o.payment_status === "failed" ? "border-destructive bg-destructive/5" : "border-amber-500 bg-amber-500/5"}`}>
+        <Card className={`space-y-2 p-3 ${o.payment_status === "failed" ? "border-destructive bg-destructive/5" : confirming ? "border-blue-500 bg-blue-500/5" : "border-amber-500 bg-amber-500/5"}`}>
           <div className="text-sm font-semibold">
-            {o.payment_status === "failed" ? "❌ Payment failed" : "⏳ Payment pending"}
+            {o.payment_status === "failed" ? "❌ Payment failed" : confirming ? "🔄 Payment received — confirming" : "⏳ Payment pending"}
           </div>
           <p className="text-xs text-muted-foreground">
             {o.payment_status === "failed"
               ? "Your previous payment attempt was unsuccessful. The order is on hold and will not be processed by the merchant until payment is completed."
+              : confirming
+              ? "Pembayaran anda telah diterima. Kami sedang mengesahkan dengan gateway — status akan dikemas kini secara automatik dalam beberapa saat."
               : "Complete the payment to confirm your order. The merchant will only start processing once payment is received."}
           </p>
-          <Link to={`/user/payment/${o.id}`}>
-            <Button className="w-full">
-              {o.payment_status === "failed" ? "Retry payment" : "Pay now"} (RM {Number(o.total_amount).toFixed(2)})
-            </Button>
-          </Link>
+          {!confirming && (
+            <Link to={`/user/payment/${o.id}`}>
+              <Button className="w-full">
+                {o.payment_status === "failed" ? "Retry payment" : "Pay now"} (RM {Number(o.total_amount).toFixed(2)})
+              </Button>
+            </Link>
+          )}
         </Card>
       )}
 

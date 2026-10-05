@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,17 +38,37 @@ export default function UserPayment() {
           : window.location.origin;
       }
 
+      const isNative = Capacitor.isNativePlatform();
+      // CHIP only accepts https-style redirect URLs (it rejects the gasbee://
+      // scheme), so on native we point the gateway at the public web bridge
+      // page, which bounces straight back into the app via the deep link.
+      // VITE_BRIDGE_BASE_URL lets local testing target the dev server
+      // (default: production domain).
+      const bridgeBase = (import.meta.env.VITE_BRIDGE_BASE_URL || "https://gasbee.com.my").replace(/\/+$/, "");
+      const success_redirect = isNative
+        ? `${bridgeBase}/payment-bridge?status=success&order_id=${order.id}`
+        : `${redirectOrigin}/user/orders/${order.id}?payment=success`;
+      const failure_redirect = isNative
+        ? `${bridgeBase}/payment-bridge?status=failed&order_id=${order.id}`
+        : `${redirectOrigin}/user/orders/${order.id}?payment=failed`;
+
       const { data, error } = await supabase.functions.invoke("chip-create-purchase", {
-        body: {
-          order_id: order.id,
-          success_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=success`,
-          failure_redirect: `${redirectOrigin}/user/orders/${order.id}?payment=failed`,
-        },
+        body: { order_id: order.id, success_redirect, failure_redirect },
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL");
 
-      // Break out of any iframe (Lovable preview) by using a target="_top" anchor click.
+      // Native: open the checkout in the in-app browser instead of leaving the
+      // app. When the overlay closes (abandoned, failed, or right after
+      // paying), bring the user back to the order page — the deep-link return
+      // lands there anyway, and the status updates via the webhook.
+      if (isNative) {
+        await Browser.open({ url: data.url });
+        nav(`/user/orders/${order.id}`, { replace: true });
+        return;
+      }
+
+      // Web: break out of any iframe (Lovable preview) by using a target="_top" anchor click.
       // This works cross-origin where window.top.location assignment is blocked,
       // and avoids loading CHIP in an iframe (which CHIP refuses via X-Frame-Options).
       const a = document.createElement("a");
@@ -56,12 +79,26 @@ export default function UserPayment() {
       a.click();
       a.remove();
     } catch (e: any) {
-      toast.error(e.message ?? "Failed to start payment");
+      // Surface the real reason from the edge function body, not the generic
+      // "non-2xx status code" message.
+      let msg = e?.message ?? "Failed to start payment";
+      if (e instanceof FunctionsHttpError) {
+        try {
+          const body = await e.context.json();
+          if (body?.error) msg = body.error;
+        } catch {
+          // keep the generic message
+        }
+      }
+      toast.error(msg);
       setBusy(false);
     }
   };
 
   if (!order) return <p className="p-4 text-sm text-muted-foreground">Loading…</p>;
+
+  const amount = Number(order.total_amount ?? 0);
+  const amountInvalid = !(amount > 0);
 
   return (
     <div className="mx-auto max-w-md space-y-4 p-2">
@@ -83,7 +120,12 @@ export default function UserPayment() {
       </Card>
 
       <Card className="space-y-3 p-4">
-        <Button className="w-full" disabled={busy} onClick={payNow}>
+        {amountInvalid && (
+          <p className="text-sm font-medium text-destructive">
+            Jumlah pesanan tidak sah (RM 0.00). Pesanan ini tidak boleh dibayar — silakan batalkan dan buat pesanan semula, atau hubungi sokongan.
+          </p>
+        )}
+        <Button className="w-full" disabled={busy || amountInvalid} onClick={payNow}>
           {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
           Pay with CHIP
         </Button>
