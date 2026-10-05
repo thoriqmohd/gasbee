@@ -75,10 +75,8 @@ export default function UserCheckout() {
   const distanceKm = haversineKm(addr?.latitude, addr?.longitude, merchant?.latitude, merchant?.longitude);
   const feeCalc = calcDeliveryFee({ distanceKm, config: feeConfig });
   const baseDeliveryFee = subtotal > 0 ? feeCalc.fee : 0;
-  // High-Rise surcharge is folded into Delivery fee (server adds it again authoritatively from the base)
-  const deliveryFee = subtotal > 0
-    ? Math.round((feeCalc.fee + (addr?.property_type === "highrise" ? feeConfig.highriseDeliverySurcharge : 0)) * 100) / 100
-    : 0;
+  const deliveryFee = subtotal > 0 ? feeCalc.fee : 0;
+  const highriseSurcharge = subtotal > 0 && addr?.property_type === "highrise" ? feeConfig.highriseDeliverySurcharge : 0;
   const serviceFee = subtotal > 0 ? feeConfig.serviceFee : 0;
 
   const savePropertyType = async (t: "landed" | "highrise") => {
@@ -96,7 +94,7 @@ export default function UserCheckout() {
   // Filter credits: must be from a DIFFERENT merchant than the current cart
   const cartMerchantId = items[0]?.merchant_id;
   const eligibleCredit = credits.find((c) => c.source_merchant_id !== cartMerchantId);
-  const grossTotal = Math.max(0, subtotal + deliveryFee + serviceFee + processingFee + gasExchangeFee - discount);
+  const grossTotal = Math.max(0, subtotal + deliveryFee + highriseSurcharge + serviceFee + processingFee + gasExchangeFee - discount);
   const creditApplied = useCredit && eligibleCredit ? Math.min(Number(eligibleCredit.amount), grossTotal) : 0;
   const creditLeftover = useCredit && eligibleCredit ? Math.max(0, Number(eligibleCredit.amount) - creditApplied) : 0;
   const total = Math.max(0, grossTotal - creditApplied);
@@ -404,6 +402,9 @@ export default function UserCheckout() {
             {feeCalc.extraKm > 0 && <> · +{feeCalc.extraKm} km × RM{feeConfig.deliveryPerKm.toFixed(2)} = RM{feeCalc.breakdown.extra.toFixed(2)}</>}
             {distanceKm == null && " · estimated, set address coordinates for accurate fee"}
           </div>
+        )}
+        {highriseSurcharge > 0 && (
+          <div className="flex justify-between"><span>High-Rise surcharge</span><span>RM {highriseSurcharge.toFixed(2)}</span></div>
         )}
         <div className="flex justify-between">
           <span>Processing fee</span>

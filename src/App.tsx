@@ -106,6 +106,14 @@ const queryClient = new QueryClient();
 
 // Handles gasbee:// deep links coming back from external flows (e.g. CHIP
 // payment redirect in the native app): gasbee:///user/orders/<id>?payment=...
+// iOS delivers the same deep link MANY times (SFSafariViewController retries
+// the gasbee:// navigation, and appUrlOpen + getLaunchUrl both fire on cold
+// start) — without dedupe the app keeps yanking the user back to the order
+// page and re-toasting the payment success.
+const handledPaymentLinks = new Map<string, number>(); // key -> handled at
+let lastGenericLinkKey = "";
+let lastGenericLinkAt = 0;
+
 const DeepLinkHandler = () => {
   const nav = useNavigate();
 
@@ -114,15 +122,33 @@ const DeepLinkHandler = () => {
     try {
       const parsed = new URL(url);
       if (parsed.protocol !== "gasbee:") return;
-      // Payment return — close the in-app payment browser that may still be
-      // sitting in the task stack (carried over from the old build's flow).
-      if (parsed.search.includes("payment=")) {
+      const key = `${parsed.pathname}${parsed.search}`;
+      const isPayment = parsed.search.includes("payment=");
+
+      if (isPayment) {
+        const last = handledPaymentLinks.get(key);
+        if (last && Date.now() - last < 120000) {
+          // Already handled — just make sure the payment overlay is gone.
+          try {
+            await Browser.close();
+          } catch {
+            // browser not open — nothing to close
+          }
+          return;
+        }
+        handledPaymentLinks.set(key, Date.now());
         try {
           await Browser.close();
         } catch {
           // browser not open — nothing to close
         }
+      } else {
+        const now = Date.now();
+        if (key === lastGenericLinkKey && now - lastGenericLinkAt < 10000) return;
+        lastGenericLinkKey = key;
+        lastGenericLinkAt = now;
       }
+
       if (parsed.pathname && parsed.pathname !== "/") {
         nav(`${parsed.pathname}${parsed.search}`, { replace: true });
       }

@@ -5,6 +5,7 @@ import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { MerchantOrderAlert } from "@/components/merchant/MerchantOrderAlert";
+import AppVersionLabel from "@/components/AppVersionLabel";
 
 const items = [
   { to: "/merchant/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -45,7 +46,7 @@ export default function MerchantLayout({ children }: { children?: ReactNode }) {
           <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent" onClick={async () => { await signOut(); nav("/merchant/login"); }}>
             <LogOut className="mr-2 h-4 w-4" />Sign out
           </Button>
-          <div className="mt-2 text-center text-[10px] opacity-50">Version 2.6.5(32)</div>
+          <AppVersionLabel className="mt-2 text-center text-[10px] opacity-50" />
         </div>
       </aside>
       <main className="flex-1 overflow-x-auto"><div className="mx-auto max-w-6xl p-6 md:p-8">{children ?? <Outlet />}</div></main>

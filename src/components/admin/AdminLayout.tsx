@@ -9,6 +9,7 @@ import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import AppVersionLabel from "@/components/AppVersionLabel";
 
 const groups: { label: string; items: { to: string; label: string; icon: any }[] }[] = [
   {
@@ -115,7 +116,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           onClick={async () => { await signOut(); nav("/login"); }}>
           <LogOut className="mr-2 h-4 w-4" />Sign out
         </Button>
-        <div className="mt-2 text-center text-[10px] opacity-50">Version 2.6.5(32)</div>
+        <AppVersionLabel className="mt-2 text-center text-[10px] opacity-50" />
       </div>
     </div>
   );

@@ -193,7 +193,7 @@ export default function UserOrderDetail() {
 
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-28">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold">{o.code}</h1>
         <StatusBadge value={o.status} />
@@ -340,6 +340,7 @@ export default function UserOrderDetail() {
         <div className="flex justify-between"><span>Delivery Fee</span><span>RM {Number(o.delivery_fee).toFixed(2)}</span></div>
         {Number(o.service_fee) > 0 && <div className="flex justify-between"><span>Service Fee</span><span>RM {Number(o.service_fee).toFixed(2)}</span></div>}
         {Number(o.processing_fee) > 0 && <div className="flex justify-between"><span>Processing Fee</span><span>RM {Number(o.processing_fee).toFixed(2)}</span></div>}
+        {Number(o.highrise_surcharge || 0) > 0 && <div className="flex justify-between"><span>High-Rise surcharge</span><span>RM {Number(o.highrise_surcharge).toFixed(2)}</span></div>}
         {o.gas_exchange_type && <div className="flex justify-between"><span>Gas Exchange Charge ({o.gas_exchange_type === "non_petronas" ? "Non-Petronas" : "Petronas"})</span><span>RM {Number(o.gas_exchange_fee ?? 0).toFixed(2)}</span></div>}
         {Number(o.discount) > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {Number(o.discount).toFixed(2)}</span></div>}
         <div className="flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {Number(o.total_amount).toFixed(2)}</span></div>
