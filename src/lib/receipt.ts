@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { Capacitor } from "@capacitor/core";
 import gasbeeMark from "@/assets/gasbee-mark.png";
 
 export interface ReceiptOrder {
@@ -9,6 +10,7 @@ export interface ReceiptOrder {
   delivery_fee: number | string;
   service_fee?: number | string | null;
   processing_fee?: number | string | null;
+  highrise_surcharge?: number | string | null;
   gas_exchange_type?: string | null;
   gas_exchange_fee?: number | string | null;
   discount?: number | string | null;
@@ -207,6 +209,8 @@ export async function generateReceiptPdf(
     totalsRow("Service Fee", money(order.service_fee));
   if (Number(order.processing_fee || 0) > 0)
     totalsRow("Processing Fee", money(order.processing_fee));
+  if (Number(order.highrise_surcharge || 0) > 0)
+    totalsRow("High-Rise Delivery Surcharge", money(order.highrise_surcharge));
   if (order.gas_exchange_type)
     totalsRow(`Gas Exchange (${order.gas_exchange_type === "non_petronas" ? "Non-Petronas" : "Petronas"})`, money(order.gas_exchange_fee || 0));
   if (Number(order.discount || 0) > 0)
@@ -274,5 +278,23 @@ export async function downloadReceipt(orderId: string) {
     .select("*")
     .eq("order_id", orderId);
   const doc = await generateReceiptPdf(order as any, (items ?? []) as any);
-  doc.save(`Receipt-${(order as any).code}.pdf`);
+  const filename = `Receipt-${(order as any).code}.pdf`;
+
+  // jsPDF's save() relies on the browser's <a download> + blob behaviour,
+  // which does nothing inside the native WebView — write the file and open
+  // the share sheet instead so the user can save or send the receipt.
+  if (Capacitor.isNativePlatform()) {
+    const { Filesystem, Directory } = await import("@capacitor/filesystem");
+    const { Share } = await import("@capacitor/share");
+    const base64 = doc.output("datauristring").split(",")[1] ?? "";
+    const result = await Filesystem.writeFile({
+      path: filename,
+      data: base64,
+      directory: Directory.Cache,
+    });
+    await Share.share({ title: filename, url: result.uri });
+    return;
+  }
+
+  doc.save(filename);
 }

@@ -7,6 +7,7 @@ import { Logo } from "@/components/Logo";
 import UserTabBar from "@/components/user/UserTabBar";
 import { BeeIntro } from "@/components/user/BeeIntro";
 import DevModeNotice from "@/components/user/DevModeNotice";
+import AppVersionLabel from "@/components/AppVersionLabel";
 
 const TOP_LEVEL = ["/user/home", "/user/orders", "/user/notifications", "/user/profile"];
 
@@ -57,7 +58,7 @@ export default function UserLayout() {
       <main className="flex-1 p-4">
         <Outlet />
       </main>
-      <div className="pb-24 text-center text-[10px] text-muted-foreground py-1">Version 2.6.5(32)</div>
+      <AppVersionLabel className="pb-24 text-center text-[10px] text-muted-foreground py-1" />
       <UserTabBar />
       {showBee && <BeeIntro onDone={() => setShowBee(false)} />}
       <DevModeNotice />
