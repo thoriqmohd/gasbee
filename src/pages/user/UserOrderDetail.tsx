@@ -5,16 +5,30 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toast } from "sonner";
-import { Phone, Navigation, Clock, CheckCircle2, Package, Truck, Home, Download } from "lucide-react";
+import {
+  Phone,
+  Navigation,
+  Clock,
+  CheckCircle2,
+  Package,
+  Truck,
+  Home,
+  Download,
+} from "lucide-react";
 import { downloadReceipt, formatOrderItemName } from "@/lib/receipt";
 import { MapPicker } from "@/components/MapPicker";
 import { OrderChat } from "@/components/OrderChat";
 import { OrderRating } from "@/components/user/OrderRating";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
 
 const STEPS = [
   { key: "pending", label: "Pending", icon: Clock },
@@ -29,7 +43,9 @@ export default function UserOrderDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [o, setO] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
-  const [riderLoc, setRiderLoc] = useState<{ lat: number; lng: number } | null>(null);
+  const [riderLoc, setRiderLoc] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelNote, setCancelNote] = useState("");
@@ -39,20 +55,43 @@ export default function UserOrderDetail() {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-
-      const { data: order } = await supabase.from("orders").select("*, merchants(name, phone, latitude, longitude), riders(id, full_name, phone, current_lat, current_lng, vehicle_type, vehicle_plate)").eq("id", id).maybeSingle();
+      const { data: order } = await supabase
+        .from("orders")
+        .select(
+          "*, merchants(name, phone, latitude, longitude), riders(id, full_name, phone, current_lat, current_lng, vehicle_type, vehicle_plate)",
+        )
+        .eq("id", id)
+        .maybeSingle();
       setO(order);
       if ((order as any)?.riders?.current_lat) {
-        setRiderLoc({ lat: Number((order as any).riders.current_lat), lng: Number((order as any).riders.current_lng) });
+        setRiderLoc({
+          lat: Number((order as any).riders.current_lat),
+          lng: Number((order as any).riders.current_lng),
+        });
       }
-      const { data: oi } = await supabase.from("order_items").select("*").eq("order_id", id);
+      const { data: oi } = await supabase
+        .from("order_items")
+        .select("*")
+        .eq("order_id", id);
       setItems(oi ?? []);
     };
     load();
-    const ch = supabase.channel(`order-${id}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` }, load)
+    const ch = supabase
+      .channel(`order-${id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+          filter: `id=eq.${id}`,
+        },
+        load,
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [id]);
 
   // Payment return feedback (?payment=...) — toasts once per status change.
@@ -81,9 +120,17 @@ export default function UserOrderDetail() {
     if (!confirming || !id) return;
     const started = Date.now();
     const t = setInterval(async () => {
-      const { data: ord } = await supabase.from("orders").select("payment_status").eq("id", id).maybeSingle();
+      const { data: ord } = await supabase
+        .from("orders")
+        .select("payment_status")
+        .eq("id", id)
+        .maybeSingle();
       if ((ord as any)?.payment_status === "paid") {
-        setO((prev: any) => (prev && prev.payment_status !== "paid" ? { ...prev, payment_status: "paid" } : prev));
+        setO((prev: any) =>
+          prev && prev.payment_status !== "paid"
+            ? { ...prev, payment_status: "paid" }
+            : prev,
+        );
         setConfirming(false);
       } else if (Date.now() - started > 60000) {
         setConfirming(false);
@@ -98,11 +145,28 @@ export default function UserOrderDetail() {
   useEffect(() => {
     const riderId = (o as any)?.riders?.id;
     if (!riderId) return;
-    const ch = supabase.channel(`rider-${riderId}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "riders", filter: `id=eq.${riderId}` }, (p: any) => {
-        if (p.new?.current_lat) setRiderLoc({ lat: Number(p.new.current_lat), lng: Number(p.new.current_lng) });
-      }).subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const ch = supabase
+      .channel(`rider-${riderId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "riders",
+          filter: `id=eq.${riderId}`,
+        },
+        (p: any) => {
+          if (p.new?.current_lat)
+            setRiderLoc({
+              lat: Number(p.new.current_lat),
+              lng: Number(p.new.current_lng),
+            });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [(o as any)?.riders?.id]);
 
   if (!o) return <p className="text-sm text-muted-foreground">Loading…</p>;
@@ -110,8 +174,14 @@ export default function UserOrderDetail() {
   const STATUS_TO_STEP: Record<string, number> = {
     pending: 0,
     confirmed: 1,
-    preparing: 2, assigned: 2, rider_accepted: 2, arrived_at_merchant: 2,
-    out_for_delivery: 3, picked_up: 3, on_delivery: 3, arrived_at_customer: 3,
+    preparing: 2,
+    assigned: 2,
+    rider_accepted: 2,
+    arrived_at_merchant: 2,
+    out_for_delivery: 3,
+    picked_up: 3,
+    on_delivery: 3,
+    arrived_at_customer: 3,
     delivered: 4,
   };
   const stepIdx = STATUS_TO_STEP[o.status] ?? -1;
@@ -124,22 +194,33 @@ export default function UserOrderDetail() {
   ];
 
   const submitCancel = async () => {
-    if (!cancelReason) { toast.error("Sila pilih sebab pembatalan"); return; }
+    if (!cancelReason) {
+      toast.error("Sila pilih sebab pembatalan");
+      return;
+    }
     setCancelling(true);
-    const reasonText = cancelNote.trim() ? `${cancelReason} — ${cancelNote.trim()}` : cancelReason;
-    const { error } = await supabase.from("orders").update({
-      status: "cancelled",
-      cancelled_at: new Date().toISOString(),
-      failure_reason: reasonText,
-    }).eq("id", o.id);
+    const reasonText = cancelNote.trim()
+      ? `${cancelReason} — ${cancelNote.trim()}`
+      : cancelReason;
+    const { error } = await supabase
+      .from("orders")
+      .update({
+        status: "cancelled",
+        cancelled_at: new Date().toISOString(),
+        failure_reason: reasonText,
+      })
+      .eq("id", o.id);
     setCancelling(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Pesanan dibatalkan");
     setO({ ...o, status: "cancelled", failure_reason: reasonText });
     setCancelOpen(false);
-    setCancelReason(""); setCancelNote("");
+    setCancelReason("");
+    setCancelNote("");
   };
-
 
   const a = o.address_snapshot ?? {};
 
@@ -155,7 +236,9 @@ export default function UserOrderDetail() {
         <div className="absolute left-5 right-5 top-5 h-1 -translate-y-1/2 rounded-full bg-muted" />
         <div
           className="absolute left-5 top-5 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700 ease-out"
-          style={{ width: `calc((100% - 2.5rem) * ${stepIdx / (STEPS.length - 1)})` }}
+          style={{
+            width: `calc((100% - 2.5rem) * ${stepIdx / (STEPS.length - 1)})`,
+          }}
         />
         <div className="relative flex items-start justify-between">
           {STEPS.map((s, i) => {
@@ -163,7 +246,10 @@ export default function UserOrderDetail() {
             const isActive = i === stepIdx;
             const isDone = i <= stepIdx;
             return (
-              <div key={s.key} className="flex flex-1 flex-col items-center text-center">
+              <div
+                key={s.key}
+                className="flex flex-1 flex-col items-center text-center"
+              >
                 <div
                   className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all duration-500 ${
                     isDone
@@ -191,7 +277,6 @@ export default function UserOrderDetail() {
     </>
   );
 
-
   return (
     <div className="space-y-4 pb-28">
       <div className="flex items-center justify-between">
@@ -201,7 +286,10 @@ export default function UserOrderDetail() {
 
       {o.delivery_type === "scheduled" && o.scheduled_at && (
         <Card className="border-primary bg-primary/5 p-3 text-sm">
-          📅 Scheduled delivery: <span className="font-semibold">{new Date(o.scheduled_at).toLocaleString()}</span>
+          📅 Scheduled delivery:{" "}
+          <span className="font-semibold">
+            {new Date(o.scheduled_at).toLocaleString()}
+          </span>
         </Card>
       )}
 
@@ -211,8 +299,6 @@ export default function UserOrderDetail() {
         </div>
       )}
 
-
-
       {(() => {
         // Live rider tracking — available once rider has accepted the job, regardless of payment method (COD or online).
         const isCod = o.payment_method === "cod";
@@ -221,27 +307,56 @@ export default function UserOrderDetail() {
         const DELIVERY = ["picked_up", "on_delivery", "arrived_at_customer"];
         const isPickup = PRE_PICKUP.includes(o.status);
         const isDelivery = DELIVERY.includes(o.status);
-        const riderAccepted = isPickup || isDelivery || o.status === "delivered";
+        const riderAccepted =
+          isPickup || isDelivery || o.status === "delivered";
 
         // Show waiting card after rider assigned but not yet accepted
         if (paymentOk && o.rider_id && o.status === "assigned") {
           return (
             <Card className="border-amber-500 bg-amber-500/5 p-3 text-sm">
-              <div className="font-semibold">⏳ Waiting for rider to accept the delivery job.</div>
-              <p className="mt-1 text-xs text-muted-foreground">Live tracking will appear here once the rider accepts.</p>
+              <div className="font-semibold">
+                ⏳ Waiting for rider to accept the delivery job.
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Live tracking will appear here once the rider accepts.
+              </p>
             </Card>
           );
         }
 
-        if (!paymentOk || !o.rider_id || !riderAccepted || !isPickup && !isDelivery) return null;
+        if (
+          !paymentOk ||
+          !o.rider_id ||
+          !riderAccepted ||
+          (!isPickup && !isDelivery)
+        )
+          return null;
 
         const target = isPickup
-          ? (o.merchants?.latitude ? { lat: Number(o.merchants.latitude), lng: Number(o.merchants.longitude), label: o.merchants.name } : null)
-          : (a.latitude ? { lat: Number(a.latitude), lng: Number(a.longitude), label: "Delivery address" } : null);
+          ? o.merchants?.latitude
+            ? {
+                lat: Number(o.merchants.latitude),
+                lng: Number(o.merchants.longitude),
+                label: o.merchants.name,
+              }
+            : null
+          : a.latitude
+            ? {
+                lat: Number(a.latitude),
+                lng: Number(a.longitude),
+                label: "Delivery address",
+              }
+            : null;
 
         // Primary point = rider live location. Target (merchant / customer) shown as secondary marker.
         const extraMarkers: any[] = [];
-        if (target) extraMarkers.push({ ...target, label: isPickup ? `📍 ${target.label ?? "Merchant"}` : `🏠 ${target.label ?? "Delivery address"}` });
+        if (target)
+          extraMarkers.push({
+            ...target,
+            label: isPickup
+              ? `📍 ${target.label ?? "Merchant"}`
+              : `🏠 ${target.label ?? "Delivery address"}`,
+          });
 
         // ETA: haversine distance assuming 30 km/h
         let etaMin: number | null = null;
@@ -250,7 +365,11 @@ export default function UserOrderDetail() {
           const R = 6371;
           const dLat = toRad(target.lat - riderLoc.lat);
           const dLng = toRad(target.lng - riderLoc.lng);
-          const aa = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(riderLoc.lat)) * Math.cos(toRad(target.lat)) * Math.sin(dLng / 2) ** 2;
+          const aa =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(riderLoc.lat)) *
+              Math.cos(toRad(target.lat)) *
+              Math.sin(dLng / 2) ** 2;
           const km = R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
           etaMin = Math.max(1, Math.round((km / 30) * 60));
         }
@@ -268,7 +387,9 @@ export default function UserOrderDetail() {
 
         return (
           <Card className="overflow-hidden p-0">
-            <div className={`p-3 ${isPickup ? "bg-amber-500/10" : "bg-primary/10"}`}>
+            <div
+              className={`p-3 ${isPickup ? "bg-amber-500/10" : "bg-primary/10"}`}
+            >
               <div className="text-sm font-semibold">{phaseLabel}</div>
               <div className="mt-0.5 text-xs text-muted-foreground">
                 {statusDetail[o.status] ?? o.status.replace(/_/g, " ")}
@@ -285,7 +406,9 @@ export default function UserOrderDetail() {
                 height={280}
               />
             ) : (
-              <p className="px-3 py-3 text-xs text-muted-foreground">Waiting for rider GPS signal…</p>
+              <p className="px-3 py-3 text-xs text-muted-foreground">
+                Waiting for rider GPS signal…
+              </p>
             )}
           </Card>
         );
@@ -293,8 +416,14 @@ export default function UserOrderDetail() {
 
       <Card className="space-y-1 p-3 text-sm">
         <div className="text-xs text-muted-foreground">Merchant</div>
-        <div className="text-base font-semibold">{o.merchants?.name ?? "—"}</div>
-        {o.merchants?.phone && <div className="text-xs text-muted-foreground">{o.merchants.phone}</div>}
+        <div className="text-base font-semibold">
+          {o.merchants?.name ?? "—"}
+        </div>
+        {o.merchants?.phone && (
+          <div className="text-xs text-muted-foreground">
+            {o.merchants.phone}
+          </div>
+        )}
       </Card>
 
       {o.riders && (
@@ -303,20 +432,43 @@ export default function UserOrderDetail() {
           <div>{o.riders.full_name}</div>
           {(o.riders.vehicle_type || o.riders.vehicle_plate) && (
             <div className="text-xs text-muted-foreground">
-              🛵 {o.riders.vehicle_type ?? ""} {o.riders.vehicle_plate ? <span className="font-mono font-semibold">{o.riders.vehicle_plate}</span> : null}
+              🛵 {o.riders.vehicle_type ?? ""}{" "}
+              {o.riders.vehicle_plate ? (
+                <span className="font-mono font-semibold">
+                  {o.riders.vehicle_plate}
+                </span>
+              ) : null}
             </div>
           )}
-          {o.riders.phone && <div className="text-xs text-muted-foreground">{o.riders.phone}</div>}
           {o.riders.phone && (
-            <Button asChild size="sm" className="w-full"><a href={`tel:${o.riders.phone}`}><Phone className="mr-1 h-3 w-3" />Call rider</a></Button>
+            <div className="text-xs text-muted-foreground">
+              {o.riders.phone}
+            </div>
+          )}
+          {o.riders.phone && (
+            <Button asChild size="sm" className="w-full">
+              <a href={`tel:${o.riders.phone}`}>
+                <Phone className="mr-1 h-3 w-3" />
+                Call rider
+              </a>
+            </Button>
           )}
         </Card>
       )}
 
       <Card className="p-3">
-        <div className="mb-1 flex items-center justify-between text-sm font-semibold"><span>Delivery to</span>
+        <div className="mb-1 flex items-center justify-between text-sm font-semibold">
+          <span>Delivery to</span>
           {a.latitude && (
-            <a className="text-xs text-primary underline" href={`https://www.google.com/maps?q=${a.latitude},${a.longitude}`} target="_blank" rel="noreferrer"><Navigation className="mr-1 inline h-3 w-3" />Open map</a>
+            <a
+              className="text-xs text-primary underline"
+              href={`https://www.google.com/maps?q=${a.latitude},${a.longitude}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Navigation className="mr-1 inline h-3 w-3" />
+              Open map
+            </a>
           )}
         </div>
         <div className="text-xs text-muted-foreground">
@@ -329,85 +481,176 @@ export default function UserOrderDetail() {
       <Card className="divide-y">
         {items.map((it) => (
           <div key={it.id} className="flex justify-between p-3 text-sm">
-            <span>{formatOrderItemName(it)} × {it.quantity}</span>
+            <span>
+              {/* {formatOrderItemName(it)} × {it.quantity} */}
+              {it.product_name || ""} &times; {it.quantity}
+            </span>
             <span>RM {Number(it.subtotal).toFixed(2)}</span>
           </div>
         ))}
       </Card>
 
       <Card className="space-y-1 p-3 text-sm">
-        <div className="flex justify-between"><span>Subtotal</span><span>RM {Number(o.items_subtotal).toFixed(2)}</span></div>
-        <div className="flex justify-between"><span>Delivery Fee</span><span>RM {Number(o.delivery_fee).toFixed(2)}</span></div>
-        {Number(o.service_fee) > 0 && <div className="flex justify-between"><span>Service Fee</span><span>RM {Number(o.service_fee).toFixed(2)}</span></div>}
-        {Number(o.processing_fee) > 0 && <div className="flex justify-between"><span>Processing Fee</span><span>RM {Number(o.processing_fee).toFixed(2)}</span></div>}
-        {Number(o.highrise_surcharge || 0) > 0 && <div className="flex justify-between"><span>High-Rise surcharge</span><span>RM {Number(o.highrise_surcharge).toFixed(2)}</span></div>}
-        {o.gas_exchange_type && <div className="flex justify-between"><span>Gas Exchange Charge ({o.gas_exchange_type === "non_petronas" ? "Non-Petronas" : "Petronas"})</span><span>RM {Number(o.gas_exchange_fee ?? 0).toFixed(2)}</span></div>}
-        {Number(o.discount) > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>- RM {Number(o.discount).toFixed(2)}</span></div>}
-        <div className="flex justify-between border-t pt-2 font-bold"><span>Total</span><span className="text-primary">RM {Number(o.total_amount).toFixed(2)}</span></div>
-        <div className="flex justify-between pt-1 text-xs"><span>Payment</span><span className="uppercase">{o.payment_method === "fpx" ? "FPX (Online Transfer)" : (o.payment_method === "card" ? "Credit Card" : (o.payment_method === "cod" ? "COD (Cash on Delivery)" : (o.payment_method ?? "—")))} · {o.payment_status}</span></div>
+        <div className="flex justify-between">
+          <span>Subtotal</span>
+          <span>RM {Number(o.items_subtotal).toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Delivery Fee</span>
+          <span>RM {Number(o.delivery_fee).toFixed(2)}</span>
+        </div>
+        {Number(o.service_fee) > 0 && (
+          <div className="flex justify-between">
+            <span>Service Fee</span>
+            <span>RM {Number(o.service_fee).toFixed(2)}</span>
+          </div>
+        )}
+        {Number(o.processing_fee) > 0 && (
+          <div className="flex justify-between">
+            <span>Processing Fee</span>
+            <span>RM {Number(o.processing_fee).toFixed(2)}</span>
+          </div>
+        )}
+        {Number(o.highrise_surcharge || 0) > 0 && (
+          <div className="flex justify-between">
+            <span>High-Rise surcharge</span>
+            <span>RM {Number(o.highrise_surcharge).toFixed(2)}</span>
+          </div>
+        )}
+        {o.gas_exchange_type && (
+          <div className="flex justify-between">
+            <span>
+              Gas Exchange Charge (
+              {o.gas_exchange_type === "non_petronas"
+                ? "Non-Petronas"
+                : "Petronas"}
+              )
+            </span>
+            <span>RM {Number(o.gas_exchange_fee ?? 0).toFixed(2)}</span>
+          </div>
+        )}
+        {Number(o.discount) > 0 && (
+          <div className="flex justify-between text-primary">
+            <span>Discount</span>
+            <span>- RM {Number(o.discount).toFixed(2)}</span>
+          </div>
+        )}
+        <div className="flex justify-between border-t pt-2 font-bold">
+          <span>Total</span>
+          <span className="text-primary">
+            RM {Number(o.total_amount).toFixed(2)}
+          </span>
+        </div>
+        <div className="flex justify-between pt-1 text-xs">
+          <span>Payment</span>
+          <span className="uppercase">
+            {o.payment_method === "fpx"
+              ? "FPX (Online Transfer)"
+              : o.payment_method === "card"
+                ? "Credit Card"
+                : o.payment_method === "cod"
+                  ? "COD (Cash on Delivery)"
+                  : (o.payment_method ?? "—")}{" "}
+            · {o.payment_status}
+          </span>
+        </div>
       </Card>
 
-      {o.payment_status !== "paid" && o.payment_method && o.payment_method !== "cod" && o.status !== "cancelled" && (
-        <Card className={`space-y-2 p-3 ${o.payment_status === "failed" ? "border-destructive bg-destructive/5" : confirming ? "border-blue-500 bg-blue-500/5" : "border-amber-500 bg-amber-500/5"}`}>
-          <div className="text-sm font-semibold">
-            {o.payment_status === "failed" ? "❌ Payment failed" : confirming ? "🔄 Payment received — confirming" : "⏳ Payment pending"}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {o.payment_status === "failed"
-              ? "Your previous payment attempt was unsuccessful. The order is on hold and will not be processed by the merchant until payment is completed."
-              : confirming
-              ? "Pembayaran anda telah diterima. Kami sedang mengesahkan dengan gateway — status akan dikemas kini secara automatik dalam beberapa saat."
-              : "Complete the payment to confirm your order. The merchant will only start processing once payment is received."}
-          </p>
-          {!confirming && (
-            <Link to={`/user/payment/${o.id}`}>
-              <Button className="w-full">
-                {o.payment_status === "failed" ? "Retry payment" : "Pay now"} (RM {Number(o.total_amount).toFixed(2)})
-              </Button>
-            </Link>
-          )}
-        </Card>
-      )}
+      {o.payment_status !== "paid" &&
+        o.payment_method &&
+        o.payment_method !== "cod" &&
+        o.status !== "cancelled" && (
+          <Card
+            className={`space-y-2 p-3 ${o.payment_status === "failed" ? "border-destructive bg-destructive/5" : confirming ? "border-blue-500 bg-blue-500/5" : "border-amber-500 bg-amber-500/5"}`}
+          >
+            <div className="text-sm font-semibold">
+              {o.payment_status === "failed"
+                ? "❌ Payment failed"
+                : confirming
+                  ? "🔄 Payment received — confirming"
+                  : "⏳ Payment pending"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {o.payment_status === "failed"
+                ? "Your previous payment attempt was unsuccessful. The order is on hold and will not be processed by the merchant until payment is completed."
+                : confirming
+                  ? "Pembayaran anda telah diterima. Kami sedang mengesahkan dengan gateway — status akan dikemas kini secara automatik dalam beberapa saat."
+                  : "Complete the payment to confirm your order. The merchant will only start processing once payment is received."}
+            </p>
+            {!confirming && (
+              <Link to={`/user/payment/${o.id}`}>
+                <Button className="w-full">
+                  {o.payment_status === "failed" ? "Retry payment" : "Pay now"}{" "}
+                  (RM {Number(o.total_amount).toFixed(2)})
+                </Button>
+              </Link>
+            )}
+          </Card>
+        )}
 
-      {o.status === "delivered" && <OrderRating orderId={o.id} hasRider={!!o.rider_id} />}
+      {o.status === "delivered" && (
+        <OrderRating orderId={o.id} hasRider={!!o.rider_id} />
+      )}
 
       {o.status === "cancelled" && o.rejected_at && o.failure_reason && (
         <Card className="space-y-3 border-destructive/40 bg-destructive/5 p-4">
           <div>
-            <div className="text-sm font-semibold text-destructive">Order rejected by merchant</div>
+            <div className="text-sm font-semibold text-destructive">
+              Order rejected by merchant
+            </div>
             <p className="mt-1 text-sm">{o.failure_reason}</p>
           </div>
-          {o.payment_status === "paid" && (
-            <RejectedOptions order={o} />
-          )}
+          {o.payment_status === "paid" && <RejectedOptions order={o} />}
         </Card>
       )}
 
       <div className="flex flex-wrap gap-2">
-        {["pending","confirmed"].includes(o.status) && <Button variant="destructive" className="flex-1" onClick={() => setCancelOpen(true)}>Cancel</Button>}
+        {["pending", "confirmed"].includes(o.status) && (
+          <Button
+            variant="destructive"
+            className="flex-1"
+            onClick={() => setCancelOpen(true)}
+          >
+            Cancel
+          </Button>
+        )}
         {o.payment_status === "paid" && (
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => downloadReceipt(o.id).catch((e) => toast.error(e.message))}
+            onClick={() =>
+              downloadReceipt(o.id).catch((e) => toast.error(e.message))
+            }
           >
-            <Download className="mr-1 h-4 w-4" />Download receipt
+            <Download className="mr-1 h-4 w-4" />
+            Download receipt
           </Button>
         )}
         {o.payment_status === "paid" && o.status !== "cancelled" && (
-          <Button asChild variant="outline" className="flex-1"><Link to={`/user/refund?order=${o.id}`}>Request refund</Link></Button>
+          <Button asChild variant="outline" className="flex-1">
+            <Link to={`/user/refund?order=${o.id}`}>Request refund</Link>
+          </Button>
         )}
       </div>
 
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Batalkan pesanan</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Batalkan pesanan</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label className="text-sm">Sebab pembatalan *</Label>
-              <RadioGroup value={cancelReason} onValueChange={setCancelReason} className="mt-2 space-y-2">
+              <RadioGroup
+                value={cancelReason}
+                onValueChange={setCancelReason}
+                className="mt-2 space-y-2"
+              >
                 {CANCEL_REASONS.map((r) => (
-                  <label key={r} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <label
+                    key={r}
+                    className="flex items-center gap-2 text-sm cursor-pointer"
+                  >
                     <RadioGroupItem value={r} id={`cr-${r}`} />
                     <span>{r}</span>
                   </label>
@@ -416,35 +659,74 @@ export default function UserOrderDetail() {
             </div>
             <div>
               <Label className="text-sm">Nota tambahan (pilihan)</Label>
-              <Textarea value={cancelNote} onChange={(e) => setCancelNote(e.target.value.slice(0, 500))} placeholder="Ceritakan lebih lanjut…" maxLength={500} rows={3} />
+              <Textarea
+                value={cancelNote}
+                onChange={(e) => setCancelNote(e.target.value.slice(0, 500))}
+                placeholder="Ceritakan lebih lanjut…"
+                maxLength={500}
+                rows={3}
+              />
             </div>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              <span className="font-semibold">Note:</span> Cancellation Policy - Order Cancellation (Chargeable). If the order is cancelled after the rider has accepted and/or picked up the order for delivery, a cancellation fee will be charged.
+              <span className="font-semibold">Note:</span> Cancellation Policy -
+              Order Cancellation (Chargeable). If the order is cancelled after
+              the rider has accepted and/or picked up the order for delivery, a
+              cancellation fee will be charged.
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelling}>Kembali</Button>
-            <Button variant="destructive" onClick={submitCancel} disabled={cancelling || !cancelReason}>{cancelling ? "Membatalkan…" : "Sahkan batal"}</Button>
+            <Button
+              variant="outline"
+              onClick={() => setCancelOpen(false)}
+              disabled={cancelling}
+            >
+              Kembali
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={submitCancel}
+              disabled={cancelling || !cancelReason}
+            >
+              {cancelling ? "Membatalkan…" : "Sahkan batal"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-
   );
 }
 
 function RejectedOptions({ order }: { order: any }) {
   const [credit, setCredit] = useState<any>(null);
   useEffect(() => {
-    supabase.from("order_credits").select("*").eq("source_order_id", order.id).maybeSingle().then(({ data }) => setCredit(data));
+    supabase
+      .from("order_credits")
+      .select("*")
+      .eq("source_order_id", order.id)
+      .maybeSingle()
+      .then(({ data }) => setCredit(data));
   }, [order.id]);
 
-  if (!credit) return <p className="text-xs text-muted-foreground">Preparing your store credit…</p>;
+  if (!credit)
+    return (
+      <p className="text-xs text-muted-foreground">
+        Preparing your store credit…
+      </p>
+    );
   if (credit.status === "used") {
-    return <p className="text-xs text-muted-foreground">Credit of RM {Number(credit.amount).toFixed(2)} has been applied to another order.</p>;
+    return (
+      <p className="text-xs text-muted-foreground">
+        Credit of RM {Number(credit.amount).toFixed(2)} has been applied to
+        another order.
+      </p>
+    );
   }
   if (credit.status === "refunded") {
-    return <p className="text-xs text-muted-foreground">Full refund of RM {Number(credit.amount).toFixed(2)} is being processed.</p>;
+    return (
+      <p className="text-xs text-muted-foreground">
+        Full refund of RM {Number(credit.amount).toFixed(2)} is being processed.
+      </p>
+    );
   }
   const requestRefund = async () => {
     const { error: e1 } = await supabase.from("refunds").insert({
@@ -456,23 +738,39 @@ function RejectedOptions({ order }: { order: any }) {
       refund_amount: order.total_amount,
       status: "requested",
     });
-    if (e1) { toast.error(e1.message); return; }
-    const { error: e2 } = await supabase.rpc("refund_order_credit", { _credit_id: credit.id });
-    if (e2) { toast.error(e2.message); return; }
+    if (e1) {
+      toast.error(e1.message);
+      return;
+    }
+    const { error: e2 } = await supabase.rpc("refund_order_credit", {
+      _credit_id: credit.id,
+    });
+    if (e2) {
+      toast.error(e2.message);
+      return;
+    }
     toast.success("Refund requested. Admin will process shortly.");
     setCredit({ ...credit, status: "refunded" });
   };
   return (
     <div className="space-y-2">
       <div className="rounded-md bg-background/60 p-3 text-sm">
-        <div className="font-semibold">Store credit available: RM {Number(credit.amount).toFixed(2)}</div>
+        <div className="font-semibold">
+          Store credit available: RM {Number(credit.amount).toFixed(2)}
+        </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Place a new order with another merchant — your credit auto-applies at checkout. If the new total is higher, you only pay the difference. If lower, admin will refund the remainder.
+          Place a new order with another merchant — your credit auto-applies at
+          checkout. If the new total is higher, you only pay the difference. If
+          lower, admin will refund the remainder.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button asChild className="flex-1"><Link to="/user/merchants">Order from another merchant</Link></Button>
-        <Button variant="outline" className="flex-1" onClick={requestRefund}>Request full refund</Button>
+        <Button asChild className="flex-1">
+          <Link to="/user/merchants">Order from another merchant</Link>
+        </Button>
+        <Button variant="outline" className="flex-1" onClick={requestRefund}>
+          Request full refund
+        </Button>
       </div>
     </div>
   );

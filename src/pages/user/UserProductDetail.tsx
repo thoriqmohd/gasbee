@@ -68,8 +68,10 @@ export default function UserProductDetail() {
       refill_price: type === "new" ? refillPrice : null,
     });
     if (!res.ok) { toast.error(res.error!); return; }
-    toast.success("Added to cart");
-    nav("/user/cart");
+    // Stay on the page so the user can keep browsing and add more items.
+    toast.success("Added to cart", {
+      action: { label: "View cart", onClick: () => nav("/user/cart") },
+    });
   };
 
   return (
@@ -111,7 +113,7 @@ export default function UserProductDetail() {
         <div className="text-sm"><span className="text-muted-foreground">Unit price: </span><span className="font-semibold text-primary">RM {accessoryPrice.toFixed(2)}</span></div>
       ) : type === "new" ? (
         <Card className="space-y-1 p-3 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">New cylinder (tong)</span><span>RM {newCylinderPrice.toFixed(2)}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">New cylinder deposit</span><span>RM {newCylinderPrice.toFixed(2)}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Refill (gas)</span><span>RM {refillPrice.toFixed(2)}</span></div>
           <div className="flex justify-between border-t pt-1 font-semibold"><span>Unit price</span><span className="text-primary">RM {newCylTotal.toFixed(2)}</span></div>
         </Card>

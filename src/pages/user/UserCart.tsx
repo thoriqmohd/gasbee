@@ -76,6 +76,11 @@ export default function UserCart() {
         </Card>
       ))}
       <div className="sticky bottom-20 rounded-lg border bg-card p-3">
+        {items[0]?.merchant_id && (
+          <Button asChild variant="outline" className="mb-2 w-full">
+            <Link to={`/user/merchant/${items[0].merchant_id}`}>Add more items</Link>
+          </Button>
+        )}
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm">Subtotal</span>
           <span className="text-lg font-bold text-primary">RM {subtotal.toFixed(2)}</span>

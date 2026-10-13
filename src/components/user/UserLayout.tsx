@@ -9,7 +9,12 @@ import { BeeIntro } from "@/components/user/BeeIntro";
 import DevModeNotice from "@/components/user/DevModeNotice";
 import AppVersionLabel from "@/components/AppVersionLabel";
 
-const TOP_LEVEL = ["/user/home", "/user/orders", "/user/notifications", "/user/profile"];
+const TOP_LEVEL = [
+  "/user/home",
+  "/user/orders",
+  "/user/notifications",
+  "/user/profile",
+];
 
 export default function UserLayout() {
   const nav = useNavigate();
@@ -37,16 +42,29 @@ export default function UserLayout() {
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/80 px-4 pb-3 pt-[max(0.75rem,calc(env(safe-area-inset-top)+0.5rem))] backdrop-blur">
         <div className="flex items-center gap-1">
           {!isTopLevel && (
-            <Button variant="ghost" size="icon" onClick={handleBack} aria-label="Back">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              aria-label="Back"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <button onClick={() => nav("/user/home")} className="flex items-center gap-2">
+          <button
+            onClick={() => nav("/user/home")}
+            className="flex items-center gap-2"
+          >
             <Logo size={32} />
             <span className="font-bold">Gasbee</span>
           </button>
         </div>
-        <Button variant="ghost" size="icon" className="relative" onClick={() => nav("/user/cart")}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          onClick={() => nav("/user/cart")}
+        >
           <ShoppingCart className="h-5 w-5" />
           {count > 0 && (
             <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
