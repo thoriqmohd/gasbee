@@ -52,11 +52,33 @@ function parseJwtClaims(token: string): Record<string, unknown> | null {
   }
 }
 
+// A queued email message, as returned by the read_email_batch RPC.
+type QueueMessage = {
+  msg_id: number
+  read_ct?: number
+  enqueued_at?: string
+  message: Record<string, unknown>
+}
+
+// Minimal shape of the Supabase client this function needs. Declaring it
+// explicitly keeps the queue helpers type-safe without relying on generated
+// Database types, which do not cover the pgmq RPCs (read_email_batch,
+// move_to_dlq, delete_email).
+type EmailQueueClient = {
+  from: (table: string) => {
+    insert: (values: Record<string, unknown>) => PromiseLike<{ error: unknown }>
+  }
+  rpc: (
+    functionName: string,
+    args?: Record<string, unknown>
+  ) => PromiseLike<{ data: unknown; error: unknown }>
+}
+
 // Move a message to the dead letter queue and log the reason.
 async function moveToDlq(
-  supabase: ReturnType<typeof createClient>,
+  supabase: EmailQueueClient,
   queue: string,
-  msg: { msg_id: number; message: Record<string, unknown> },
+  msg: QueueMessage,
   reason: string
 ): Promise<void> {
   const payload = msg.message
