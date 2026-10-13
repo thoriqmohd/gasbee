@@ -314,7 +314,7 @@ export default function UserCheckout() {
               </div>
               {it.type === "new" && it.category_slug !== "accessories" && it.category_slug !== "lpg-refill" && (it.new_cylinder_price != null || it.refill_price != null) && (
                 <div className="mt-1 space-y-0.5 pl-3 text-xs text-muted-foreground">
-                  <div className="flex justify-between"><span>· New cylinder (tong)</span><span>RM {(Number(it.new_cylinder_price ?? 0) * it.quantity).toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span>· New cylinder deposit</span><span>RM {(Number(it.new_cylinder_price ?? 0) * it.quantity).toFixed(2)}</span></div>
                   <div className="flex justify-between"><span>· Refill (gas)</span><span>RM {(Number(it.refill_price ?? 0) * it.quantity).toFixed(2)}</span></div>
                 </div>
               )}
