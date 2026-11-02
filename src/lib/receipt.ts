@@ -501,9 +501,19 @@ export async function downloadReceipt(orderId: string) {
         : product.cylinder_size_kg
           ? `${product.cylinder_size_kg}KG`
           : null,
-      deposit_amount:
-        product.deposit_amount || product.new_cylinder_price || null,
-      refill_amount: product.refill_price || null,
+      // Only show the split when current product prices still add up to the
+      // price charged on this order; otherwise it would mislead the customer.
+      ...(() => {
+        const dep = Number(product.new_cylinder_price || 0);
+        const ref = Number(product.refill_price || 0);
+        const matches =
+          it.type === "new_cylinder" &&
+          dep > 0 &&
+          Math.abs(dep + ref - Number(it.unit_price || 0)) < 0.01;
+        return matches
+          ? { deposit_amount: dep, refill_amount: ref || null }
+          : { deposit_amount: null, refill_amount: null };
+      })(),
     };
   });
 
