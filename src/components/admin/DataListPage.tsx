@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,27 +25,45 @@ interface Props<T = any> {
   rowAction?: (row: T) => React.ReactNode;
   topAction?: React.ReactNode;
   selectQuery?: string;
+  enrichRows?: (rows: T[]) => Promise<T[]>;
 }
 
 export function DataListPage<T = any>({
-  title, description, table, columns, searchField, orderBy, rowAction, topAction, selectQuery = "*",
+  title, description, table, columns, searchField, orderBy, rowAction, topAction, selectQuery = "*", enrichRows,
 }: Props<T>) {
   const [rows, setRows] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const loadVersion = useRef(0);
 
   const load = async () => {
+    const version = ++loadVersion.current;
     setLoading(true);
-    let q: any = supabase.from(table as any).select(selectQuery).limit(200);
-    if (orderBy) q = q.order(orderBy.column, { ascending: orderBy.ascending ?? false });
-    if (search && searchField) q = q.ilike(searchField, `%${search}%`);
-    const { data, error } = await q;
-    if (error) toast.error(error.message);
-    setRows((data ?? []) as T[]);
-    setLoading(false);
+    try {
+      let q: any = supabase.from(table as any).select(selectQuery).limit(200);
+      if (orderBy) q = q.order(orderBy.column, { ascending: orderBy.ascending ?? false });
+      if (search && searchField) q = q.ilike(searchField, `%${search}%`);
+      const { data, error } = await q;
+      if (version !== loadVersion.current) return;
+      if (error) toast.error(error.message);
+      const nextRows = (data ?? []) as T[];
+      setRows(nextRows);
+      if (enrichRows && nextRows.length) {
+        const enriched = await enrichRows(nextRows);
+        if (version === loadVersion.current) setRows(enriched);
+      }
+    } catch (error) {
+      if (version === loadVersion.current) toast.error(error instanceof Error ? error.message : "Records could not be loaded.");
+    } finally {
+      if (version === loadVersion.current) setLoading(false);
+    }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [search]);
+  useEffect(() => {
+    void load();
+    return () => { loadVersion.current++; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   return (
     <div className="space-y-6">
