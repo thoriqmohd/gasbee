@@ -1921,6 +1921,31 @@ export type Database = {
       }
     }
     Functions: {
+      apply_chip_collect_notification: {
+        Args: {
+          p_configured_brand: string
+          p_configured_is_test: boolean
+          p_purchase: Json
+        }
+        Returns: Json
+      }
+      begin_chip_order_payment: {
+        Args: { p_customer_id: string; p_order_id: string }
+        Returns: Json
+      }
+      create_web_checkout_order: {
+        Args: {
+          p_address_id: string
+          p_delivery_type: string
+          p_gas_exchange_type: string
+          p_items: Json
+          p_notes: string
+          p_order_id: string
+          p_promotion_code?: string
+          p_scheduled_at: string
+        }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1928,6 +1953,23 @@ export type Database = {
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
+        Returns: number
+      }
+      finish_chip_order_payment: {
+        Args: {
+          p_gateway_payload: Json
+          p_gateway_ref: string
+          p_payment_id: string
+        }
+        Returns: undefined
+      }
+      gasbee_delivery_distance_km: {
+        Args: {
+          from_latitude: number
+          from_longitude: number
+          to_latitude: number
+          to_longitude: number
+        }
         Returns: number
       }
       get_public_fee_settings: {
@@ -1967,6 +2009,14 @@ export type Database = {
         Returns: number
       }
       refund_order_credit: { Args: { _credit_id: string }; Returns: undefined }
+      retire_chip_order_payment: {
+        Args: {
+          p_gateway_ref: string
+          p_payment_id: string
+          p_verified_status: string
+        }
+        Returns: undefined
+      }
       setting_numeric: {
         Args: { _default: number; _key: string }
         Returns: number
