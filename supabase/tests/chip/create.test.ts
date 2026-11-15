@@ -28,7 +28,9 @@ function fixture(status = 'created', changes: Record<string, unknown> = {}) {
 
 function setup(overrides: Partial<Parameters<typeof createChipPurchase>[0]> = {}) {
   let claim: object | undefined;
+  let attempt = paymentId;
   let posts = 0;
+  const submitted: Array<{ success_redirect?: string; failure_redirect?: string; key: string | null }> = [];
   let providerStatus = 'created';
   let finalizeCount = 0;
   const handler = createChipPurchase({
@@ -38,20 +40,21 @@ function setup(overrides: Partial<Parameters<typeof createChipPurchase>[0]> = {}
       assert.equal(requestedOrder, orderId);
       assert.equal(requestedUser, userId);
       if (claim) return claim;
-      claim = { state: 'awaiting_gateway', payment_id: paymentId, amount: 25 };
-      return { state: 'reserved', payment_id: paymentId, amount: 25, order_code: 'GB-TEST' };
+      claim = { state: 'awaiting_gateway', payment_id: attempt, amount: 25 };
+      return { state: 'reserved', payment_id: attempt, amount: 25, order_code: 'GB-TEST' };
     },
     finish: async (id, ref, payload) => {
-      assert.equal(id, paymentId);
+      assert.equal(id, attempt);
       assert.equal(ref, remoteId);
       assert.equal(payload.checkout_url, checkout);
-      claim = { state: 'check_gateway', payment_id: paymentId, gateway_ref: remoteId, amount: 25 };
+      claim = { state: 'check_gateway', payment_id: attempt, gateway_ref: remoteId, amount: 25 };
     },
     retire: async (id, ref, status) => {
-      assert.equal(id, paymentId);
+      assert.equal(id, attempt);
       assert.equal(ref, remoteId);
       assert.ok(['cancelled', 'expired'].includes(status));
       claim = undefined;
+      attempt = '10000000-0000-4000-8000-000000000006';
       providerStatus = 'created';
     },
     finalize: async () => { finalizeCount++; },
@@ -64,14 +67,18 @@ function setup(overrides: Partial<Parameters<typeof createChipPurchase>[0]> = {}
         posts++;
         const body = JSON.parse(String(options.body));
         assert.equal(body.purchase.products[0].price, 2500);
-        assert.equal(body.purchase.metadata.gasbee_payment_id, paymentId);
-        return Response.json(fixture(providerStatus));
+        assert.equal(body.purchase.metadata.gasbee_payment_id, attempt);
+        const key = new Headers(options.headers).get('Idempotency-Key');
+        assert.equal(key, attempt);
+        submitted.push({ success_redirect: body.success_redirect, failure_redirect: body.failure_redirect, key });
       }
-      return Response.json(fixture(providerStatus));
+      return Response.json(fixture(providerStatus, {
+        purchase: { currency: 'MYR', total: 2500, metadata: { gasbee_payment_id: attempt } },
+      }));
     },
     ...overrides,
   });
-  return { handler, posts: () => posts, setStatus: (value: string) => { providerStatus = value; }, finalizeCount: () => finalizeCount };
+  return { handler, posts: () => posts, submitted, setStatus: (value: string) => { providerStatus = value; }, finalizeCount: () => finalizeCount };
 }
 
 test('creates once, retrieves verified purchase on retry, and keeps supported native return URL', async () => {
@@ -132,7 +139,7 @@ test('prevents concurrent provider POSTs while a reservation is in progress', as
 });
 
 test('only verified closed status permits fresh payment', async () => {
-  const { handler, posts, setStatus } = setup();
+  const { handler, posts, setStatus, submitted } = setup();
   assert.equal((await handler(request())).status, 200);
   setStatus('error');
   assert.equal((await handler(request())).status, 200);
@@ -140,6 +147,7 @@ test('only verified closed status permits fresh payment', async () => {
   setStatus('expired');
   assert.equal((await handler(request())).status, 200);
   assert.equal(posts(), 2);
+  assert.equal(new Set(submitted.map(({ key }) => key)).size, 2);
 });
 
 test('charged payment reconciles with no replacement charge', async () => {
@@ -179,12 +187,36 @@ test('uses safe refusal for an order owned by another user or otherwise unavaila
   assert.equal(posts(), 0);
 });
 
-test('allows verified V2 origins and keeps portal FPX paused, including www', async () => {
-  const { handler, posts } = setup();
+test('sends the exact same-order portal return URLs for both production hosts', async () => {
   for (const origin of ['https://gasbee.com.my', 'https://www.gasbee.com.my']) {
-    assert.equal((await handler(request({ success_redirect: `${origin}/order/orders/${orderId}?payment=success` }))).status, 503);
+    const { handler, posts, submitted } = setup();
+    const redirects = {
+      success_redirect: `${origin}/order/orders/${orderId}?payment=success`,
+      failure_redirect: `${origin}/order/orders/${orderId}?payment=failed`,
+    };
+    const response = await handler(request(redirects));
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { url: checkout, purchase_id: remoteId });
+    assert.deepEqual(submitted, [{ ...redirects, key: paymentId }]);
+    assert.equal((await handler(request(redirects))).status, 200);
+    assert.equal(posts(), 1);
+  }
+});
+
+test('rejects portal returns for another order or unexpected query values', async () => {
+  const { handler, posts } = setup();
+  for (const success_redirect of [
+    `https://gasbee.com.my/order/orders/${userId}?payment=success`,
+    `https://gasbee.com.my/order/orders/${orderId}?payment=failed`,
+    `https://gasbee.com.my/order/orders/${orderId}?payment=success&untrusted=1`,
+  ]) {
+    assert.equal((await handler(request({ success_redirect }))).status, 400);
   }
   assert.equal(posts(), 0);
+});
+
+test('allows verified V2 browser origins', async () => {
+  const { handler, posts } = setup();
   for (const origin of ['https://app.gasbee.com.my', 'https://gasbee.lovable.app']) {
     assert.equal((await handler(request({ success_redirect: `${origin}/user/orders/${orderId}?payment=success` }))).status, 200);
   }

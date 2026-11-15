@@ -89,12 +89,9 @@ function returnUrl(raw: unknown, orderId: string, outcome: 'success' | 'failed',
   // The existing gateway omits the return URL when neither caller nor configuration provides one.
   if (raw === undefined || raw === null || raw === '') return;
   try {
-    if (typeof raw !== 'string' || raw.length > 1000) throw new Error();
+    if (typeof raw !== 'string' || raw.length > 500) throw new Error();
     const url = new URL(raw);
     if (!origins.has(url.origin) || url.username || url.password || url.hash) throw new Error();
-    if (PORTAL_ORIGINS.has(url.origin) && url.pathname.startsWith('/order/orders/')) {
-      throw new PurchaseRequestError(503, 'Website payments are temporarily paused. Your order has not been charged.');
-    }
     if (
       (url.pathname === `/user/orders/${orderId}` || url.pathname === `/order/orders/${orderId}`) &&
       url.search === `?payment=${outcome}`
@@ -105,8 +102,7 @@ function returnUrl(raw: unknown, orderId: string, outcome: 'success' | 'failed',
       url.searchParams.get('order_id') === orderId &&
       [...url.searchParams].length === 2
     ) return url.href;
-  } catch (error) {
-    if (error instanceof PurchaseRequestError) throw error;
+  } catch {
     // Use the same error for malformed, unrelated, and untrusted destinations.
   }
   throw new PurchaseRequestError(400, 'Invalid payment return page');
@@ -229,7 +225,10 @@ export function createChipPurchase(deps: Dependencies): (req: Request) => Promis
         }
 
         const remote = await fetcher(new URL('purchases/', CHIP_BASE), {
-          method: 'POST', headers: apiHeaders, redirect: 'error', signal: AbortSignal.timeout(12000),
+          method: 'POST',
+          headers: { ...apiHeaders, 'Idempotency-Key': claim.payment_id },
+          redirect: 'error',
+          signal: AbortSignal.timeout(12000),
           body: JSON.stringify({
             brand_id: config.brandId,
             success_callback: deps.callbackUrl,
