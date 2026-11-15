@@ -59,6 +59,30 @@ test('a signed callback fetches authoritative state, caches public key, and pass
   assert.equal(app.finalized[0].client, undefined);
 });
 
+test('derives the callback-first source from the verified purchase instead of the callback event', async () => {
+  const body = JSON.stringify({
+    type: 'purchase', id, _gasbee_checkout_source: 'app',
+    success_redirect: `https://gasbee.com.my/payment-bridge?status=success&order_id=${order}`,
+    failure_redirect: `https://gasbee.com.my/payment-bridge?status=failed&order_id=${order}`,
+  });
+  const sig = await signature(body);
+  const app = setup({ purchase: {
+    ...baseline,
+    success_redirect: `https://gasbee.com.my/order/orders/${order}?payment=success`,
+    failure_redirect: `https://gasbee.com.my/order/orders/${order}?payment=failed`,
+  } });
+  assert.equal((await app.handler(req(body, sig))).status, 204);
+  assert.equal(app.finalized[0]._gasbee_checkout_source, 'web');
+
+  const ambiguous = setup({ purchase: {
+    ...baseline, _gasbee_checkout_source: 'web',
+    success_redirect: `https://untrusted.example/order/orders/${order}?payment=success`,
+    failure_redirect: `https://gasbee.com.my/order/orders/${order}?payment=failed`,
+  } });
+  assert.equal((await ambiguous.handler(req(body, sig))).status, 204);
+  assert.equal(ambiguous.finalized[0]._gasbee_checkout_source, undefined);
+});
+
 test('missing, malformed and tampered signatures stop before purchase lookup or database writes', async () => {
   const app = setup();
   assert.equal((await app.handler(req(event))).status, 401);

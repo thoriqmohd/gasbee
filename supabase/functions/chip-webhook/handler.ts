@@ -1,3 +1,5 @@
+import { inferGasbeePaymentSource, type GasbeePaymentSource } from '../_shared/gasbee-payment-source.ts';
+
 const CHIP_BASE = 'https://gate.chip-in.asia/api/v1/';
 const MAX_CALLBACK_BYTES = 128 * 1024;
 const CHARGED_STATUSES = new Set(['paid', 'cleared', 'settled']);
@@ -18,6 +20,7 @@ export type Purchase = {
   is_test: boolean;
   marked_as_paid: boolean;
   purchase: { total: number; currency: 'MYR'; metadata?: { gasbee_payment_id: string } };
+  _gasbee_checkout_source?: GasbeePaymentSource;
 };
 
 export type GatewayConfig = {
@@ -91,8 +94,10 @@ function purchaseFacts(value: unknown, requestedId: string): Purchase | null {
   const metadata = object(purchase.metadata);
   const paymentId = metadata?.gasbee_payment_id;
   if (paymentId !== undefined && (typeof paymentId !== 'string' || !UUID.test(paymentId))) return null;
+  const source = inferGasbeePaymentSource(reference, remote.success_redirect, remote.failure_redirect);
   return {
     id: requestedId, reference, status, brand_id, is_test, marked_as_paid,
+    ...(source ? { _gasbee_checkout_source: source } : {}),
     purchase: {
       total: purchase.total,
       currency: 'MYR',

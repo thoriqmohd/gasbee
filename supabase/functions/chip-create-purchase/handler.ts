@@ -1,15 +1,13 @@
+import {
+  inferGasbeePaymentSource, paymentReturnRoute, PORTAL_ORIGINS, V2_ORIGINS, type GasbeePaymentSource,
+} from '../_shared/gasbee-payment-source.ts';
+
 const CHIP_BASE = 'https://gate.chip-in.asia/api/v1/';
 const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 const PAYABLE = new Set(['created', 'sent', 'viewed', 'overdue', 'error', 'blocked']);
 const CHARGED = new Set(['paid', 'cleared', 'settled']);
 const TERMINAL = new Set(['cancelled', 'expired']);
 const CHECKOUT_ORIGINS = new Set(['https://gate.chip-in.asia', 'https://payments.chip-in.asia']);
-const PORTAL_ORIGINS = new Set(['https://gasbee.com.my', 'https://www.gasbee.com.my']);
-const V2_ORIGINS = [
-  'https://app.gasbee.com.my',
-  'https://gasbee.lovable.app',
-  'https://id-preview--0c2049ef-a851-486b-94a3-95a84d60c4ba.lovable.app',
-];
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -37,6 +35,7 @@ type Purchase = {
   marked_as_paid: boolean;
   purchase: { currency: 'MYR'; total: number; metadata?: { gasbee_payment_id?: string } };
   checkout_url?: string;
+  _gasbee_checkout_source?: GasbeePaymentSource;
 };
 type Dependencies = {
   authenticate: (authorization: string) => Promise<User | null>;
@@ -91,17 +90,7 @@ function returnUrl(raw: unknown, orderId: string, outcome: 'success' | 'failed',
   try {
     if (typeof raw !== 'string' || raw.length > 500) throw new Error();
     const url = new URL(raw);
-    if (!origins.has(url.origin) || url.username || url.password || url.hash) throw new Error();
-    if (
-      (url.pathname === `/user/orders/${orderId}` || url.pathname === `/order/orders/${orderId}`) &&
-      url.search === `?payment=${outcome}`
-    ) return url.href;
-    if (
-      url.pathname === '/payment-bridge' &&
-      url.searchParams.get('status') === outcome &&
-      url.searchParams.get('order_id') === orderId &&
-      [...url.searchParams].length === 2
-    ) return url.href;
+    if (origins.has(url.origin) && paymentReturnRoute(url, orderId, outcome)) return url.href;
   } catch {
     // Use the same error for malformed, unrelated, and untrusted destinations.
   }
@@ -253,7 +242,11 @@ export function createChipPurchase(deps: Dependencies): (req: Request) => Promis
           throw waiting();
         }
         const purchase = purchaseOf(await remote.json(), orderId, claim, config);
-        await deps.finish(claim.payment_id, purchase.id, purchase);
+        const source = inferGasbeePaymentSource(orderId, success, failure);
+        await deps.finish(claim.payment_id, purchase.id, {
+          ...purchase,
+          ...(source ? { _gasbee_checkout_source: source } : {}),
+        });
         if (PAYABLE.has(purchase.status) && !purchase.marked_as_paid && purchase.checkout_url) {
           return json(200, { url: purchase.checkout_url, purchase_id: purchase.id });
         }

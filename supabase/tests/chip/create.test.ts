@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { getGasbeePaymentSource } from '../../functions/_shared/gasbee-payment-source.ts';
 import { createChipPurchase, PurchaseRequestError } from '../../functions/chip-create-purchase/handler.ts';
 
 const orderId = '10000000-0000-4000-8000-000000000001';
@@ -31,6 +32,7 @@ function setup(overrides: Partial<Parameters<typeof createChipPurchase>[0]> = {}
   let attempt = paymentId;
   let posts = 0;
   const submitted: Array<{ success_redirect?: string; failure_redirect?: string; key: string | null }> = [];
+  const savedSources: unknown[] = [];
   let providerStatus = 'created';
   let finalizeCount = 0;
   const handler = createChipPurchase({
@@ -47,6 +49,7 @@ function setup(overrides: Partial<Parameters<typeof createChipPurchase>[0]> = {}
       assert.equal(id, attempt);
       assert.equal(ref, remoteId);
       assert.equal(payload.checkout_url, checkout);
+      savedSources.push(payload._gasbee_checkout_source);
       claim = { state: 'check_gateway', payment_id: attempt, gateway_ref: remoteId, amount: 25 };
     },
     retire: async (id, ref, status) => {
@@ -67,7 +70,8 @@ function setup(overrides: Partial<Parameters<typeof createChipPurchase>[0]> = {}
         posts++;
         const body = JSON.parse(String(options.body));
         assert.equal(body.purchase.products[0].price, 2500);
-        assert.equal(body.purchase.metadata.gasbee_payment_id, attempt);
+        assert.deepEqual(body.purchase.metadata, { gasbee_payment_id: attempt });
+        assert.equal(body._gasbee_checkout_source, undefined);
         const key = new Headers(options.headers).get('Idempotency-Key');
         assert.equal(key, attempt);
         submitted.push({ success_redirect: body.success_redirect, failure_redirect: body.failure_redirect, key });
@@ -78,11 +82,11 @@ function setup(overrides: Partial<Parameters<typeof createChipPurchase>[0]> = {}
     },
     ...overrides,
   });
-  return { handler, posts: () => posts, submitted, setStatus: (value: string) => { providerStatus = value; }, finalizeCount: () => finalizeCount };
+  return { handler, posts: () => posts, submitted, savedSources, setStatus: (value: string) => { providerStatus = value; }, finalizeCount: () => finalizeCount };
 }
 
-test('creates once, retrieves verified purchase on retry, and keeps supported native return URL', async () => {
-  const { handler, posts } = setup();
+test('preserves the native source when a verified purchase is resumed from the website', async () => {
+  const { handler, posts, savedSources } = setup();
   const req = {
     success_redirect: `https://gasbee.com.my/payment-bridge?status=success&order_id=${orderId}`,
     failure_redirect: `https://gasbee.com.my/payment-bridge?status=failed&order_id=${orderId}`,
@@ -90,8 +94,12 @@ test('creates once, retrieves verified purchase on retry, and keeps supported na
   const first = await handler(request(req));
   assert.equal(first.status, 200);
   assert.deepEqual(await first.json(), { url: checkout, purchase_id: remoteId });
-  assert.equal((await handler(request(req))).status, 200);
+  assert.equal((await handler(request({
+    success_redirect: `https://gasbee.com.my/order/orders/${orderId}?payment=success`,
+    failure_redirect: `https://gasbee.com.my/order/orders/${orderId}?payment=failed`,
+  }))).status, 200);
   assert.equal(posts(), 1);
+  assert.deepEqual(savedSources, ['app']);
 });
 
 test('rejects unsigned session and unsafe, cross-order, mismatched return URLs before reservation', async () => {
@@ -189,7 +197,7 @@ test('uses safe refusal for an order owned by another user or otherwise unavaila
 
 test('sends the exact same-order portal return URLs for both production hosts', async () => {
   for (const origin of ['https://gasbee.com.my', 'https://www.gasbee.com.my']) {
-    const { handler, posts, submitted } = setup();
+    const { handler, posts, submitted, savedSources } = setup();
     const redirects = {
       success_redirect: `${origin}/order/orders/${orderId}?payment=success`,
       failure_redirect: `${origin}/order/orders/${orderId}?payment=failed`,
@@ -200,6 +208,7 @@ test('sends the exact same-order portal return URLs for both production hosts', 
     assert.deepEqual(submitted, [{ ...redirects, key: paymentId }]);
     assert.equal((await handler(request(redirects))).status, 200);
     assert.equal(posts(), 1);
+    assert.deepEqual(savedSources, ['web']);
   }
 });
 
@@ -216,11 +225,54 @@ test('rejects portal returns for another order or unexpected query values', asyn
 });
 
 test('allows verified V2 browser origins', async () => {
-  const { handler, posts } = setup();
-  for (const origin of ['https://app.gasbee.com.my', 'https://gasbee.lovable.app']) {
-    assert.equal((await handler(request({ success_redirect: `${origin}/user/orders/${orderId}?payment=success` }))).status, 200);
+  for (const origin of ['https://app.gasbee.com.my', 'https://gasbee.lovable.app', 'https://gasbee.com.my']) {
+    const { handler, posts, savedSources } = setup();
+    assert.equal((await handler(request({
+      success_redirect: `${origin}/user/orders/${orderId}?payment=success`,
+      failure_redirect: `${origin}/user/orders/${orderId}?payment=failed`,
+    }))).status, 200);
+    assert.equal(posts(), 1);
+    assert.deepEqual(savedSources, ['app']);
   }
-  assert.equal(posts(), 1);
+});
+
+test('does not label missing, conflicting, or non-production redirect pairs', async () => {
+  for (const redirects of [
+    {},
+    { success_redirect: `https://gasbee.com.my/order/orders/${orderId}?payment=success` },
+    {
+      success_redirect: `https://gasbee.com.my/order/orders/${orderId}?payment=success`,
+      failure_redirect: `https://app.gasbee.com.my/user/orders/${orderId}?payment=failed`,
+    },
+    {
+      success_redirect: `https://mobile-gasbee.example.test/order/orders/${orderId}?payment=success`,
+      failure_redirect: `https://mobile-gasbee.example.test/order/orders/${orderId}?payment=failed`,
+    },
+  ]) {
+    const { handler, savedSources } = setup();
+    assert.equal((await handler(request({ ...redirects, _gasbee_checkout_source: 'web' }))).status, 200);
+    assert.deepEqual(savedSources, [undefined]);
+  }
+});
+
+test('reads stamped payment sources and exact redirect pairs on older CHIP payloads', () => {
+  assert.equal(getGasbeePaymentSource({ _gasbee_checkout_source: 'app' }, orderId), 'app');
+  assert.equal(getGasbeePaymentSource({
+    success_redirect: `https://www.gasbee.com.my/order/orders/${orderId}?payment=success`,
+    failure_redirect: `https://www.gasbee.com.my/order/orders/${orderId}?payment=failed`,
+  }, orderId), 'web');
+  assert.equal(getGasbeePaymentSource({
+    success_redirect: `https://app.gasbee.com.my/payment-bridge?status=success&order_id=${orderId}`,
+    failure_redirect: `https://app.gasbee.com.my/payment-bridge?order_id=${orderId}&status=failed`,
+  }, orderId), 'app');
+  assert.equal(getGasbeePaymentSource({
+    success_redirect: `https://gasbee.vercel.app/payment-success?order_id=${orderId}`,
+    failure_redirect: `https://gasbee.vercel.app/payment-failed?order_id=${orderId}`,
+  }, orderId), 'app');
+  assert.equal(getGasbeePaymentSource({
+    success_redirect: `https://gasbee.vercel.app/payment-success?order_id=${orderId}`,
+    failure_redirect: `https://gasbee.vercel.app/payment-failed?order_id=${paymentId}`,
+  }, orderId), undefined);
 });
 
 test('requires reconciliation for multiple legacy attempts before provider access', async () => {
